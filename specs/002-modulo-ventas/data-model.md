@@ -88,7 +88,7 @@ Los estados son cadenas de texto exactas, incluidos acentos y mayúsculas. El es
 | Cancelado | Documento anulado; no admite nuevas transiciones | Ninguna | Terminal |
 | Vencido | Cotización cuya vigencia expiró sin aprobación | Ninguna | Terminal, automático |
 
-> El mapa de transiciones del plan no declara transiciones de entrada hacia `Vencido`. El modelo lo define como una transición automática del sistema: si `quoteValidity` existe y la fecha actual la supera mientras el documento permanece en `Cotización` o `En revisión`, el estado pasa a `Vencido`. Si se requiere control manual, la transición debe agregarse explícitamente a `statusLifecycle`.
+> `Vencido` se declara en `statusLifecycle` del plan como transición de entrada desde `Cotización` y `En revisión`, pero se aplica automáticamente por el sistema: si `quoteValidity` existe y la fecha actual la supera mientras el documento permanece en uno de esos estados, el estado pasa a `Vencido`. No puede asignarse manualmente salvo que se habilite una transición manual explícita.
 
 ## Reglas de Configuración del Módulo
 
@@ -154,6 +154,8 @@ Los estados son cadenas de texto exactas, incluidos acentos y mayúsculas. El es
 ## Diagramas Conceptuales
 
 ### Modelo Entidad-Relación
+
+> Imagen exportada del diagrama: [`mer-ventas.svg`](./mer-ventas.svg) (requerida como entregable por la rúbrica).
 
 ```mermaid
 erDiagram

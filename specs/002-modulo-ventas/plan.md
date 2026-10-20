@@ -9,7 +9,7 @@ Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-mo
 ### Dentro del alcance
 
 - Gestión de Clientes: Creación, edición, eliminación y búsqueda de clientes (tomando como base el concepto de Entidad).
-- Gestión de Documentos de Venta: Creación, edición, eliminación y seguimiento de Cotizaciones, Pedidos de Venta y Facturas (tomando como base el concepto de Documento).
+- Gestión de Documentos de Venta: Creación, edición, eliminación y seguimiento de Cotizaciones y Pedidos de Venta (tomando como base el concepto de Documento). "Facturado" es un estado de cierre del mismo documento, no una entidad separada; la facturación electrónica queda fuera de alcance.
 - Ciclo de vida de ventas: Control de estados con transiciones permitidas (ej. Cotización → Aprobado → Pedido → Facturado).
 - Información comercial: Registro de condiciones de pago, límite de crédito, fecha de entrega, forma de pago, entre otros.
 - Integración con el marco ERP: Aprovechar la barra superior, barra lateral, panel de inicio y acciones rápidas ya existentes.
@@ -52,8 +52,11 @@ export const userConfig = {
   customFields: [
     { target: "entity", key: "rfcNit", label: "RFC / NIT", type: "text", required: false },
     { target: "entity", key: "contactName", label: "Nombre de contacto", type: "text", required: false },
-    { target: "entity", key: "creditLimit", label: "Límite de crédito", type: "number", required: false },
-    { target: "entity", key: "paymentTerms", label: "Condiciones de pago", type: "select", required: false, options: ["Contado", "Crédito 15 días", "Crédito 30 días", "Crédito 45 días", "Crédito 60 días"] },
+    // creditLimit y paymentTerms son campos BASE del modelo (ver data-model.md).
+    // El perfil de Ventas los muestra en formularios como alias de UI y NO se
+    // declaran como customFields para no duplicar almacenamiento ni chocar con
+    // las claves base. Las opciones válidas de paymentTerms en Ventas son:
+    // Contado, Crédito 15 días, Crédito 30 días, Crédito 45 días, Crédito 60 días.
     { target: "entity", key: "salesRep", label: "Vendedor asignado", type: "text", required: false },
 
     { target: "document", key: "deliveryDate", label: "Fecha de entrega", type: "date", required: false },
@@ -65,8 +68,8 @@ export const userConfig = {
   statusLifecycle: {
     statuses: ["Cotización", "En revisión", "Aprobado", "Pedido", "En proceso", "Facturado", "Cancelado", "Vencido"],
     transitions: {
-      "Cotización": ["En revisión", "Aprobado", "Cancelado"],
-      "En revisión": ["Aprobado", "Cotización", "Cancelado"],
+      "Cotización": ["En revisión", "Aprobado", "Cancelado", "Vencido"],
+      "En revisión": ["Aprobado", "Cotización", "Cancelado", "Vencido"],
       "Aprobado": ["Pedido", "Cancelado"],
       "Pedido": ["En proceso", "Facturado", "Cancelado"],
       "En proceso": ["Facturado", "Cancelado"],
