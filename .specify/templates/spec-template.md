@@ -1,4 +1,23 @@
 # Feature Specification: [FEATURE NAME]
+1. Historia de Usuario 1 - Historial y seguimiento de Documentos de Venta (Prioridad: P1)
+
+Descripción: Como Ejecutivo de Ventas, quiero consultar el historial de documentos de un Cliente específico para saber el estado de cada operación comercial (Cotización, Pedido, Facturado) y hacer seguimiento.
+
+Por qué esta prioridad: Aporta valor inmediato para la gestión de cartera y atención al cliente, reduciendo fricciones en el embudo de ventas, y permite probar la integridad 1:N entre Cliente y Documento definida en el plan.
+
+Prueba independiente: Se puede probar ingresando a la vista de un Cliente y verificando que aparezca la lista de operaciones comerciales pasadas con su respectivo estado.
+
+Escenarios de Aceptación:
+
+Dado que el Cliente tiene operaciones previas, cuando el Ejecutivo de Ventas consulta su ficha, entonces visualiza el historial detallando el tipo de documento, fecha, monto y estado actual.
+
+Dado que existen lineamientos estrictos sobre datos sensibles, cuando el usuario visualiza el historial, entonces el sistema enmascara la vista del límite de crédito (creditLimit) si el rol no tiene los permisos financieros correspondientes.
+
+
+
+
+
+
 
 **Feature Branch**: `[###-feature-name]`
 
