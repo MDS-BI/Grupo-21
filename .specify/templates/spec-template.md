@@ -22,7 +22,7 @@
   - Demonstrated to users independently
 -->
 
-### User Story 1 - Historial y seguimiento de Documentos de Venta  (Prioriridad: P1)
+### Historial de usuario 6 - Historial y seguimiento de Documentos de Venta  (Prioriridad: P1)
 Descripción: Como Ejecutivo de Ventas, quiero consultar el historial de documentos de un Cliente específico para saber el estado de cada operación comercial (Cotización, Pedido, Facturado) y hacer seguimiento.
 
 Por qué esta prioridad: Aporta valor inmediato para la gestión de cartera y atención al cliente, reduciendo fricciones en el embudo de ventas, y permite probar la integridad 1:N entre Cliente y Documento definida en el plan.
