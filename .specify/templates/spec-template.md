@@ -22,8 +22,7 @@
   - Demonstrated to users independently
 -->
 
-1. Historia de Usuario 1 - Historial y seguimiento de Documentos de Venta (Prioridad: P1)
-
+### User Story 1 - Historial y seguimiento de Documentos de Venta  (Prioriridad: P1)
 Descripción: Como Ejecutivo de Ventas, quiero consultar el historial de documentos de un Cliente específico para saber el estado de cada operación comercial (Cotización, Pedido, Facturado) y hacer seguimiento.
 
 Por qué esta prioridad: Aporta valor inmediato para la gestión de cartera y atención al cliente, reduciendo fricciones en el embudo de ventas, y permite probar la integridad 1:N entre Cliente y Documento definida en el plan.
@@ -35,26 +34,6 @@ Escenarios de Aceptación:
 Dado que el Cliente tiene operaciones previas, cuando el Ejecutivo de Ventas consulta su ficha, entonces visualiza el historial detallando el tipo de documento, fecha, monto y estado actual.
 
 Dado que existen lineamientos estrictos sobre datos sensibles, cuando el usuario visualiza el historial, entonces el sistema enmascara la vista del límite de crédito (creditLimit) si el rol no tiene los permisos financieros correspondientes.
-
-
-
-
-
-
-### User Story 1 - [Brief Title] (Priority: P1)
-
-[Describe this user journey in plain language]
-
-**Why this priority**: [Explain the value and why it has this priority level]
-
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
-
-**Acceptance Scenarios**:
-
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-2. **Given** [initial state], **When** [action], **Then** [expected outcome]
-
----
 
 ### User Story 2 - [Brief Title] (Priority: P2)
 
