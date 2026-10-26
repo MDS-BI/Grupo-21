@@ -1,5 +1,11 @@
 # Plan para el Módulo de Ventas (Basado en el Módulo Base ERP)
 
+## Resumen
+
+El Módulo de Ventas está orientado a los usuarios del área comercial de la empresa. Sus usuarios potenciales principales son los ejecutivos de ventas, quienes gestionan clientes, elaboran cotizaciones y dan seguimiento a los pedidos; los supervisores o jefes de ventas, que revisan y aprueban documentos, controlan el avance del ciclo de vida y consultan los indicadores del panel; y, de forma secundaria, el personal administrativo que apoya el registro y la actualización de datos comerciales.
+
+El diseño debe incorporar el manejo responsable de riesgos y datos sensibles. Los datos fiscales de los clientes, como el RUT/RFC/NIT (taxId), deben tratarse como información confidencial: se recomienda validar su formato al ingresarlos, restringir su visualización según el rol, evitar exponerlos innecesariamente en listados o mensajes y no registrarlos en logs. Respecto de los límites de crédito, deben considerarse como datos comerciales sensibles sujetos a control de acceso y auditoría; el módulo solo los almacena y muestra, y cualquier bloqueo o aprobación automática por crédito queda para una iteración futura con reglas explícitas. Finalmente, para prevenir sesgos en el diseño, las búsquedas, filtros, ordenamientos y reglas de aprobación deben basarse en criterios objetivos y verificables (estado, fechas, montos, condiciones de pago), evitando decisiones automatizadas sobre clientes o vendedores a partir de atributos personales y asegurando que la información mostrada sea transparente y trazable.
+
 ## 1. Objetivo
 
 Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-module), adaptándolo para cubrir la gestión comercial de una empresa. El objetivo es permitir administrar la cartera de clientes, generar cotizaciones/pedidos de venta y dar seguimiento a su ciclo de vida, sin modificar el núcleo del sistema, únicamente mediante el archivo de configuración src/module-config.js.
