@@ -58,7 +58,7 @@ escenario de aceptacion:
 ⁠2. si no llegan a existir productos en el rango de precios seleccionados, cuando el usuario aplica el filtro, el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
 
 
-4. Historia de Usuario 4 - Aplicación de códigos de descuento (Prioridad: P4)
+**4. Historia de Usuario 4 - Aplicación de códigos de descuento (Prioridad: P4)**
 
 Descripción: Como cliente, quiero ingresar un código de cupón promocional en el resumen de compra o carrito para obtener un descuento directo en el valor total de mi pedido, dinamizando mi experiencia de compra.
 
