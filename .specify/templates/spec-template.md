@@ -1,9 +1,9 @@
 # Feature Specification: [FEATURE NAME]
 **Feature Branch**: `[002-modulo-ventas]`
 
-**Created**: [DATE]
+**Created**: [26/10/26]
 
-**Status**: Draft
+**Status**: Borrador
 
 **Input**: User description: "$ARGUMENTS"
 
