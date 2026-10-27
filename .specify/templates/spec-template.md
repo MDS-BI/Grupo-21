@@ -58,6 +58,22 @@ escenario de aceptacion:
 ⁠2. si no llegan a existir productos en el rango de precios seleccionados, cuando el usuario aplica el filtro, el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
 
 
+4. Historia de Usuario 4 - Aplicación de códigos de descuento (Prioridad: P4)
+
+Descripción: Como cliente, quiero ingresar un código de cupón promocional en el resumen de compra o carrito para obtener un descuento directo en el valor total de mi pedido, dinamizando mi experiencia de compra.
+
+¿Por qué esta prioridad?: Es una herramienta comercial estratégica fundamental para captar la atención de nuevos clientes, incentivar campañas de marketing y mejorar la retención, a pesar de que la venta puede completarse con normalidad aunque el cupón no exista o no se utilice.
+
+Prueba independiente: Se puede probar introduciendo un código de descuento válido en el resumen de la compra y verificando tanto en tiempo real como en el almacenamiento local que se aplique correctamente el porcentaje o monto rebajado al total del pedido.
+
+Escenarios de Aceptación:
+
+Dado que el usuario introduce un código de cupón activo y vigente en el campo correspondiente, cuando hace clic en el botón "Aplicar", entonces el sistema valida el código, descuenta de forma dinámica el monto o porcentaje correspondiente del total y muestra una notificación visual de éxito.
+
+Dado que el usuario ingresa un código inválido, mal escrito, vencido o que ya superó su límite de uso, cuando hace clic en "Aplicar", entonces el sistema bloquea la aplicación del descuento y muestra un mensaje de error claro indicando que el cupón no es válido.
+
+Dado que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
+
 
 ### User Story 3 - [Brief Title] (Priority: P3)
 
