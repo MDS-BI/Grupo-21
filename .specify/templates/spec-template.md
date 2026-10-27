@@ -35,19 +35,17 @@ Dado que el Cliente tiene operaciones previas, cuando el Ejecutivo de Ventas con
 
 Dado que existen lineamientos estrictos sobre datos sensibles, cuando el usuario visualiza el historial, entonces el sistema enmascara la vista del límite de crédito (creditLimit) si el rol no tiene los permisos financieros correspondientes.
 
-### User Story 2 - [Brief Title] (Priority: P2)
+### Historial de usuario 2 - filtrado de productos por categoria y precio  (Priority: P2)
 
-[Describe this user journey in plain language]
+descripcion: como cliente, tengo la necesidad de filtar el catalogo de ventas por categorias y el rango de precio para poder encontrar un producto en especifico que deseo comprar sin la necesidad de ir pestaña tras pestaña.
 
-**Why this priority**: [Explain the value and why it has this priority level]
+¿Por que esta prioridad?: mejora la experiencia del cliente y acelera el proceso de decision de la compra.
 
-**Independent Test**: [Describe how this can be tested independently]
+escenario de aceptacion:
+1. el usuario esta en el catalogo, cuando selecciona la categoria de "smartphone" y establece un precio maximo,  el listado se actualiza mostrando solo los artículos que cumplen con ambos criterios
+⁠2. si no llegan a existir productos en el rango de precios seleccionados, cuando el usuario aplica el filtro, el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
 
-**Acceptance Scenarios**:
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-
----
 
 ### User Story 3 - [Brief Title] (Priority: P3)
 
