@@ -21,11 +21,23 @@
   - Deployed independently
   - Demonstrated to users independently
 -->
+### Historial de usuario 3 - Gestion de carrito de compras (Prioridad: P3)
+Descripción: Como comprador, quiero agregar productos al carrito, ajustar las cantidades o quitar artículos para revisar mi pedido antes de proceder al pago.
+
+¿Por qué esta prioridad?: Constituye una etapa clave en el embudo de conversión que le permite al usuario simular su compra y calcular el monto total a pagar.
+
+Prueba independiente: Se puede verificar haciendo clic en "Agregar al carrito", cambiando la cantidad de unidades y comprobando que tanto el subtotal como el total general se actualicen correctamente.
+
+Escenarios de Aceptación:
+
+Dado que el usuario añade un producto al carrito, cuando aumenta la cantidad a 2 unidades, entonces el precio total del artículo y el subtotal del carrito se multiplican de forma correcta por dos. 
+
+Dado que el usuario quiere descartar un artículo, cuando hace clic en el botón de eliminar dentro del carrito, entonces el producto se quita y el monto total se actualiza de inmediato. 
 
 ### Historial de usuario 6 - Historial y seguimiento de Documentos de Venta  (Prioriridad: P1)
 Descripción: Como Ejecutivo de Ventas, quiero consultar el historial de documentos de un Cliente específico para saber el estado de cada operación comercial (Cotización, Pedido, Facturado) y hacer seguimiento.
 
-Por qué esta prioridad: Aporta valor inmediato para la gestión de cartera y atención al cliente, reduciendo fricciones en el embudo de ventas, y permite probar la integridad 1:N entre Cliente y Documento definida en el plan.
+¿Por qué esta prioridad? Aporta valor inmediato para la gestión de cartera y atención al cliente, reduciendo fricciones en el embudo de ventas, y permite probar la integridad 1:N entre Cliente y Documento definida en el plan.
 
 Prueba independiente: Se puede probar ingresando a la vista de un Cliente y verificando que aparezca la lista de operaciones comerciales pasadas con su respectivo estado.
 
