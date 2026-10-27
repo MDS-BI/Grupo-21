@@ -1,5 +1,5 @@
 # Feature Specification: [FEATURE NAME]
-**Feature Branch**: `[###-feature-name]`
+**Feature Branch**: `[002-modulo-ventas]`
 
 **Created**: [DATE]
 
