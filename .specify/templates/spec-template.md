@@ -1,11 +1,11 @@
-# Feature Specification: [FEATURE NAME]
+# Feature Specification: [Módulo de Ventas]
 **Feature Branch**: `[002-modulo-ventas]`
 
 **Created**: [26/10/26]
 
 **Status**: Borrador
 
-**Input**: User description: "$ARGUMENTS"
+**Input**:Construir un módulo de ventas para un sistema ERP que permita gestionar datos maestros de clientes y el ciclo de documentos transaccionales vinculados (cotizaciones, pedidos, facturas) con capacidades de crear, editar, eliminar y buscar.
 
 ## User Scenarios & Testing *(mandatory)*
 
