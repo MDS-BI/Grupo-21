@@ -22,6 +22,20 @@
   - Demonstrated to users independently
 -->
 
+### Historial de usuario 1 - Catálogo de productos destacados  (Priority: P1)
+
+**Descripción**: Como cliente que accede a la plataforma online, quiero que en la pagina principal se encuentre una seccion que enseñe los productos mas destacados, de forma que se conozca rapidamente la oferta principal.
+
+**¿Por qué esta prioridad?**: Esto permite enganchar la atencion del cliente, logrando que siga navegando por la pagina.
+
+**Prueba independiente**: se puede probar ingresando a la pagina principal y verificar que se muestre en la seccion de destacados los articulos junto a su precio y boton de compra.
+
+**Escenario de aceptación**:
+1. **Dado** que el usuario ingresa a la pagina principal, **cuando** está termina de cargar, **entonces** se visualiza la seccion que contiene los productos principales que se encuentran disponibles.
+⁠2. **Dado** que uno de los productos se queda sin stock, **cuando** el sistema actualiza el conteo de inventario, **entonces** el producto muestra la etiqueda de agotado y se deshabilita el boton de compra.
+
+---
+
 ### Historial de usuario 2 - Filtrado de productos por categoria y precio  (Priority: P2)
 
 **Descripción**: Como cliente, tengo la necesidad de filtar el catalogo de ventas por categorias y el rango de precio para poder encontrar un producto en especifico que deseo comprar sin la necesidad de ir pestaña tras pestaña.
