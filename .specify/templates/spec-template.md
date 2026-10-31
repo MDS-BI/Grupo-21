@@ -119,8 +119,9 @@
   Fill them out with the right edge cases.
 -->
 
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- ¿Qué sucede cuando dos usuarios intentan comprar la última unidad de un producto con stock crítico exactamente al mismo tiempo?
+- ¿Cómo maneja el sistema una caída de conexión o un timeout de la pasarela de pagos externa justo en el momento de confirmar la transacción?
+- ¿Qué ocurre si un cupón de descuento expira exactamente mientras el usuario tiene el producto en el carrito de compras pero aún no finaliza el pago?
 
 ## Requirements *(mandatory)*
 
@@ -131,21 +132,18 @@
 
 ### Functional Requirements
 
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-001**: El sistema DEBE [permitir a los clientes filtrar el catálogo de productos por categoría y rango de precios dinámicamente.]
+- **FR-002**: El sistema DEBE [calcular y actualizar automáticamente el subtotal y total del carrito de compras cuando se modifican las cantidades o se eliminan productos.]
+- **FR-003**: El sistema DEBE [validar la vigencia de los cupones promocionales y aplicar el descuento correspondiente sobre el monto total del pedido.]
+- **FR-004**: El sistema DEBE [procesar los datos de envío y derivar el pago a una pasarela segura, generando un número de confirmación tras el éxito.]
+- **FR-005**: EL sistema DEBE [egistrar el historial de documentos de venta (Cotización, Pedido, Facturado) y restringir datos sensibles según el rol del usuario (ej. Ejecutivo de Ventas).]
 
-*Example of marking unclear requirements:*
-
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Producto]**: [Representa el artículo disponible en la tienda. Atributos clave: ID, nombre, descripción, precio, stock disponible, categoría, etiqueta (destacado/normal).]
+- **[Pedido(documento de venta)]**: [Representa la transacción comercial en sus distintos estados. Atributos clave: ID, cliente_id, fecha, monto_total, estado (cotización, pagado, facturado), cupon_aplicado.]
+- **[Cliente]**:[Representa al usuario comprador. Atributos clave: ID, nombre, correo electrónico, dirección_envío, limite_credito.]
 
 ## Success Criteria *(mandatory)*
 
@@ -156,10 +154,10 @@
 
 ### Measurable Outcomes
 
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-001**: [Los usuarios pueden completar el embudo de compra (desde el carrito hasta la confirmación de pago) en menos de 3 minutos.]
+- **SC-002**: [El sistema actualiza el stock y muestra la etiqueta de "agotado" en el catálogo principal en menos de 2 segundos tras confirmarse una venta.]
+- **SC-003**: [El 95% de los usuarios logra aplicar cupones de descuento válidos exitosamente en su primer intento sin errores de interfaz.]
+- **SC-004**: [Reducir el tiempo que los Ejecutivos de Ventas dedican a buscar el estado de las compras de un cliente en un 40% gracias a la nueva vista de historial.]
 
 ## Assumptions
 
@@ -169,7 +167,7 @@
   chosen when the feature description did not specify certain details.
 -->
 
-- [Assumption about target users, e.g., "Users have stable internet connectivity"]
-- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
-- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
-- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- [Los usuarios (clientes y ejecutivos) cuentan con una conexión a internet estable para navegar y procesar pagos sin pérdida de sesión.]
+- [El sistema de autenticación (inicio de sesión y registro de usuarios/roles) ya existe en el ERP base y será reutilizado para este módulo.]
+- [La integración con la pasarela de pagos (ej. Webpay, Stripe) será provista por un servicio de terceros; el desarrollo de la pasarela en sí está fuera del alcance de esta versión.]
+- [La gestión logística y seguimiento del despacho físico de los productos está fuera del alcance del módulo de ventas v1.]
