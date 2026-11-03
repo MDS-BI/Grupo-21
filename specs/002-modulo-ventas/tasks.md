@@ -1,6 +1,6 @@
 # Tareas: Módulo Base de Software de Planificación de Recursos Empresariales (ERP)
 
-**Entrada**: Documentos de diseño desde `/specs/001-erp-base-module/`
+**Entrada**: Documentos de diseño desde `/specs/002-modulo-ventas/`
 **Prerrequisitos**: plan.md (obligatorio), spec.md (obligatorio para las historias de usuario), research.md, data-model.md, contracts/entity-storage.md, quickstart.md
 **Pruebas**: Incluidas porque la constitución exige verificación test-first y el plan confirma pruebas automatizadas para los flujos centrales.
 
