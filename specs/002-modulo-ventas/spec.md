@@ -24,20 +24,14 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 ---
 
-### Historia de Usuario 2 - Editar y eliminar entidades (Prioridad: P1)
-Como usuario de negocio, quiero actualizar o eliminar entidades cuando cambien los datos maestros para que los registros se mantengan precisos.
+Historial de usuario 2 - Filtrado de productos por categoria y precio (Priority: P2)
+Descripción: Como cliente, tengo la necesidad de filtar el catalogo de ventas por categorias y el rango de precio para poder encontrar un producto en especifico que deseo comprar sin la necesidad de ir pestaña tras pestaña.
 
-**Por qué esta prioridad**: Mantener los registros actualizados es esencial para la confianza en la herramienta y para soportar las operaciones comerciales diarias.
+¿Por qué esta prioridad?: Mejora la experiencia del cliente y acelera el proceso de decision de la compra.
 
-**Prueba Independiente**: Un usuario puede seleccionar una entidad existente, cambiar su información o eliminarla, y la lista refleja el cambio.
+Escenario de aceptación:
 
-**Escenarios de Aceptación**:
-
-1. **Dada** una entidad que ya existe en la lista, **cuando** el usuario edita sus detalles, **entonces** la información actualizada se guarda y se muestra en la lista.
-2. **Dada** una entidad que ya no es relevante, **cuando** el usuario la elimina, **entonces** desaparece de la lista y deja de aparecer en los resultados de búsqueda.
-3. **Dadas** cientos de entidades almacenadas, **cuando** el usuario edita o elimina una, **entonces** la lista se actualiza correctamente y sigue siendo ágil.
-
----
+Dado que el usuario esta en el catalogo, cuando selecciona la categoria de "smartphone" y establece un precio maximo, entonces el listado se actualiza mostrando solo los artículos que cumplen con ambos criterios ⁠2. Dado si es que no llegan a existir productos en el rango de precios seleccionados, cuando el usuario aplica el filtro, entonces el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
 
 ### Historia de Usuario 3 - Panel de inicio con acciones rápidas y estadísticas de registros (Prioridad: P1)
 
