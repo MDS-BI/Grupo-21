@@ -2,6 +2,8 @@
 
 El módulo de Ventas reutiliza las entidades base `Entity` y `Document` del ERP, adaptándolas como `Cliente` y `Documento de Venta`. La Cotización y el Pedido de Venta son el mismo documento en distintos estados del ciclo de vida, no entidades separadas.
 
+> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B.
+
 ## Entidad: Cliente
 
 Representa a una persona natural o jurídica con la que se realiza una operación comercial. Es la adaptación de `Entity` e incorpora identidad fiscal, datos de contacto, condiciones comerciales y vendedor asignado.
@@ -156,7 +158,87 @@ Los estados son cadenas de texto exactas, incluidos acentos y mayúsculas. El es
 - Las partidas del documento (producto, cantidad, precio unitario e impuestos por línea) son el siguiente punto natural de extensión; el desglose actual es agregado a nivel de documento.
 - La facturación electrónica puede incorporarse como una entidad fiscal separada o como una extensión del documento, manteniendo `Facturado` como estado comercial de cierre.
 - El límite de crédito puede evolucionar de campo informativo a regla de bloqueo o autorización al confirmar pedidos.
-- El catálogo de productos y la integración con inventario quedan fuera de esta versión y podrán vincularse a las futuras partidas del documento.
+- La administración de inventario (CRUD de productos desde la interfaz) queda fuera de esta versión; el catálogo semilla y el descuento de stock al comprar sí forman parte del alcance implementado (ver sección final).
 - La conversión de Cotización a Pedido puede evolucionar a documentos separados con trazabilidad de origen si la empresa requiere folios independientes por tipo.
 - La unicidad de folio por serie, la numeración automática y la auditoría detallada de transiciones son extensiones compatibles con este modelo.
 - Cualquier módulo futuro que reutilice este perfil debe respetar los nombres y la semántica de los campos base para no romper el almacenamiento, la búsqueda ni la integridad referencial.
+
+## Entidades implementadas (tienda en línea)
+
+Estas son las entidades que realmente persiste la aplicación de `spec.md`. Se almacenan en `localStorage` con las claves indicadas.
+
+| Entidad | Clave de almacenamiento | Módulo |
+|---|---|---|
+| Producto | `erp.products` | `src/storage.js`, `src/data/products.js` |
+| Cliente | `erp.clients` | `src/storage.js` |
+| Pedido | `erp.orders` | `src/storage.js` |
+| Carrito | `erp.cart` | `src/storage.js` |
+| Cupón | `erp.coupons` | `src/coupons.js` |
+| Uso de cupones | `erp.couponUsage` | `src/coupons.js` |
+| Rol activo | `erp.role` | `src/module-config.js` |
+
+### Producto
+
+| Campo | Tipo | Descripción | Restricciones |
+|---|---|---|---|
+| id | string | Identificador interno | Único, generado automáticamente |
+| name | string | Nombre comercial | Obligatorio |
+| description | string | Descripción corta | Opcional |
+| price | number | Precio unitario en CLP | No negativo |
+| stock | number | Unidades disponibles | Entero no negativo; 0 ⇒ Agotado |
+| category | string | Categoría del catálogo | Opcional |
+| featured | boolean | Aparece en destacados | Por defecto `false` |
+| createdAt / updatedAt | string | Marcas de tiempo ISO | Generadas por el sistema |
+
+### Cupón
+
+| Campo | Tipo | Descripción | Restricciones |
+|---|---|---|---|
+| code | string | Código del cupón | Único, se normaliza a mayúsculas |
+| type | string | `percent` o `fixed` | Obligatorio |
+| value | number | Porcentaje o monto fijo | No negativo |
+| active | boolean | Habilita el cupón | Por defecto `true` |
+| expiresAt | string | Fecha límite `YYYY-MM-DD` | Vencido si la fecha ya pasó |
+| usageLimit | number | Usos máximos permitidos | `0` ⇒ agotado; `null` ⇒ sin límite |
+
+El uso acumulado se guarda en `erp.couponUsage` como `{ [code]: usos }`. Los cupones semilla son `BIENVENIDO10`, `AHORRA5000`, `EXPIRADO` y `AGOTADO`.
+
+### Pedido
+
+| Campo | Tipo | Descripción | Restricciones |
+|---|---|---|---|
+| id | string | Identificador interno | Único |
+| orderNumber | string | Número de pedido `PED-YYYYMMDD-NNNN` | Único, generado al confirmar |
+| clientId | string | Referencia al cliente comprador | Debe existir; el cliente se crea o reutiliza por correo |
+| documentType | string | Tipo de documento | `Pedido` |
+| status | string | Estado del documento | `Pedido` |
+| items | array | Líneas `{ productId, name, price, quantity, lineTotal }` | Al menos una al confirmar |
+| subtotal | number | Suma de líneas antes del descuento | No negativo |
+| discount | number | Descuento del cupón aplicado | No negativo y ≤ subtotal |
+| total | number | `subtotal - discount` | No negativo |
+| couponCode | string \| null | Cupón usado | Debe haber sido válido al confirmar |
+| paymentMethod | string | Tarjeta, Transferencia, Efectivo o Crédito | Obligatorio en el checkout |
+| shipping | object | Nombre, correo, dirección, ciudad, código postal y teléfono | Obligatorios salvo teléfono |
+| date | string | Fecha de emisión ISO | Generada al confirmar |
+
+### Relaciones y reglas implementadas
+
+- Un cliente puede tener muchos pedidos; cada pedido pertenece a un solo cliente (`Pedido.clientId → Cliente.id`). No se permiten pedidos huérfanos: el checkout crea o reutiliza el cliente antes de guardar el pedido.
+- Al eliminar un cliente se eliminan en cascada sus pedidos (`deleteOrdersForClient`).
+- El stock se descuenta al confirmar el pago. Si alguna línea no tiene stock suficiente, la compra se rechaza y el carrito se conserva.
+- El cupón se valida contra subtotal, vigencia y límite de uso; al confirmar el pedido se incrementa su uso.
+- El carrito es single-user (un solo espacio de trabajo) y se vacía tras una compra exitosa.
+- `creditLimit` es informativo: se muestra en el historial y se enmascara (`•••••`) para roles sin permiso financiero (`sales`, `warehouse`, `admin`); solo `finance` lo ve.
+
+### Equivalencias con el modelo B2B de referencia
+
+| Modelo B2B | Implementación tienda en línea |
+|---|---|
+| `Cliente.entity_id` | `Cliente.id` |
+| `Documento.entity_id` | `Pedido.clientId` |
+| `Documento.series` + `folio` | `Pedido.orderNumber` (`PED-…`) |
+| `Documento.totalAmount` | `Pedido.total` |
+| Partidas del documento (extensión) | `Pedido.items[]` |
+| Estado `Pedido` del ciclo B2B | `Pedido.status = "Pedido"` |
+| Cotización, Aprobado, Facturado, Cancelado, Vencido | No implementados |
+

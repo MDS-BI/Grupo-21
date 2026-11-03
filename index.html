@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Tienda en línea del módulo de ventas: catálogo, carrito, cupones y checkout." />
+    <title>Módulo de Ventas</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">ERP</span>
+        <span id="brand-name" class="brand__name">Módulo de Ventas</span>
+      </div>
+      <nav class="site-nav" aria-label="Navegación principal">
+        <button type="button" class="nav-button" data-view="catalog" aria-current="page">Catálogo</button>
+        <button type="button" class="nav-button" data-view="cart">
+          Carrito <span id="cart-count" class="cart-count">0</span>
+        </button>
+        <button type="button" class="nav-button" data-view="history">Historial</button>
+      </nav>
+      <label class="role-select">
+        <span class="sr-only">Rol activo</span>
+        <select id="role-select">
+          <option value="sales">Ventas</option>
+          <option value="warehouse">Bodega</option>
+          <option value="finance">Finanzas</option>
+          <option value="admin">Administración</option>
+        </select>
+      </label>
+    </header>
+
+    <main class="site-main">
+      <section id="view-catalog" class="view" aria-labelledby="catalog-title">
+        <header class="view-header">
+          <h1 id="catalog-title">Catálogo de productos</h1>
+          <p class="view-subtitle">Explora, filtra y agrega productos al carrito.</p>
+        </header>
+        <div id="product-filters"></div>
+        <p id="catalog-message" class="notice" role="status" hidden></p>
+        <p id="catalog-feedback" class="notice" role="status" hidden></p>
+        <div id="product-catalog"></div>
+      </section>
+
+      <section id="view-cart" class="view" hidden aria-labelledby="cart-title">
+        <header class="view-header">
+          <h1 id="cart-title">Tu carrito</h1>
+          <p class="view-subtitle">Revisa cantidades, aplica cupones y continúa al pago.</p>
+        </header>
+        <div id="cart"></div>
+        <div id="coupon-area"></div>
+        <div class="cart-summary" id="cart-summary">
+          <dl class="summary-list">
+            <div class="summary-row"><dt>Subtotal</dt><dd id="cart-subtotal">$0</dd></div>
+            <div class="summary-row"><dt>Descuento</dt><dd id="cart-discount">$0</dd></div>
+            <div class="summary-row summary-row--total"><dt>Total</dt><dd id="cart-total">$0</dd></div>
+          </dl>
+          <button type="button" id="go-checkout" class="btn btn--primary">Ir a pagar</button>
+        </div>
+      </section>
+
+      <section id="view-checkout" class="view" hidden aria-labelledby="checkout-title">
+        <header class="view-header">
+          <h1 id="checkout-title">Datos de envío y pago</h1>
+          <p class="view-subtitle">Completa tus datos para confirmar el pedido.</p>
+        </header>
+        <div id="checkout"></div>
+      </section>
+
+      <section id="view-confirmation" class="view" hidden aria-labelledby="confirmation-title">
+        <h1 id="confirmation-title" class="sr-only">Confirmación de compra</h1>
+        <div id="confirmation"></div>
+      </section>
+
+      <section id="view-history" class="view" hidden aria-labelledby="history-title">
+        <header class="view-header">
+          <h1 id="history-title">Historial de ventas</h1>
+          <p class="view-subtitle">Documentos de venta por cliente.</p>
+        </header>
+        <div id="history"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,5 +1,7 @@
 # Plan para el Módulo de Ventas (Basado en el Módulo Base ERP)
 
+> **Reconciliación con `spec.md` (T050)**: la implementación final de esta entrega es una **tienda en línea** (catálogo con stock, filtros, carrito, cupones, checkout e historial de pedidos), tal como se define en `spec.md`. Las secciones 1–4 conservan el diseño B2B original (Clientes y Documentos de Venta) como referencia de negocio y de stack; la sección 2.1 y la sección 10 describen el alcance realmente construido y su trazabilidad con las historias de usuario.
+
 ## Resumen
 
 El Módulo de Ventas está orientado a los usuarios del área comercial de la empresa. Sus usuarios potenciales principales son los ejecutivos de ventas, quienes gestionan clientes, elaboran cotizaciones y dan seguimiento a los pedidos; los supervisores o jefes de ventas, que revisan y aprueban documentos, controlan el avance del ciclo de vida y consultan los indicadores del panel; y, de forma secundaria, el personal administrativo que apoya el registro y la actualización de datos comerciales.
@@ -12,21 +14,27 @@ Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-mo
 
 ## 2. Alcance
 
-### Dentro del alcance
+### Dentro del alcance (alcance implementado, según `spec.md`)
 
-- Gestión de Clientes: Creación, edición, eliminación y búsqueda de clientes (tomando como base el concepto de Entidad).
-- Gestión de Documentos de Venta: Creación, edición, eliminación y seguimiento de Cotizaciones y Pedidos de Venta (tomando como base el concepto de Documento). "Facturado" es un estado de cierre del mismo documento, no una entidad separada; la facturación electrónica queda fuera de alcance.
-- Ciclo de vida de ventas: Control de estados con transiciones permitidas (ej. Cotización → Aprobado → Pedido → Facturado).
-- Información comercial: Registro de condiciones de pago, límite de crédito, fecha de entrega, forma de pago, entre otros.
-- Integración con el marco ERP: Aprovechar la barra superior, barra lateral, panel de inicio y acciones rápidas ya existentes.
-- Personalización por configuración: Aplicar toda la terminología, campos y reglas desde src/module-config.js.
+- Catálogo de productos: productos semilla con nombre, descripción, precio, categoría, stock y marca de destacado; los productos sin stock se muestran como agotados y no se pueden comprar.
+- Filtros de catálogo: filtrado combinado por categoría y precio máximo, con mensaje de resultados vacíos y acción de reinicio.
+- Carrito de compras: añadir productos, ajustar cantidades, quitar líneas, vaciar y recalcular subtotal/total; el carrito persiste en `localStorage` y respeta el stock disponible.
+- Cupones: validación de código, vigencia y límite de uso; descuento porcentual o fijo; notificaciones de éxito/error y restauración del total al quitar el cupón.
+- Checkout: formulario de envío y método de pago, validación de campos obligatorios, pasarela simulada (éxito, rechazo y timeout), descuento de stock y número de pedido `PED-YYYYMMDD-NNNN`.
+- Confirmación e historial: página de confirmación con resumen y número de pedido; historial de documentos de venta por cliente con tipo, fecha, número, monto y estado; límite de crédito enmascarado para roles sin permisos financieros.
+- Personalización por configuración y roles: nombre del módulo, etiquetas, color de acento y control de acceso a datos financieros desde `src/module-config.js`.
 
 ### Fuera del alcance
 
-- Módulo de Inventario/Productos: No se implementará el catálogo de productos con existencias en esta primera versión.
-- Módulo de Facturación Electrónica: Se deja para una futura iteración.
-- Cuentas por Cobrar/Pagar: No forma parte de este módulo.
-- Multi-sucursal o Multi-empresa: El sistema seguirá trabajando sobre un único espacio de trabajo.
+- Administración de inventario y CRUD completo de productos desde la interfaz (solo se consume el catálogo semilla y se descuenta stock al comprar).
+- Módulo de Facturación Electrónica: se deja para una futura iteración.
+- Cuentas por Cobrar/Pagar: no forma parte de este módulo.
+- Multi-sucursal o Multi-empresa: el sistema trabaja sobre un único espacio de trabajo.
+- Backend, autenticación real y pasarela de pago real: la persistencia es local y el pago es simulado.
+
+### 2.1 Alcance B2B de referencia (no implementado en esta entrega)
+
+El diseño original contemplaba gestión de Clientes y Documentos de Venta (Cotización → Pedido → Facturado) con límite de crédito y condiciones de pago. Ese modelo se conserva en `data-model.md` como referencia de dominio y de evolución, pero **no** es el flujo construido en esta entrega. La tienda en línea solo usa un subconjunto de Cliente (nombre, correo, dirección) y Pedido (ítems, subtotal, descuento, total, estado `Pedido`).
 
 ## 3. Mapeo con el Módulo Base
 
@@ -35,7 +43,18 @@ Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-mo
 | Entidad | Cliente | Representa a personas naturales o jurídicas con los que se realiza negocio. |
 | Documento | Pedido de Venta / Cotización | Representa una transacción comercial vinculada a un cliente. Puede iniciar como cotización y evolucionar a pedido/factura. |
 | Panel | Panel de Ventas | Punto de entrada con acciones rápidas orientadas al área comercial. |
-| Búsqueda | Búsqueda de Clientes/Pedidos | Permite localizar clientes o documentos de venta rápidamente.
+| Búsqueda | Búsqueda de Clientes/Pedidos | Permite localizar clientes o documentos de venta rápidamente. |
+
+**Mapeo del alcance implementado (tienda en línea)**
+
+| Concepto implementado | Archivo | Descripción |
+|---|---|---|
+| Producto | `src/data/products.js`, `src/storage.js` | Catálogo semilla y CRUD interno con precio, stock, categoría y destacado. |
+| Filtros de catálogo | `src/catalog.js`, `src/components/product-filters.js` | Filtrado por categoría y precio máximo con estado vacío. |
+| Carrito | `src/storage.js`, `src/components/cart.js` | Líneas con cantidad, subtotal, descuento y total; persistencia local. |
+| Cupón | `src/coupons.js`, `src/components/coupon-form.js` | Código, tipo (porcentaje/fijo), vigencia y límite de uso. |
+| Pedido | `src/storage.js`, `src/checkout.js`, `src/components/order-confirmation.js` | Documento de venta con número `PED-…`, ítems, totales y estado `Pedido`. |
+| Historial | `src/components/order-history.js`, `src/app.js` | Documentos de venta por cliente y enmascaramiento de `creditLimit` por rol. |
 
 ## 4. Propuesta de Configuración (src/module-config.js)
 
@@ -91,6 +110,8 @@ export const userConfig = {
 };
 ```
 
+> **Nota de implementación**: `src/module-config.js` expone `DEFAULT_CONFIG` con las etiquetas del escaparate (Catálogo, Productos destacados, Carrito, Pago, Historial, Agotado, etc.), los roles `sales`/`warehouse`/`finance`/`admin` y el color de acento `#1F7A3E`. El bloque anterior queda como referencia del perfil B2B original.
+
 ## 5. Funcionalidades Detalladas
 
 | Funcionalidad | Descripción | Origen en el Base |
@@ -145,3 +166,18 @@ export const userConfig = {
 3. Flujo completo de Cotización/Pedido operativo con control de estados.
 4. Panel de Ventas con acciones rápidas y estadísticas correctas.
 5. Validación exitosa de la suite de pruebas (npm test).
+
+## 10. Estado de implementación del alcance `spec.md`
+
+| Historia | Prioridad | Estado | Evidencia |
+|---|---|---|---|
+| US1 Catálogo de productos destacados | P1 | Implementado | `src/components/product-card.js`, `src/components/product-catalog.js`, `tests/integration/product-catalog.test.js` |
+| US2 Filtrado por categoría y precio | P2 | Implementado | `src/catalog.js`, `src/components/product-filters.js`, `tests/integration/product-filters.test.js` |
+| US3 Gestión de carrito | P3 | Implementado | `src/storage.js`, `src/components/cart.js`, `tests/integration/cart.test.js` |
+| US4 Cupones de descuento | P4 | Implementado | `src/coupons.js`, `src/components/coupon-form.js`, `tests/integration/coupons.test.js` |
+| US5 Checkout y confirmación | P5 | Implementado | `src/checkout.js`, `src/payments.js`, `src/components/checkout-form.js`, `src/components/order-confirmation.js`, `tests/integration/checkout.test.js` |
+| US6 Historial de documentos de venta | P6 | Implementado | `src/components/order-history.js`, `src/module-config.js`, `tests/integration/order-history.test.js` |
+
+- Verificación ejecutada: 35 pruebas unitarias + 30 de integración del alcance 002, y `npm run build` exitoso.
+- Los antiguos criterios CV-001 a CV-010 y las fases A–F de la sección 6 corresponden al perfil B2B de referencia; no son criterios de aceptación de esta entrega.
+- Las pruebas heredadas del módulo base 001 permanecen en `tests/` pero dependen de una implementación que no forma parte de este alcance.

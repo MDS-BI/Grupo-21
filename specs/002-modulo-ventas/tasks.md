@@ -26,10 +26,10 @@
 
 **Propósito**: Inicializar la estructura Vite, dependencias y arnés de pruebas.
 
-- [ ] T001 Crear la estructura del proyecto Vite con `index.html`, `package.json`, `vite.config.js`, `vitest.config.mjs`, `src/`, `src/components/`, `src/data/` y `tests/`
-- [ ] T002 [P] Configurar scripts y dependencias de Vite, Vitest y jsdom en `package.json`, `vite.config.js` y `vitest.config.mjs`
-- [ ] T003 [P] Crear el arnés de pruebas con jsdom y aislamiento de `localStorage` por prueba en `tests/setup/jsdom.js`
-- [ ] T004 [P] Construir el HTML base con cabecera, contenedor de catálogo, panel de carrito, formulario de checkout, vista de confirmación e historial en `index.html`
+- [X] T001 Crear la estructura del proyecto Vite con `index.html`, `package.json`, `vite.config.js`, `vitest.config.mjs`, `src/`, `src/components/`, `src/data/` y `tests/`
+- [X] T002 [P] Configurar scripts y dependencias de Vite, Vitest y jsdom en `package.json`, `vite.config.js` y `vitest.config.mjs`
+- [X] T003 [P] Crear el arnés de pruebas con jsdom y aislamiento de `localStorage` por prueba en `tests/setup/jsdom.js`
+- [X] T004 [P] Construir el HTML base con cabecera, contenedor de catálogo, panel de carrito, formulario de checkout, vista de confirmación e historial en `index.html`
 
 ---
 
@@ -39,14 +39,14 @@
 
 **⚠️ CRÍTICO**: Ninguna historia de usuario puede comenzar hasta completar esta fase.
 
-- [ ] T005 Implementar las primitivas de almacenamiento y el CRUD de productos (stock, precio, categoría, destacado) en `src/storage.js`
-- [ ] T006 Implementar el almacenamiento de clientes y pedidos, la integridad referencial y la eliminación en cascada en `src/storage.js`
-- [ ] T007 Implementar el estado y la persistencia del carrito (añadir, actualizar cantidad, quitar, vaciar) en `src/storage.js`
-- [ ] T008 [P] Implementar el modelo, almacenamiento y validación de cupones (vigencia, tipo, valor, límite de uso) en `src/coupons.js`
-- [ ] T009 [P] Implementar la configuración del módulo, etiquetas, valores predeterminados y ayudantes de rol en `src/module-config.js`
-- [ ] T010 Implementar el arranque de la aplicación, el enrutado de vistas y los ayudantes de renderizado en `src/app.js`
-- [ ] T011 [P] Crear las variables de tokens de diseño y los estilos base del escaparate, carrito y formularios en `src/styles.css`
-- [ ] T012 [P] Crear el catálogo semilla de productos con categorías, precios, stock y marca de destacado en `src/data/products.js`
+- [X] T005 Implementar las primitivas de almacenamiento y el CRUD de productos (stock, precio, categoría, destacado) en `src/storage.js`
+- [X] T006 Implementar el almacenamiento de clientes y pedidos, la integridad referencial y la eliminación en cascada en `src/storage.js`
+- [X] T007 Implementar el estado y la persistencia del carrito (añadir, actualizar cantidad, quitar, vaciar) en `src/storage.js`
+- [X] T008 [P] Implementar el modelo, almacenamiento y validación de cupones (vigencia, tipo, valor, límite de uso) en `src/coupons.js`
+- [X] T009 [P] Implementar la configuración del módulo, etiquetas, valores predeterminados y ayudantes de rol en `src/module-config.js`
+- [X] T010 Implementar el arranque de la aplicación, el enrutado de vistas y los ayudantes de renderizado en `src/app.js`
+- [X] T011 [P] Crear las variables de tokens de diseño y los estilos base del escaparate, carrito y formularios en `src/styles.css`
+- [X] T012 [P] Crear el catálogo semilla de productos con categorías, precios, stock y marca de destacado en `src/data/products.js`
 
 **Punto de control**: La base está lista; las historias de usuario pueden comenzar.
 
@@ -60,15 +60,15 @@
 
 ### Pruebas para la Historia de Usuario 1
 
-- [ ] T013 [P] [US1] Añadir pruebas unitarias para la selección de destacados y el cálculo de disponibilidad por stock en `tests/unit/products.test.js`
-- [ ] T014 [P] [US1] Añadir la prueba de integración del renderizado del catálogo, precios, botón de compra y estado agotado en `tests/integration/product-catalog.test.js`
+- [X] T013 [P] [US1] Añadir pruebas unitarias para la selección de destacados y el cálculo de disponibilidad por stock en `tests/unit/products.test.js`
+- [X] T014 [P] [US1] Añadir la prueba de integración del renderizado del catálogo, precios, botón de compra y estado agotado en `tests/integration/product-catalog.test.js`
 
 ### Implementación de la Historia de Usuario 1
 
-- [ ] T015 [P] [US1] Crear el componente de tarjeta de producto con nombre, precio, botón de compra, insignia de agotado y botón deshabilitado en `src/components/product-card.js`
-- [ ] T016 [P] [US1] Crear el componente de catálogo destacado que agrupa las tarjetas de productos disponibles en `src/components/product-catalog.js`
-- [ ] T017 [US1] Conectar el catálogo destacado con la vista de inicio y el estado de stock en `src/app.js`
-- [ ] T018 [P] [US1] Dar estilo a la sección de destacados, tarjetas de producto e insignias de agotado en `src/styles.css`
+- [X] T015 [P] [US1] Crear el componente de tarjeta de producto con nombre, precio, botón de compra, insignia de agotado y botón deshabilitado en `src/components/product-card.js`
+- [X] T016 [P] [US1] Crear el componente de catálogo destacado que agrupa las tarjetas de productos disponibles en `src/components/product-catalog.js`
+- [X] T017 [US1] Conectar el catálogo destacado con la vista de inicio y el estado de stock en `src/app.js`
+- [X] T018 [P] [US1] Dar estilo a la sección de destacados, tarjetas de producto e insignias de agotado en `src/styles.css`
 
 **Punto de control**: La Historia de Usuario 1 es completamente funcional y comprobable de forma independiente.
 
@@ -82,14 +82,14 @@
 
 ### Pruebas para la Historia de Usuario 2
 
-- [ ] T019 [P] [US2] Añadir pruebas unitarias para el filtrado combinado por categoría y precio máximo y el caso sin resultados en `tests/unit/product-filters.test.js`
-- [ ] T020 [P] [US2] Añadir la prueba de integración de la interfaz de filtros actualizando el catálogo y el estado vacío en `tests/integration/product-filters.test.js`
+- [X] T019 [P] [US2] Añadir pruebas unitarias para el filtrado combinado por categoría y precio máximo y el caso sin resultados en `tests/unit/product-filters.test.js`
+- [X] T020 [P] [US2] Añadir la prueba de integración de la interfaz de filtros actualizando el catálogo y el estado vacío en `tests/integration/product-filters.test.js`
 
 ### Implementación de la Historia de Usuario 2
 
-- [ ] T021 [US2] Crear los controles de filtro (categoría y precio máximo) y el mensaje de resultados vacíos con acción de reinicio en `src/components/product-filters.js`
-- [ ] T022 [US2] Implementar el estado de filtros y el renderizado del catálogo filtrado en `src/app.js`
-- [ ] T023 [P] [US2] Dar estilo a la barra de filtros y al estado de resultados vacíos en `src/styles.css`
+- [X] T021 [US2] Crear los controles de filtro (categoría y precio máximo) y el mensaje de resultados vacíos con acción de reinicio en `src/components/product-filters.js`
+- [X] T022 [US2] Implementar el estado de filtros y el renderizado del catálogo filtrado en `src/app.js`
+- [X] T023 [P] [US2] Dar estilo a la barra de filtros y al estado de resultados vacíos en `src/styles.css`
 
 **Punto de control**: La Historia de Usuario 2 es funcional de forma independiente sobre el catálogo de US1.
 
@@ -103,14 +103,14 @@
 
 ### Pruebas para la Historia de Usuario 3
 
-- [ ] T024 [P] [US3] Añadir pruebas unitarias para añadir, actualizar cantidad, quitar artículos y recalcular totales en `tests/unit/cart.test.js`
-- [ ] T025 [P] [US3] Añadir la prueba de integración de las interacciones del carrito y la actualización de totales en `tests/integration/cart.test.js`
+- [X] T024 [P] [US3] Añadir pruebas unitarias para añadir, actualizar cantidad, quitar artículos y recalcular totales en `tests/unit/cart.test.js`
+- [X] T025 [P] [US3] Añadir la prueba de integración de las interacciones del carrito y la actualización de totales en `tests/integration/cart.test.js`
 
 ### Implementación de la Historia de Usuario 3
 
-- [ ] T026 [P] [US3] Crear el componente del carrito con líneas de producto, controles de cantidad, botón de quitar y totales en `src/components/cart.js`
-- [ ] T027 [US3] Conectar las operaciones del carrito y el recálculo de subtotal/total en `src/storage.js` y `src/app.js`
-- [ ] T028 [P] [US3] Dar estilo al panel del carrito, líneas, controles de cantidad y resumen de totales en `src/styles.css`
+- [X] T026 [P] [US3] Crear el componente del carrito con líneas de producto, controles de cantidad, botón de quitar y totales en `src/components/cart.js`
+- [X] T027 [US3] Conectar las operaciones del carrito y el recálculo de subtotal/total en `src/storage.js` y `src/app.js`
+- [X] T028 [P] [US3] Dar estilo al panel del carrito, líneas, controles de cantidad y resumen de totales en `src/styles.css`
 
 **Punto de control**: La Historia de Usuario 3 es funcional y persistente de forma independiente.
 
@@ -124,14 +124,14 @@
 
 ### Pruebas para la Historia de Usuario 4
 
-- [ ] T029 [P] [US4] Añadir pruebas unitarias para cupones válidos, inválidos, vencidos y con límite de uso agotado en `tests/unit/coupons.test.js`
-- [ ] T030 [P] [US4] Añadir la prueba de integración de aplicar y quitar cupones con actualización del total en `tests/integration/coupons.test.js`
+- [X] T029 [P] [US4] Añadir pruebas unitarias para cupones válidos, inválidos, vencidos y con límite de uso agotado en `tests/unit/coupons.test.js`
+- [X] T030 [P] [US4] Añadir la prueba de integración de aplicar y quitar cupones con actualización del total en `tests/integration/coupons.test.js`
 
 ### Implementación de la Historia de Usuario 4
 
-- [ ] T031 [P] [US4] Crear el componente de entrada de cupón con notificaciones de éxito y error en `src/components/coupon-form.js`
-- [ ] T032 [US4] Conectar la validación, aplicación, eliminación y restauración del cupón con el total del carrito en `src/app.js` y `src/coupons.js`
-- [ ] T033 [P] [US4] Dar estilo al campo de cupón y a los avisos de éxito/error en `src/styles.css`
+- [X] T031 [P] [US4] Crear el componente de entrada de cupón con notificaciones de éxito y error en `src/components/coupon-form.js`
+- [X] T032 [US4] Conectar la validación, aplicación, eliminación y restauración del cupón con el total del carrito en `src/app.js` y `src/coupons.js`
+- [X] T033 [P] [US4] Dar estilo al campo de cupón y a los avisos de éxito/error en `src/styles.css`
 
 **Punto de control**: La Historia de Usuario 4 es funcional de forma independiente sobre el carrito de US3.
 
@@ -145,16 +145,16 @@
 
 ### Pruebas para la Historia de Usuario 5
 
-- [ ] T034 [P] [US5] Añadir pruebas unitarias para la validación de checkout y la generación del número de pedido en `tests/unit/checkout.test.js`
-- [ ] T035 [P] [US5] Añadir la prueba de integración del flujo de checkout, errores de campos obligatorios y página de confirmación en `tests/integration/checkout.test.js`
+- [X] T034 [P] [US5] Añadir pruebas unitarias para la validación de checkout y la generación del número de pedido en `tests/unit/checkout.test.js`
+- [X] T035 [P] [US5] Añadir la prueba de integración del flujo de checkout, errores de campos obligatorios y página de confirmación en `tests/integration/checkout.test.js`
 
 ### Implementación de la Historia de Usuario 5
 
-- [ ] T036 [P] [US5] Crear el formulario de checkout con campos de envío, selección de método de pago y mensajes de validación en `src/components/checkout-form.js`
-- [ ] T037 [US5] Crear la vista de confirmación con el número de pedido y el resumen de la compra en `src/components/order-confirmation.js`
-- [ ] T038 [US5] Implementar la validación del checkout, el descuento de stock, la persistencia del pedido y el enrutado a la confirmación en `src/app.js` y `src/storage.js`
-- [ ] T039 [US5] Implementar la pasarela de pago simulada con éxito, error y timeout reintentable en `src/payments.js`
-- [ ] T040 [P] [US5] Dar estilo al formulario de checkout, estados de error y vista de confirmación en `src/styles.css`
+- [X] T036 [P] [US5] Crear el formulario de checkout con campos de envío, selección de método de pago y mensajes de validación en `src/components/checkout-form.js`
+- [X] T037 [US5] Crear la vista de confirmación con el número de pedido y el resumen de la compra en `src/components/order-confirmation.js`
+- [X] T038 [US5] Implementar la validación del checkout, el descuento de stock, la persistencia del pedido y el enrutado a la confirmación en `src/app.js` y `src/storage.js`
+- [X] T039 [US5] Implementar la pasarela de pago simulada con éxito, error y timeout reintentable en `src/payments.js`
+- [X] T040 [P] [US5] Dar estilo al formulario de checkout, estados de error y vista de confirmación en `src/styles.css`
 
 **Punto de control**: El embudo de compra está completo hasta la confirmación del pedido.
 
@@ -168,14 +168,14 @@
 
 ### Pruebas para la Historia de Usuario 6
 
-- [ ] T041 [P] [US6] Añadir pruebas unitarias para la obtención del historial por cliente y el enmascaramiento por rol en `tests/unit/order-history.test.js`
-- [ ] T042 [P] [US6] Añadir la prueba de integración de la vista de historial, estados y límite de crédito enmascarado en `tests/integration/order-history.test.js`
+- [X] T041 [P] [US6] Añadir pruebas unitarias para la obtención del historial por cliente y el enmascaramiento por rol en `tests/unit/order-history.test.js`
+- [X] T042 [P] [US6] Añadir la prueba de integración de la vista de historial, estados y límite de crédito enmascarado en `tests/integration/order-history.test.js`
 
 ### Implementación de la Historia de Usuario 6
 
-- [ ] T043 [P] [US6] Crear el componente de historial con tipo de documento, fecha, monto y estado en `src/components/order-history.js`
-- [ ] T044 [US6] Implementar la consulta del historial por cliente y el enmascaramiento de `creditLimit` según el rol en `src/app.js` y `src/module-config.js`
-- [ ] T045 [P] [US6] Dar estilo a la tabla/tarjetas de historial y a las insignias de estado en `src/styles.css`
+- [X] T043 [P] [US6] Crear el componente de historial con tipo de documento, fecha, monto y estado en `src/components/order-history.js`
+- [X] T044 [US6] Implementar la consulta del historial por cliente y el enmascaramiento de `creditLimit` según el rol en `src/app.js` y `src/module-config.js`
+- [X] T045 [P] [US6] Dar estilo a la tabla/tarjetas de historial y a las insignias de estado en `src/styles.css`
 
 **Punto de control**: Todas las historias de usuario están funcionales y son comprobables de forma independiente.
 
@@ -185,12 +185,12 @@
 
 **Propósito**: Seguridad, accesibilidad, casos límite, documentación y verificación final.
 
-- [ ] T046 [P] Reforzar la sanitización de entradas y el escape de HTML/atributos antes de renderizar en el DOM en `src/app.js` y `src/components/*.js`
-- [ ] T047 [P] Añadir refinamientos de accesibilidad (etiquetas, foco, teclado, insignias con texto alternativo) en `index.html` y `src/styles.css`
-- [ ] T048 [P] Cubrir casos límite: última unidad en stock concurrente, expiración de cupón durante el checkout y timeout de la pasarela en `src/app.js`, `src/coupons.js` y `src/payments.js`
-- [ ] T049 [P] Añadir una prueba de extremo a extremo del embudo completo (catálogo → carrito → cupón → checkout → confirmación) en `tests/integration/purchase-funnel.test.js`
-- [ ] T050 [P] Reconciliar `plan.md` y `data-model.md` con el alcance de `spec.md` (Producto, Cupón, Pedido, reglas de stock) en `specs/002-modulo-ventas/plan.md` y `specs/002-modulo-ventas/data-model.md`
-- [ ] T051 Ejecutar la suite completa (`npm test`) y la compilación de producción (`npm run build`), y actualizar la documentación de uso en `README.md`
+- [X] T046 [P] Reforzar la sanitización de entradas y el escape de HTML/atributos antes de renderizar en el DOM en `src/app.js` y `src/components/*.js`
+- [X] T047 [P] Añadir refinamientos de accesibilidad (etiquetas, foco, teclado, insignias con texto alternativo) en `index.html` y `src/styles.css`
+- [X] T048 [P] Cubrir casos límite: última unidad en stock concurrente, expiración de cupón durante el checkout y timeout de la pasarela en `src/app.js`, `src/coupons.js` y `src/payments.js`
+- [X] T049 [P] Añadir una prueba de extremo a extremo del embudo completo (catálogo → carrito → cupón → checkout → confirmación) en `tests/integration/purchase-funnel.test.js`
+- [X] T050 [P] Reconciliar `plan.md` y `data-model.md` con el alcance de `spec.md` (Producto, Cupón, Pedido, reglas de stock) en `specs/002-modulo-ventas/plan.md` y `specs/002-modulo-ventas/data-model.md`
+- [X] T051 Ejecutar la suite completa (`npm test`) y la compilación de producción (`npm run build`), y actualizar la documentación de uso en `README.md`
 
 ---
 
