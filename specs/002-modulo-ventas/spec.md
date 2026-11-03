@@ -61,19 +61,19 @@ Como usuario de negocio, quiero aterrizar en un panel estilo ERP con botones de 
 
 ### Historia de Usuario 4 - Aplicación de códigos de descuento (Prioridad: P4)
 
-Descripción: Como cliente, quiero ingresar un código de cupón promocional en el resumen de compra o carrito para obtener un descuento directo en el valor total de mi pedido, dinamizando mi experiencia de compra.
+**Descripción**: Como cliente, quiero ingresar un código de cupón promocional en el resumen de compra o carrito para obtener un descuento directo en el valor total de mi pedido, dinamizando mi experiencia de compra.
 
-¿Por qué esta prioridad?: Es una herramienta comercial estratégica fundamental para captar la atención de nuevos clientes, incentivar campañas de marketing y mejorar la retención, a pesar de que la venta puede completarse con normalidad aunque el cupón no exista o no se utilice.
+**¿Por qué esta prioridad?:** Es una herramienta comercial estratégica fundamental para captar la atención de nuevos clientes, incentivar campañas de marketing y mejorar la retención, a pesar de que la venta puede completarse con normalidad aunque el cupón no exista o no se utilice.
 
-Prueba independiente: Se puede probar introduciendo un código de descuento válido en el resumen de la compra y verificando tanto en tiempo real como en el almacenamiento local que se aplique correctamente el porcentaje o monto rebajado al total del pedido.
+**Prueba independiente:** Se puede probar introduciendo un código de descuento válido en el resumen de la compra y verificando tanto en tiempo real como en el almacenamiento local que se aplique correctamente el porcentaje o monto rebajado al total del pedido.
 
-Escenarios de Aceptación:
+**Escenarios de Aceptación:**
 
-Dado que el usuario introduce un código de cupón activo y vigente en el campo correspondiente, cuando hace clic en el botón "Aplicar", entonces el sistema valida el código, descuenta de forma dinámica el monto o porcentaje correspondiente del total y muestra una notificación visual de éxito.
+**Dado** que el usuario introduce un código de cupón activo y vigente en el campo correspondiente, cuando hace clic en el botón "Aplicar", entonces el sistema valida el código, descuenta de forma dinámica el monto o porcentaje correspondiente del total y muestra una notificación visual de éxito.
 
-Dado que el usuario ingresa un código inválido, mal escrito, vencido o que ya superó su límite de uso, cuando hace clic en "Aplicar", entonces el sistema bloquea la aplicación del descuento y muestra un mensaje de error claro indicando que el cupón no es válido.
+**Dado** que el usuario ingresa un código inválido, mal escrito, vencido o que ya superó su límite de uso, cuando hace clic en "Aplicar", entonces el sistema bloquea la aplicación del descuento y muestra un mensaje de error claro indicando que el cupón no es válido.
 
-Dado que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
+**Dado** que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
 ---
 
 ### Historia de Usuario 5 - Definir un perfil de configuración del módulo (Prioridad: P1)
