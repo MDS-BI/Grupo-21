@@ -11,7 +11,7 @@ Este proyecto sirve como módulo base reutilizable para construir módulos ERP p
 
 ## Escenarios de Usuario y Pruebas *(obligatorio)*
 
-### Historial de usuario 1 - Catálogo de productos destacados (Priority: P1)
+### Historia de Usuario 1 - Catálogo de productos destacados (Priority: P1)
 Como cliente que accede a la plataforma online, quiero que en la pagina principal se encuentre una seccion que enseñe los productos mas destacados, de forma que se conozca rapidamente la oferta principal.
 
 **Por qué esta prioridad**: Esto permite enganchar la atencion del cliente, logrando que siga navegando por la pagina.
