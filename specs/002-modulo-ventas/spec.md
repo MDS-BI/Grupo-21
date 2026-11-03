@@ -74,7 +74,6 @@ Como usuario de negocio, quiero aterrizar en un panel estilo ERP con botones de 
 **Dado** que el usuario ingresa un código inválido, mal escrito, vencido o que ya superó su límite de uso, cuando hace clic en "Aplicar", entonces el sistema bloquea la aplicación del descuento y muestra un mensaje de error claro indicando que el cupón no es válido.
 
 **Dado** que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
----
 
 ### Historia de Usuario 5 - Definir un perfil de configuración del módulo (Prioridad: P1)
 
