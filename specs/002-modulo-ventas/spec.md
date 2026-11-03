@@ -74,20 +74,19 @@ Como usuario de negocio, quiero aterrizar en un panel estilo ERP con botones de 
 
 **Dado** que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
 
-### Historia de Usuario 5 - Definir un perfil de configuración del módulo (Prioridad: P1)
+### Historial de usuario 5 - Proceso de pago seguro (Priority: P5)
 
-Como desarrollador de módulos, quiero declarar un único archivo de configuración que defina la identidad, terminología, campos personalizados y reglas de mi módulo, para adaptar el módulo base en un módulo específico sin modificar su código central.
+**Descripción**: Como cliente, quiero ingresar mis datos de envío y seleccionar un método de pago seguro para finalizar mi compra de forma confiable.
 
-**Por qué esta prioridad**: La adaptación mediante configuración es lo que convierte este proyecto de una aplicación fija en una base reutilizable. Sin ella, cada módulo personalizado requeriría editar archivos fuente centrales, lo que frustra el propósito de la plantilla; todas las historias de personalización posteriores dependen de que este mecanismo exista primero.
+**¿Por qué esta prioridad?**: Es el cierre crítico de la transacción comercial (conversión final) indispensable para concretar los ingresos de la plataforma.
 
-**Prueba Independiente**: Un desarrollador proporciona un archivo de configuración que define un perfil de Ventas (nombre del módulo, mapeos Entidad→Cliente, campos personalizados, ciclo de vida), y la aplicación se presenta plenamente como un módulo de Ventas; al quitar el archivo se restauran los valores predeterminados de la base sin errores.
+**Prueba independiente**: Se puede probar rellenando los campos obligatorios de dirección, seleccionando una pasarela de pago simulada y completando la transacción exitosamente
 
 **Escenarios de Aceptación**:
 
-1. **Dado** que un archivo de configuración define el nombre del módulo, **cuando** la aplicación carga, **entonces** el panel de inicio y el marco del espacio de trabajo muestran el nombre configurado.
-2. **Dada** una configuración completa (nombre, mapeos de términos, campos personalizados, ciclo de vida), **cuando** la aplicación carga, **entonces** el módulo se presenta plenamente bajo la identidad configurada sin que se vean términos del módulo base en ningún sitio.
-3. **Dado** que no se proporciona configuración, **cuando** la aplicación carga, **entonces** la aplicación retrocede a los valores predeterminados integrados Entidad/Documento sin errores.
-4. **Dada** una configuración con valores inválidos o conflictivos, **cuando** la aplicación carga, **entonces** el sistema informa del problema con claridad en lugar de fallar silenciosamente.
+1. **Dado** que el usuario llena su dirección y selecciona pago con tarjeta, **cuando** introduce datos válidos y confirma el pago, **entonces** el sistema prcesará la orden y lo redirige a una página de conformación con el número del pedido.
+
+2. **Dado** que falta un campo obligatorio en el formulario de envío ,**cuando** el usuario intenta avanzar al pago, **entonces** el sistema resalta los campos faltantes e impide continuar.
 
 ---
 
