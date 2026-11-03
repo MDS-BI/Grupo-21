@@ -11,17 +11,16 @@ Este proyecto sirve como módulo base reutilizable para construir módulos ERP p
 
 ## Escenarios de Usuario y Pruebas *(obligatorio)*
 
-### Historia de Usuario 1 - Crear y organizar entidades (Prioridad: P1)
-Como usuario de negocio, quiero crear entradas de entidad con detalles claros para poder construir y mantener los datos maestros del módulo.
+### Historial de usuario 1 - Catálogo de productos destacados (Priority: P1)
+Como cliente que accede a la plataforma online, quiero que en la pagina principal se encuentre una seccion que enseñe los productos mas destacados, de forma que se conozca rapidamente la oferta principal.
 
-**Por qué esta prioridad**: Este es el valor central del producto porque, sin crear entidades, el resto de la experiencia no puede aportar valor.
+**Por qué esta prioridad**: Esto permite enganchar la atencion del cliente, logrando que siga navegando por la pagina.
 
-**Prueba Independiente**: Un usuario puede abrir el módulo, añadir una nueva entidad y verla aparecer en la lista.
+**Prueba Independiente**: se puede probar ingresando a la pagina principal y verificar que se muestre en la seccion de destacados los articulos junto a su precio y boton de compra.
 
 **Escenarios de Aceptación**:
-
-1. **Dado** que un usuario está viendo la lista de entidades, **cuando** crea una nueva entidad con un nombre y un código, **entonces** la nueva entidad se guarda y aparece en la lista.
-2. **Dado** que un usuario está creando una entidad, **cuando** deja la información obligatoria en blanco, **entonces** el sistema impide guardar y explica qué se necesita.
+1. **Dado** que el usuario ingresa a la pagina principal, **cuando** está termina de cargar, **entonces** se visualiza la seccion que contiene los productos principales que se encuentran disponibles.
+⁠2. **Dado** que uno de los productos se queda sin stock, **cuando** el sistema actualiza el conteo de inventario, **entonces** el producto muestra la etiqueda de agotado y se deshabilita el boton de compra.
 
 ---
 
