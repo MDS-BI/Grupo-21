@@ -24,14 +24,15 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 ---
 
-Historial de usuario 2 - Filtrado de productos por categoria y precio (Priority: P2)
-Descripción: Como cliente, tengo la necesidad de filtar el catalogo de ventas por categorias y el rango de precio para poder encontrar un producto en especifico que deseo comprar sin la necesidad de ir pestaña tras pestaña.
+### Historial de usuario 2 - Filtrado de productos por categoria y precio  (Priority: P2)
 
-¿Por qué esta prioridad?: Mejora la experiencia del cliente y acelera el proceso de decision de la compra.
+**Descripción**: Como cliente, tengo la necesidad de filtar el catalogo de ventas por categorias y el rango de precio para poder encontrar un producto en especifico que deseo comprar sin la necesidad de ir pestaña tras pestaña.
 
-Escenario de aceptación:
+**¿Por qué esta prioridad?**: Mejora la experiencia del cliente y acelera el proceso de decision de la compra.
 
-Dado que el usuario esta en el catalogo, cuando selecciona la categoria de "smartphone" y establece un precio maximo, entonces el listado se actualiza mostrando solo los artículos que cumplen con ambos criterios ⁠2. Dado si es que no llegan a existir productos en el rango de precios seleccionados, cuando el usuario aplica el filtro, entonces el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
+**Escenario de aceptación**:
+1. **Dado** que el usuario esta en el catalogo, **cuando** selecciona la categoria de "smartphone" y establece un precio maximo, **entonces** el listado se actualiza mostrando solo los artículos que cumplen con ambos criterios
+⁠2. **Dado** si es que no llegan a existir productos en el rango de precios seleccionados, **cuando** el usuario aplica el filtro, **entonces** el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
 
 ### Historia de Usuario 3 - Panel de inicio con acciones rápidas y estadísticas de registros (Prioridad: P1)
 
