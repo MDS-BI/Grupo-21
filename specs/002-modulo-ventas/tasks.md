@@ -1,16 +1,17 @@
 # Tareas: Módulo de Ventas (Tienda Online)
 
 **Entrada**: Documentos de diseño desde `/specs/002-modulo-ventas/`
-**Prerrequisitos**: spec.md (fuente de verdad de las historias de usuario), plan.md (stack técnico), data-model.md (referencia de datos base)
+**Prerrequisitos**: spec.md (fuente de verdad de las historias de usuario), plan.md (stack técnico), data-model.md (referencia de datos)
 **Pruebas**: Incluidas porque la constitución exige verificación test-first.
 
-> **Nota de alcance**: Por decisión del usuario, este listado sigue las historias de `spec.md` (catálogo de productos, filtros, carrito, cupones, checkout e historial de documentos de venta). `plan.md` y `data-model.md` describen un módulo de ventas B2B basado en el ERP; se conservan como referencia del stack, la configuración y los conceptos de Cliente/Documento. La tarea T050 reconcilia ambos documentos con el alcance final.
+> **Nota de alcance**: Este listado sigue las historias de `spec.md` (catálogo de productos, filtros, carrito, cupones, checkout, historial y administración de precios/ofertas). `plan.md` y `data-model.md` describen un módulo de ventas B2B basado en el ERP; se conservan como referencia del stack, la configuración y los conceptos de Cliente/Documento. Las tareas US1–US6 y el pulido inicial ya están implementados y verificados. **US7 (Administración de precios y generación de ofertas) fue añadida después de esa entrega y permanece pendiente de implementación.** Las tareas T066–T068 reconcilian la documentación y validan el alcance completo.
 
 ## Formato: `[ID] [P?] [Historia?] Descripción`
 
 - **[P]**: Puede ejecutarse en paralelo (archivos distintos, sin dependencias pendientes)
-- **[Historia]**: Etiqueta de la historia de usuario (US1–US6). Solo se usa en las fases de historia.
+- **[Historia]**: Etiqueta de la historia de usuario (US1–US7). Solo se usa en las fases de historia.
 - Todas las tareas incluyen rutas de archivo exactas.
+- Las tareas marcadas `[X]` ya están completadas; las marcadas `[ ]` están pendientes.
 
 ## Convenciones de Rutas
 
@@ -181,16 +182,49 @@
 
 ---
 
-## Fase 9: Pulido y Preocupaciones Transversales
+## Fase 9: Historia de Usuario 7 - Administración de precios y generación de ofertas (Prioridad: P7)
+
+**Objetivo**: Permitir que un administrador modifique precios de productos y cree, edite o desactive ofertas con vigencia (porcentaje o monto fijo); el catálogo y el carrito aplican automáticamente el precio de oferta, y los usuarios sin rol administrador no pueden acceder al panel.
+
+**Prueba Independiente**: Un administrador cambia el precio de un producto y el catálogo/carrito reflejan el nuevo valor; crea una oferta vigente y el producto muestra precio original y con descuento, aplicándose en el carrito; al desactivar o vencer la oferta, vuelve el precio original; un usuario sin rol administrador es rechazado con un mensaje de permisos.
+
+### Pruebas para la Historia de Usuario 7
+
+- [ ] T046 [P] [US7] Añadir pruebas unitarias de validación de ofertas (porcentaje/monto, descuento > 100 %, fecha fin anterior a inicio, inactiva/vencida) en `tests/unit/offers.test.js`
+- [ ] T047 [P] [US7] Añadir pruebas unitarias de resolución de precio con oferta y totales de línea del carrito en `tests/unit/offer-pricing.test.js`
+- [ ] T048 [P] [US7] Añadir pruebas de integración del panel de administración (edición de precio, CRUD de ofertas, restricción por rol y reflejo en catálogo/carrito) en `tests/integration/admin-panel.test.js`
+
+### Implementación de la Historia de Usuario 7
+
+- [ ] T049 [P] [US7] Extender la configuración con el rol `admin`, etiquetas de administración/ofertas y el ayudante de permisos `canManageCatalog` en `src/module-config.js`
+- [ ] T050 [P] [US7] Implementar el modelo de oferta, la validación (tipo, valor, vigencia, descuento máximo) y la resolución de oferta activa por producto en `src/offers.js`
+- [ ] T051 [P] [US7] Crear las ofertas semilla con producto, tipo, valor y fechas de vigencia en `src/data/offers.js`
+- [ ] T052 [US7] Añadir el CRUD de ofertas (`erp.offers`), la validación del precio de producto (numérico, no negativo) y el cálculo de precios con oferta en `src/storage.js`
+- [ ] T053 [US7] Crear el panel de administración con edición de precios, formulario de ofertas, listado, activación/desactivación y mensajes de validación en `src/components/admin-panel.js`
+- [ ] T054 [US7] Añadir la vista de administración, la entrada de navegación y el guardia de acceso por rol con mensaje de denegación en `index.html` y `src/app.js`
+- [ ] T055 [US7] Conectar los manejadores del panel: actualización de precio, alta/edición/desactivación de ofertas y refresco de catálogo/carrito en `src/app.js`
+- [ ] T056 [P] [US7] Mostrar precio con descuento, precio original tachado e insignia de oferta en `src/components/product-card.js` y `src/components/product-catalog.js`
+- [ ] T057 [US7] Aplicar el precio de oferta en el renderizado y los totales del carrito en `src/components/cart.js` y `src/app.js`
+- [ ] T058 [P] [US7] Dar estilo al panel de administración, formularios de oferta, insignias y precio original tachado en `src/styles.css`
+- [ ] T059 [US7] Cubrir casos límite de US7 (oferta vencida o desactivada restaura precio original, descuento > 100 % y fecha fin inválida rechazados, cambio de precio con producto en carrito recalcula total) en `src/offers.js` y `src/app.js`
+- [ ] T060 [US7] Actualizar el script `test:002` en `package.json` para incluir las pruebas nuevas de ofertas y administración
+
+**Punto de control**: La Historia de Usuario 7 es funcional y comprobable de forma independiente sobre el catálogo de US1 y el carrito de US3.
+
+---
+
+## Fase 10: Pulido y Preocupaciones Transversales
 
 **Propósito**: Seguridad, accesibilidad, casos límite, documentación y verificación final.
 
-- [X] T046 [P] Reforzar la sanitización de entradas y el escape de HTML/atributos antes de renderizar en el DOM en `src/app.js` y `src/components/*.js`
-- [X] T047 [P] Añadir refinamientos de accesibilidad (etiquetas, foco, teclado, insignias con texto alternativo) en `index.html` y `src/styles.css`
-- [X] T048 [P] Cubrir casos límite: última unidad en stock concurrente, expiración de cupón durante el checkout y timeout de la pasarela en `src/app.js`, `src/coupons.js` y `src/payments.js`
-- [X] T049 [P] Añadir una prueba de extremo a extremo del embudo completo (catálogo → carrito → cupón → checkout → confirmación) en `tests/integration/purchase-funnel.test.js`
-- [X] T050 [P] Reconciliar `plan.md` y `data-model.md` con el alcance de `spec.md` (Producto, Cupón, Pedido, reglas de stock) en `specs/002-modulo-ventas/plan.md` y `specs/002-modulo-ventas/data-model.md`
-- [X] T051 Ejecutar la suite completa (`npm test`) y la compilación de producción (`npm run build`), y actualizar la documentación de uso en `README.md`
+- [X] T061 [P] Reforzar la sanitización de entradas y el escape de HTML/atributos antes de renderizar en el DOM en `src/app.js` y `src/components/*.js`
+- [X] T062 [P] Añadir refinamientos de accesibilidad (etiquetas, foco, teclado, insignias con texto alternativo) en `index.html` y `src/styles.css`
+- [X] T063 [P] Cubrir casos límite del embudo base: última unidad en stock concurrente, expiración de cupón durante el checkout y timeout de la pasarela en `src/app.js`, `src/coupons.js` y `src/payments.js`
+- [X] T064 [P] Añadir una prueba de extremo a extremo del embudo completo (catálogo → carrito → cupón → checkout → confirmación) en `tests/integration/purchase-funnel.test.js`
+- [X] T065 [P] Reconciliar `plan.md` y `data-model.md` con el alcance original de `spec.md` (Producto, Cupón, Pedido, reglas de stock) en `specs/002-modulo-ventas/plan.md` y `specs/002-modulo-ventas/data-model.md`
+- [ ] T066 [P] Añadir una prueba de extremo a extremo del ciclo de oferta (admin crea oferta → catálogo muestra descuento → carrito aplica precio → oferta se desactiva → precio original) en `tests/integration/offer-lifecycle.test.js`
+- [ ] T067 [P] Actualizar `plan.md`, `data-model.md` y `README.md` con US7: rol administrador, entidad Oferta, clave `erp.offers`, permisos y precios con descuento
+- [ ] T068 Ejecutar la suite completa (`npm test`), la suite de alcance (`npm run test:002`) y la compilación de producción (`npm run build`); verificar manualmente los flujos de catálogo, carrito, checkout, historial y administración de ofertas
 
 ---
 
@@ -206,7 +240,8 @@
 - **US4 (Fase 6)**: Depende de US3 (carrito y totales).
 - **US5 (Fase 7)**: Depende de US3 y US4 (carrito y total con descuento).
 - **US6 (Fase 8)**: Depende de US5 (pedidos persistidos) y de los datos de cliente.
-- **Pulido (Fase 9)**: Depende de todas las historias deseadas.
+- **US7 (Fase 9)**: Depende de US1 (productos y catálogo) y US3 (carrito y totales); integra con US2, US4 y US5 sin alterar sus flujos.
+- **Pulido (Fase 10)**: Depende de todas las historias deseadas, incluida US7.
 
 ### Dependencias entre Historias
 
@@ -216,6 +251,7 @@
 - **US4 (P4)**: Requiere US3.
 - **US5 (P5)**: Requiere US3 y US4.
 - **US6 (P6)**: Requiere US5.
+- **US7 (P7)**: Requiere US1 y US3; independiente del resto una vez completadas esas bases.
 
 ### Dentro de Cada Historia
 
@@ -228,9 +264,12 @@
 - T002, T003 y T004 pueden ejecutarse en paralelo dentro de la Configuración.
 - T008, T009, T011 y T012 pueden ejecutarse en paralelo dentro de la Fundacional.
 - Las pruebas unitarias y de integración de una misma historia marcadas `[P]` pueden ejecutarse en paralelo.
-- Los componentes de una misma historia marcados `[P]` pueden ejecutarse en paralelo.
+- T046, T047 y T048 (pruebas de US7) pueden ejecutarse en paralelo.
+- T049, T050 y T051 (configuración, modelo de ofertas y datos semilla de US7) pueden ejecutarse en paralelo.
+- T056 y T058 (componentes/estilos de US7) pueden ejecutarse en paralelo una vez disponibles T050 y T052.
+- T061 a T067 pueden ejecutarse en paralelo antes de la verificación final T068.
 - Tras la Fase 2, US1 y el trabajo de datos de US6 pueden prepararse en paralelo, aunque US6 se integra al final.
-- En la Fase 9, T046, T047, T048, T049 y T050 pueden ejecutarse en paralelo antes de la verificación final T051.
+- US7 puede desarrollarse en paralelo con US4/US5 si se respetan las dependencias de archivos compartidos (`src/app.js`, `src/storage.js`).
 
 ---
 
@@ -247,15 +286,22 @@ Task: "Crear catálogo destacado en src/components/product-catalog.js"
 Task: "Dar estilo al catálogo en src/styles.css"
 ```
 
-## Ejemplo Paralelo: Historia de Usuario 5
+## Ejemplo Paralelo: Historia de Usuario 7
 
 ```bash
-# Pruebas y componentes de checkout en paralelo:
-Task: "Añadir pruebas unitarias de checkout en tests/unit/checkout.test.js"
-Task: "Añadir prueba de integración de checkout en tests/integration/checkout.test.js"
-Task: "Crear formulario de checkout en src/components/checkout-form.js"
-Task: "Crear vista de confirmación en src/components/order-confirmation.js"
-Task: "Dar estilo al checkout en src/styles.css"
+# Pruebas de US7 en paralelo:
+Task: "Añadir pruebas unitarias de validación de ofertas en tests/unit/offers.test.js"
+Task: "Añadir pruebas unitarias de precios con oferta en tests/unit/offer-pricing.test.js"
+Task: "Añadir pruebas de integración del panel de administración en tests/integration/admin-panel.test.js"
+
+# Base de US7 en paralelo:
+Task: "Extender la configuración con rol admin en src/module-config.js"
+Task: "Implementar modelo y validación de ofertas en src/offers.js"
+Task: "Crear ofertas semilla en src/data/offers.js"
+
+# Presentación de US7 en paralelo:
+Task: "Mostrar precio con descuento en src/components/product-card.js"
+Task: "Dar estilo al panel de administración en src/styles.css"
 ```
 
 ---
@@ -279,7 +325,8 @@ Task: "Dar estilo al checkout en src/styles.css"
 5. Añadir US4 → probar → desplegar.
 6. Añadir US5 → probar → desplegar.
 7. Añadir US6 → probar → desplegar.
-8. Pulido y verificación final.
+8. Añadir US7 → probar (precio, ofertas, permisos) → desplegar.
+9. Pulido y verificación final.
 
 ### Estrategia de Equipo en Paralelo
 
@@ -288,6 +335,7 @@ Task: "Dar estilo al checkout en src/styles.css"
    - Desarrollador A: US1 → US2.
    - Desarrollador B: US3 → US4.
    - Desarrollador C: preparar US6 (historial) y apoyar el checkout de US5.
+   - Desarrollador D: US7 (administración de precios y ofertas) sobre US1/US3.
 3. Integrar y validar cada historia de forma independiente.
 
 ---
@@ -300,4 +348,6 @@ Task: "Dar estilo al checkout en src/styles.css"
 - Verificar que las pruebas fallan antes de implementar.
 - Confirmar cada tarea o grupo lógico; no agrupar cambios no relacionados.
 - Evitar tareas vagas, conflictos en el mismo archivo y dependencias entre historias que rompan la independencia.
-- `data-model.md` describe el módulo base ERP (Cliente/Documento); T050 lo reconcilia con Producto, Cupón y Pedido del alcance de `spec.md`.
+- `data-model.md` describe el módulo base ERP (Cliente/Documento); T065 lo reconcilia con Producto, Cupón y Pedido, y T067 añade la entidad Oferta y el rol administrador de US7.
+- El rol `admin` ya aparece en `index.html`; T049 debe reflejarlo también en `DEFAULT_CONFIG.roles` y en la lógica de permisos de `src/module-config.js`.
+- US7 no debe romper las pruebas heredadas de US1–US6: el script `test:002` es la referencia de verificación del alcance implementado.
