@@ -5,6 +5,10 @@ import { isAvailable } from '../catalog.js';
 export function productCard(product) {
   const available = isAvailable(product);
   const soldOut = !available;
+  const hasOffer = Boolean(product.offer) && Number(product.originalPrice) > Number(product.price);
+  const priceMarkup = hasOffer
+    ? `<span class="price--offer">${formatCurrency(product.price)}</span> <span class="price--original">${formatCurrency(product.originalPrice)}</span>`
+    : formatCurrency(product.price);
   return `
     <article class="product-card${soldOut ? ' is-sold-out' : ''}" data-product-id="${escapeHtml(product.id)}">
       <div class="product-card__media" aria-hidden="true">${escapeHtml((product.name || '?').slice(0, 2).toUpperCase())}</div>
@@ -12,7 +16,8 @@ export function productCard(product) {
         <p class="product-card__category">${escapeHtml(product.category || '')}</p>
         <h3 class="product-card__name">${escapeHtml(product.name)}</h3>
         <p class="product-card__description">${escapeHtml(product.description || '')}</p>
-        <p class="product-card__price">${formatCurrency(product.price)}</p>
+        <p class="product-card__price" data-price="${escapeHtml(product.price)}"${hasOffer ? ` data-original-price="${escapeHtml(product.originalPrice)}"` : ''}>${priceMarkup}</p>
+        ${hasOffer ? `<span class="badge badge--offer">${escapeHtml(labelFor('offerBadge', 'Oferta'))}</span>` : ''}
         ${soldOut ? `<span class="badge badge--soldout">${escapeHtml(labelFor('soldOut', 'Agotado'))}</span>` : ''}
         <button
           type="button"

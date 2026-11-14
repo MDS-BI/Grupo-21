@@ -22,11 +22,12 @@ Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-mo
 - Cupones: validación de código, vigencia y límite de uso; descuento porcentual o fijo; notificaciones de éxito/error y restauración del total al quitar el cupón.
 - Checkout: formulario de envío y método de pago, validación de campos obligatorios, pasarela simulada (éxito, rechazo y timeout), descuento de stock y número de pedido `PED-YYYYMMDD-NNNN`.
 - Confirmación e historial: página de confirmación con resumen y número de pedido; historial de documentos de venta por cliente con tipo, fecha, número, monto y estado; límite de crédito enmascarado para roles sin permisos financieros.
-- Personalización por configuración y roles: nombre del módulo, etiquetas, color de acento y control de acceso a datos financieros desde `src/module-config.js`.
+- Administración de precios y ofertas: el rol `admin` puede editar el precio de un producto (validado como numérico y no negativo) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta»; el carrito aplica el precio efectivo y lo recalcula si la oferta cambia. Los roles sin `canManageCatalog` reciben un mensaje de permisos.
+- Personalización por configuración y roles: nombre del módulo, etiquetas, color de acento y control de acceso a datos financieros y a la administración del catálogo desde `src/module-config.js`.
 
 ### Fuera del alcance
 
-- Administración de inventario y CRUD completo de productos desde la interfaz (solo se consume el catálogo semilla y se descuenta stock al comprar).
+- Administración de inventario y CRUD completo de productos desde la interfaz (el catálogo semilla se consume y el stock se descuenta al comprar; la administración se limita a editar precios y gestionar ofertas).
 - Módulo de Facturación Electrónica: se deja para una futura iteración.
 - Cuentas por Cobrar/Pagar: no forma parte de este módulo.
 - Multi-sucursal o Multi-empresa: el sistema trabaja sobre un único espacio de trabajo.
@@ -55,6 +56,8 @@ El diseño original contemplaba gestión de Clientes y Documentos de Venta (Coti
 | Cupón | `src/coupons.js`, `src/components/coupon-form.js` | Código, tipo (porcentaje/fijo), vigencia y límite de uso. |
 | Pedido | `src/storage.js`, `src/checkout.js`, `src/components/order-confirmation.js` | Documento de venta con número `PED-…`, ítems, totales y estado `Pedido`. |
 | Historial | `src/components/order-history.js`, `src/app.js` | Documentos de venta por cliente y enmascaramiento de `creditLimit` por rol. |
+| Oferta | `src/offers.js`, `src/data/offers.js`, `src/storage.js` | Validación, vigencia, resolución de la mejor oferta activa y precio efectivo por producto. |
+| Panel de administración | `src/components/admin-panel.js`, `src/app.js` | Edición de precios, CRUD de ofertas y restricción de acceso por rol (`canManageCatalog`). |
 
 ## 4. Propuesta de Configuración (src/module-config.js)
 
@@ -177,7 +180,9 @@ export const userConfig = {
 | US4 Cupones de descuento | P4 | Implementado | `src/coupons.js`, `src/components/coupon-form.js`, `tests/integration/coupons.test.js` |
 | US5 Checkout y confirmación | P5 | Implementado | `src/checkout.js`, `src/payments.js`, `src/components/checkout-form.js`, `src/components/order-confirmation.js`, `tests/integration/checkout.test.js` |
 | US6 Historial de documentos de venta | P6 | Implementado | `src/components/order-history.js`, `src/module-config.js`, `tests/integration/order-history.test.js` |
+| US7 Administración de precios y ofertas | P7 | Implementado | `src/offers.js`, `src/components/admin-panel.js`, `src/storage.js`, `tests/integration/admin-panel.test.js`, `tests/integration/offer-lifecycle.test.js` |
 
-- Verificación ejecutada: 35 pruebas unitarias + 30 de integración del alcance 002, y `npm run build` exitoso.
+- Roles implementados en `DEFAULT_CONFIG.roles`: `sales` (Ventas), `warehouse` (Bodega), `finance` (Finanzas, único con `canViewFinancials`) y `admin` (Administración, único con `canManageCatalog`).
+- Verificación ejecutada: `npm run test:002` (17 archivos, 94 pruebas) y `npm run build` exitosos. `npm test` se ejecutó; las únicas fallas provienen de las 12 suites heredadas del módulo base 001 (API `addEntity`/`addDocument` y `BASE_FIELDS` no implementadas en este alcance), sin fallas en las pruebas 002.
 - Los antiguos criterios CV-001 a CV-010 y las fases A–F de la sección 6 corresponden al perfil B2B de referencia; no son criterios de aceptación de esta entrega.
 - Las pruebas heredadas del módulo base 001 permanecen en `tests/` pero dependen de una implementación que no forma parte de este alcance.

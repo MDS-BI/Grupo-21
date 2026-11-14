@@ -10,7 +10,10 @@ export function cartView(items = []) {
     <li class="cart-line" data-product-id="${escapeHtml(item.productId)}">
       <div class="cart-line__info">
         <span class="cart-line__name">${escapeHtml(item.name)}</span>
-        <span class="cart-line__price">${formatCurrency(item.price)}</span>
+        <span class="cart-line__price">${item.hasOffer
+          ? `<span class="price--offer">${formatCurrency(item.price)}</span> <span class="price--original">${formatCurrency(item.originalPrice)}</span>`
+          : formatCurrency(item.price)}</span>
+        ${item.hasOffer ? `<span class="badge badge--offer">${escapeHtml(labelFor('offerBadge', 'Oferta'))}</span>` : ''}
       </div>
       <div class="cart-line__controls">
         <label class="sr-only" for="qty-${escapeHtml(item.productId)}">Cantidad de ${escapeHtml(item.name)}</label>

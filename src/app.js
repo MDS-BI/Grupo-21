@@ -1,13 +1,17 @@
 import {
   loadProducts, loadClients, getCartDetails, addToCart, updateCartItem, removeFromCart,
   clearCart, setCartCoupon, clearCartCoupon, loadCart, decreaseStock, addOrder,
-  findOrCreateClient, ordersForClient, getCartCount
+  findOrCreateClient, ordersForClient, getCartCount, loadOffers, getOffer, addOffer,
+  updateOffer, deleteOffer, setOfferActive, updateProductPrice, getProduct,
+  applyOffersToProducts
 } from './storage.js';
 import { featuredProducts, filterProducts, productCategories } from './catalog.js';
 import { validateCoupon, recordCouponUse } from './coupons.js';
 import {
-  normalizeConfig, setActiveConfig, getConfig, getRole, setRole, maskCreditLimit, applyTheme
+  normalizeConfig, setActiveConfig, getConfig, getRole, setRole, maskCreditLimit,
+  applyTheme, canManageCatalog
 } from './module-config.js';
+import { validateOffer } from './offers.js';
 import { validateCheckout } from './checkout.js';
 import { processPayment } from './payments.js';
 import { escapeHtml, formatCurrency, toNumber } from './utils.js';
@@ -18,6 +22,7 @@ import { couponForm } from './components/coupon-form.js';
 import { checkoutForm } from './components/checkout-form.js';
 import { orderConfirmation } from './components/order-confirmation.js';
 import { orderHistory } from './components/order-history.js';
+import { adminPanel } from './components/admin-panel.js';
 
 const state = {
   view: 'catalog',
@@ -28,7 +33,14 @@ const state = {
   checkoutMessage: null,
   lastOrder: null,
   historyClientId: null,
-  paymentBehavior: 'success'
+  paymentBehavior: 'success',
+  admin: {
+    message: null,
+    offerValues: {},
+    offerErrors: {},
+    priceErrors: {},
+    editingOfferId: null
+  }
 };
 
 function qs(id) {
@@ -70,6 +82,7 @@ export function showView(view) {
   if (view === 'checkout') renderCheckout();
   if (view === 'confirmation') renderConfirmation();
   if (view === 'history') renderHistory();
+  if (view === 'admin') renderAdmin();
 
   updateCartCount();
 }
@@ -96,8 +109,8 @@ function currentCoupon(subtotal) {
 
 function renderCatalog() {
   const products = loadProducts();
-  const filtered = filterProducts(products, state.filters);
-  const featured = featuredProducts(products);
+  const filtered = applyOffersToProducts(filterProducts(products, state.filters));
+  const featured = applyOffersToProducts(featuredProducts(products));
 
   const filtersHost = qs('product-filters');
   if (filtersHost) {
@@ -395,6 +408,156 @@ function handleHistoryChange(event) {
   renderHistory();
 }
 
+/* ------------------------------ Administración ----------------------------- */
+
+function renderAdmin() {
+  const host = qs('admin');
+  if (!host) return;
+  host.innerHTML = adminPanel({
+    allowed: canManageCatalog(),
+    products: loadProducts(),
+    offers: loadOffers(),
+    message: state.admin.message,
+    offerValues: state.admin.offerValues,
+    offerErrors: state.admin.offerErrors,
+    priceErrors: state.admin.priceErrors,
+    editingOfferId: state.admin.editingOfferId
+  });
+}
+
+function refreshCommerce() {
+  renderCatalog();
+  renderCart();
+  updateCartCount();
+}
+
+function readOfferData(form) {
+  return {
+    productId: form.querySelector('#offer-product')?.value ?? '',
+    type: form.querySelector('#offer-type')?.value ?? '',
+    value: form.querySelector('#offer-value')?.value ?? '',
+    startDate: form.querySelector('#offer-start')?.value ?? '',
+    endDate: form.querySelector('#offer-end')?.value ?? ''
+  };
+}
+
+function handleAdminSubmit(event) {
+  if (event.target.id !== 'offer-form') return;
+  event.preventDefault();
+
+  if (!canManageCatalog()) {
+    state.admin.message = { type: 'error', text: 'No tienes permisos para administrar el catálogo.' };
+    renderAdmin();
+    return;
+  }
+
+  const data = readOfferData(event.target);
+  const product = getProduct(data.productId);
+  const validation = validateOffer(data, { product });
+
+  if (!validation.valid) {
+    state.admin.offerValues = data;
+    state.admin.offerErrors = validation.errors;
+    state.admin.message = { type: 'error', text: Object.values(validation.errors).join(' ') };
+    renderAdmin();
+    return;
+  }
+
+  try {
+    if (state.admin.editingOfferId) {
+      updateOffer(state.admin.editingOfferId, { ...data, value: Number(data.value) });
+    } else {
+      addOffer({ ...data, value: Number(data.value), active: true });
+    }
+    state.admin.message = { type: 'success', text: 'Oferta guardada correctamente.' };
+    state.admin.offerValues = {};
+    state.admin.offerErrors = {};
+    state.admin.editingOfferId = null;
+    refreshCommerce();
+    renderAdmin();
+  } catch (error) {
+    state.admin.offerErrors = error.errors || {};
+    state.admin.message = { type: 'error', text: error.message };
+    renderAdmin();
+  }
+}
+
+function handleAdminClick(event) {
+  if (!canManageCatalog()) {
+    state.admin.message = { type: 'error', text: 'No tienes permisos para administrar el catálogo.' };
+    renderAdmin();
+    return;
+  }
+
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  const action = button.dataset.action;
+
+  if (action === 'save-price') {
+    const productId = button.dataset.productId;
+    const input = qs(`price-${productId}`);
+    try {
+      updateProductPrice(productId, input?.value);
+      state.admin.priceErrors = {};
+      state.admin.message = { type: 'success', text: 'Precio actualizado correctamente.' };
+      refreshCommerce();
+    } catch (error) {
+      state.admin.priceErrors = { [productId]: error.message };
+      state.admin.message = { type: 'error', text: error.message };
+    }
+    renderAdmin();
+    return;
+  }
+
+  const offerId = button.dataset.offerId;
+  const offer = offerId ? getOffer(offerId) : null;
+
+  if (action === 'edit-offer' && offer) {
+    state.admin.offerValues = {
+      productId: offer.productId,
+      type: offer.type,
+      value: offer.value,
+      startDate: offer.startDate,
+      endDate: offer.endDate
+    };
+    state.admin.offerErrors = {};
+    state.admin.editingOfferId = offer.id;
+    state.admin.message = { type: 'info', text: 'Editando oferta. Guarda los cambios para aplicarlos.' };
+    renderAdmin();
+    return;
+  }
+
+  if (action === 'cancel-offer-edit') {
+    state.admin.offerValues = {};
+    state.admin.offerErrors = {};
+    state.admin.editingOfferId = null;
+    state.admin.message = null;
+    renderAdmin();
+    return;
+  }
+
+  if (action === 'toggle-offer' && offer) {
+    setOfferActive(offer.id, !offer.active);
+    state.admin.message = {
+      type: 'success',
+      text: offer.active ? 'Oferta desactivada.' : 'Oferta activada.'
+    };
+    refreshCommerce();
+    renderAdmin();
+    return;
+  }
+
+  if (action === 'delete-offer' && offer) {
+    deleteOffer(offer.id);
+    state.admin.offerValues = {};
+    state.admin.offerErrors = {};
+    state.admin.editingOfferId = null;
+    state.admin.message = { type: 'success', text: 'Oferta eliminada.' };
+    refreshCommerce();
+    renderAdmin();
+  }
+}
+
 /* ---------------------------------- Arranque ------------------------------- */
 
 function bindStaticControls() {
@@ -408,6 +571,10 @@ function bindStaticControls() {
     roleSelect.addEventListener('change', () => {
       setRole(roleSelect.value);
       if (state.view === 'history') renderHistory();
+      if (state.view === 'admin') {
+        state.admin.message = null;
+        renderAdmin();
+      }
     });
   }
 
@@ -419,6 +586,8 @@ function bindStaticControls() {
   viewElement('checkout')?.addEventListener('submit', handleCheckoutSubmit);
   viewElement('confirmation')?.addEventListener('click', handleConfirmationClick);
   qs('history')?.addEventListener('change', handleHistoryChange);
+  qs('admin')?.addEventListener('submit', handleAdminSubmit);
+  qs('admin')?.addEventListener('click', handleAdminClick);
 }
 
 export async function boot(config) {
@@ -431,6 +600,7 @@ export async function boot(config) {
 
   loadProducts();
   loadClients();
+  loadOffers();
 
   bindStaticControls();
   showView('catalog');

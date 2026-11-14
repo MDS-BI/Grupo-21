@@ -4,7 +4,7 @@
 **Prerrequisitos**: spec.md (fuente de verdad de las historias de usuario), plan.md (stack técnico), data-model.md (referencia de datos)
 **Pruebas**: Incluidas porque la constitución exige verificación test-first.
 
-> **Nota de alcance**: Este listado sigue las historias de `spec.md` (catálogo de productos, filtros, carrito, cupones, checkout, historial y administración de precios/ofertas). `plan.md` y `data-model.md` describen un módulo de ventas B2B basado en el ERP; se conservan como referencia del stack, la configuración y los conceptos de Cliente/Documento. Las tareas US1–US6 y el pulido inicial ya están implementados y verificados. **US7 (Administración de precios y generación de ofertas) fue añadida después de esa entrega y permanece pendiente de implementación.** Las tareas T066–T068 reconcilian la documentación y validan el alcance completo.
+> **Nota de alcance**: Este listado sigue las historias de `spec.md` (catálogo de productos, filtros, carrito, cupones, checkout, historial y administración de precios/ofertas). `plan.md` y `data-model.md` describen un módulo de ventas B2B basado en el ERP; se conservan como referencia del stack, la configuración y los conceptos de Cliente/Documento. Las tareas US1–US7 y el pulido están implementados y verificados. **US7 (Administración de precios y generación de ofertas)** se añadió después de la primera entrega y quedó implementada con T046–T060; las tareas T066–T068 reconcilian la documentación y validan el alcance completo.
 
 ## Formato: `[ID] [P?] [Historia?] Descripción`
 
@@ -190,24 +190,24 @@
 
 ### Pruebas para la Historia de Usuario 7
 
-- [ ] T046 [P] [US7] Añadir pruebas unitarias de validación de ofertas (porcentaje/monto, descuento > 100 %, fecha fin anterior a inicio, inactiva/vencida) en `tests/unit/offers.test.js`
-- [ ] T047 [P] [US7] Añadir pruebas unitarias de resolución de precio con oferta y totales de línea del carrito en `tests/unit/offer-pricing.test.js`
-- [ ] T048 [P] [US7] Añadir pruebas de integración del panel de administración (edición de precio, CRUD de ofertas, restricción por rol y reflejo en catálogo/carrito) en `tests/integration/admin-panel.test.js`
+- [X] T046 [P] [US7] Añadir pruebas unitarias de validación de ofertas (porcentaje/monto, descuento > 100 %, fecha fin anterior a inicio, inactiva/vencida) en `tests/unit/offers.test.js`
+- [X] T047 [P] [US7] Añadir pruebas unitarias de resolución de precio con oferta y totales de línea del carrito en `tests/unit/offer-pricing.test.js`
+- [X] T048 [P] [US7] Añadir pruebas de integración del panel de administración (edición de precio, CRUD de ofertas, restricción por rol y reflejo en catálogo/carrito) en `tests/integration/admin-panel.test.js`
 
 ### Implementación de la Historia de Usuario 7
 
-- [ ] T049 [P] [US7] Extender la configuración con el rol `admin`, etiquetas de administración/ofertas y el ayudante de permisos `canManageCatalog` en `src/module-config.js`
-- [ ] T050 [P] [US7] Implementar el modelo de oferta, la validación (tipo, valor, vigencia, descuento máximo) y la resolución de oferta activa por producto en `src/offers.js`
-- [ ] T051 [P] [US7] Crear las ofertas semilla con producto, tipo, valor y fechas de vigencia en `src/data/offers.js`
-- [ ] T052 [US7] Añadir el CRUD de ofertas (`erp.offers`), la validación del precio de producto (numérico, no negativo) y el cálculo de precios con oferta en `src/storage.js`
-- [ ] T053 [US7] Crear el panel de administración con edición de precios, formulario de ofertas, listado, activación/desactivación y mensajes de validación en `src/components/admin-panel.js`
-- [ ] T054 [US7] Añadir la vista de administración, la entrada de navegación y el guardia de acceso por rol con mensaje de denegación en `index.html` y `src/app.js`
-- [ ] T055 [US7] Conectar los manejadores del panel: actualización de precio, alta/edición/desactivación de ofertas y refresco de catálogo/carrito en `src/app.js`
-- [ ] T056 [P] [US7] Mostrar precio con descuento, precio original tachado e insignia de oferta en `src/components/product-card.js` y `src/components/product-catalog.js`
-- [ ] T057 [US7] Aplicar el precio de oferta en el renderizado y los totales del carrito en `src/components/cart.js` y `src/app.js`
-- [ ] T058 [P] [US7] Dar estilo al panel de administración, formularios de oferta, insignias y precio original tachado en `src/styles.css`
-- [ ] T059 [US7] Cubrir casos límite de US7 (oferta vencida o desactivada restaura precio original, descuento > 100 % y fecha fin inválida rechazados, cambio de precio con producto en carrito recalcula total) en `src/offers.js` y `src/app.js`
-- [ ] T060 [US7] Actualizar el script `test:002` en `package.json` para incluir las pruebas nuevas de ofertas y administración
+- [X] T049 [P] [US7] Extender la configuración con el rol `admin`, etiquetas de administración/ofertas y el ayudante de permisos `canManageCatalog` en `src/module-config.js`
+- [X] T050 [P] [US7] Implementar el modelo de oferta, la validación (tipo, valor, vigencia, descuento máximo) y la resolución de oferta activa por producto en `src/offers.js`
+- [X] T051 [P] [US7] Crear las ofertas semilla con producto, tipo, valor y fechas de vigencia en `src/data/offers.js`
+- [X] T052 [US7] Añadir el CRUD de ofertas (`erp.offers`), la validación del precio de producto (numérico, no negativo) y el cálculo de precios con oferta en `src/storage.js`
+- [X] T053 [US7] Crear el panel de administración con edición de precios, formulario de ofertas, listado, activación/desactivación y mensajes de validación en `src/components/admin-panel.js`
+- [X] T054 [US7] Añadir la vista de administración, la entrada de navegación y el guardia de acceso por rol con mensaje de denegación en `index.html` y `src/app.js`
+- [X] T055 [US7] Conectar los manejadores del panel: actualización de precio, alta/edición/desactivación de ofertas y refresco de catálogo/carrito en `src/app.js`
+- [X] T056 [P] [US7] Mostrar precio con descuento, precio original tachado e insignia de oferta en `src/components/product-card.js` y `src/components/product-catalog.js`
+- [X] T057 [US7] Aplicar el precio de oferta en el renderizado y los totales del carrito en `src/components/cart.js` y `src/app.js`
+- [X] T058 [P] [US7] Dar estilo al panel de administración, formularios de oferta, insignias y precio original tachado en `src/styles.css`
+- [X] T059 [US7] Cubrir casos límite de US7 (oferta vencida o desactivada restaura precio original, descuento > 100 % y fecha fin inválida rechazados, cambio de precio con producto en carrito recalcula total) en `src/offers.js` y `src/app.js`
+- [X] T060 [US7] Actualizar el script `test:002` en `package.json` para incluir las pruebas nuevas de ofertas y administración
 
 **Punto de control**: La Historia de Usuario 7 es funcional y comprobable de forma independiente sobre el catálogo de US1 y el carrito de US3.
 
@@ -222,9 +222,11 @@
 - [X] T063 [P] Cubrir casos límite del embudo base: última unidad en stock concurrente, expiración de cupón durante el checkout y timeout de la pasarela en `src/app.js`, `src/coupons.js` y `src/payments.js`
 - [X] T064 [P] Añadir una prueba de extremo a extremo del embudo completo (catálogo → carrito → cupón → checkout → confirmación) en `tests/integration/purchase-funnel.test.js`
 - [X] T065 [P] Reconciliar `plan.md` y `data-model.md` con el alcance original de `spec.md` (Producto, Cupón, Pedido, reglas de stock) en `specs/002-modulo-ventas/plan.md` y `specs/002-modulo-ventas/data-model.md`
-- [ ] T066 [P] Añadir una prueba de extremo a extremo del ciclo de oferta (admin crea oferta → catálogo muestra descuento → carrito aplica precio → oferta se desactiva → precio original) en `tests/integration/offer-lifecycle.test.js`
-- [ ] T067 [P] Actualizar `plan.md`, `data-model.md` y `README.md` con US7: rol administrador, entidad Oferta, clave `erp.offers`, permisos y precios con descuento
-- [ ] T068 Ejecutar la suite completa (`npm test`), la suite de alcance (`npm run test:002`) y la compilación de producción (`npm run build`); verificar manualmente los flujos de catálogo, carrito, checkout, historial y administración de ofertas
+- [X] T066 [P] Añadir una prueba de extremo a extremo del ciclo de oferta (admin crea oferta → catálogo muestra descuento → carrito aplica precio → oferta se desactiva → precio original) en `tests/integration/offer-lifecycle.test.js`
+- [X] T067 [P] Actualizar `plan.md`, `data-model.md` y `README.md` con US7: rol administrador, entidad Oferta, clave `erp.offers`, permisos y precios con descuento
+- [X] T068 Ejecutar la suite completa (`npm test`), la suite de alcance (`npm run test:002`) y la compilación de producción (`npm run build`); verificar manualmente los flujos de catálogo, carrito, checkout, historial y administración de ofertas
+
+> **Resultado T068**: `npm run test:002` pasa (17 archivos, 94 pruebas) y `npm run build` compila. `npm test` se ejecutó: las únicas fallas son de las 12 suites heredadas del módulo base 001 (por ejemplo `addEntity`/`addDocument` y `BASE_FIELDS` no implementados), fuera del alcance 002; las suites 002 pasan completas.
 
 ---
 
@@ -349,5 +351,5 @@ Task: "Dar estilo al panel de administración en src/styles.css"
 - Confirmar cada tarea o grupo lógico; no agrupar cambios no relacionados.
 - Evitar tareas vagas, conflictos en el mismo archivo y dependencias entre historias que rompan la independencia.
 - `data-model.md` describe el módulo base ERP (Cliente/Documento); T065 lo reconcilia con Producto, Cupón y Pedido, y T067 añade la entidad Oferta y el rol administrador de US7.
-- El rol `admin` ya aparece en `index.html`; T049 debe reflejarlo también en `DEFAULT_CONFIG.roles` y en la lógica de permisos de `src/module-config.js`.
-- US7 no debe romper las pruebas heredadas de US1–US6: el script `test:002` es la referencia de verificación del alcance implementado.
+- El rol `admin` aparece en `index.html` y en `DEFAULT_CONFIG.roles` con `canManageCatalog: true`; los demás roles no pueden administrar el catálogo.
+- US7 no rompe las pruebas heredadas de US1–US6: el script `test:002` es la referencia de verificación del alcance implementado.

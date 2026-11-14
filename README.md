@@ -29,7 +29,8 @@ La entrega de `specs/002-modulo-ventas` es una tienda en línea construida con V
 - **Cupones**: `BIENVENIDO10` (10 %), `AHORRA5000` (fijo), `EXPIRADO` y `AGOTADO` como casos de prueba. Se valida existencia, vigencia, estado y límite de uso.
 - **Checkout**: validación de nombre, correo, dirección, ciudad, código postal y método de pago. Pasarela simulada con éxito, rechazo y timeout. Al confirmar se descuenta stock, se guarda el pedido y se genera un número `PED-YYYYMMDD-NNNN`.
 - **Historial**: documentos de venta por cliente con tipo, fecha, número, monto y estado. El límite de crédito se enmascara (`•••••`) para roles sin permisos financieros; solo el rol **Finanzas** lo ve.
-- **Roles**: Ventas, Bodega, Finanzas y Administración, seleccionables desde la cabecera; se guardan en `localStorage` (`erp.role`).
+- **Administración de precios y ofertas**: el rol **Administración** puede editar precios (validados como numéricos y no negativos) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta», y el carrito aplica el precio efectivo. Los demás roles ven un mensaje de permisos al entrar al panel.
+- **Roles**: Ventas, Bodega, Finanzas y Administración, seleccionables desde la cabecera; se guardan en `localStorage` (`erp.role`). Solo Administración gestiona el catálogo y solo Finanzas ve el límite de crédito.
 
 ### Ejecutar
 
@@ -43,10 +44,10 @@ npm run preview  # vista previa de la compilación
 ### Pruebas
 
 ```bash
-npm run test:002   # 35 unitarias + 30 de integración del alcance 002
+npm run test:002   # 94 pruebas del alcance 002 (unitarias + integración)
 ```
 
-> `tests/` también contiene pruebas heredadas del módulo base 001 que dependen de una implementación aún no incluida en este repositorio; por eso se usa `test:002` para validar esta entrega. La suite 002 cubre catálogo, filtros, carrito, cupones, checkout, historial y un embudo de compra de extremo a extremo.
+> `tests/` también contiene pruebas heredadas del módulo base 001 que dependen de una implementación aún no incluida en este repositorio; por eso se usa `test:002` para validar esta entrega. La suite 002 cubre catálogo, filtros, carrito, cupones, checkout, historial, administración de precios/ofertas y flujos de extremo a extremo (embudo de compra y ciclo de oferta).
 
 ### Estructura
 
@@ -59,9 +60,11 @@ src/catalog.js             Disponibilidad y filtros de catálogo
 src/coupons.js             Cupones, vigencia, límite de uso y descuentos
 src/checkout.js            Validación del checkout y numeración de pedidos
 src/payments.js            Pasarela de pago simulada
-src/module-config.js       Configuración, etiquetas, tema y roles
+src/module-config.js       Configuración, etiquetas, tema y roles (incluye admin)
+src/offers.js              Modelo, validación, vigencia y resolución de ofertas
 src/data/products.js       Catálogo semilla
-src/components/            Componentes de catálogo, carrito, cupones, checkout e historial
+src/data/offers.js         Ofertas semilla
+src/components/            Componentes de catálogo, carrito, cupones, checkout, historial y administración
 src/styles.css             Estilos responsive
 tests/unit/                Pruebas unitarias 002
 tests/integration/         Pruebas de integración 002
@@ -70,4 +73,11 @@ tests/setup/jsdom.js       Aislamiento de localStorage entre pruebas
 
 ### Datos y persistencia
 
-Claves usadas en `localStorage`: `erp.products`, `erp.clients`, `erp.orders`, `erp.cart`, `erp.coupons`, `erp.couponUsage` y `erp.role`. No se envían datos a ningún servidor.
+Claves usadas en `localStorage`: `erp.products`, `erp.clients`, `erp.orders`, `erp.cart`, `erp.coupons`, `erp.couponUsage`, `erp.offers` y `erp.role`. No se envían datos a ningún servidor.
+
+### Ofertas y precios
+
+- Una oferta activa y vigente define el precio efectivo del producto. Si hay varias, se aplica la de menor precio final.
+- `percent` descuenta un porcentaje (0–100 %); `fixed` descuenta un monto que no puede superar el precio del producto.
+- Al desactivar o vencer una oferta, el catálogo y el carrito vuelven automáticamente al precio original.
+- Ofertas semilla: `offer-cargador-10` (10 %), `offer-tablet-50000` (monto fijo) y `offer-parlante-vencida` (caso vencido).

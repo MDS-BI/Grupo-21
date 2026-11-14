@@ -19,6 +19,7 @@
           Carrito <span id="cart-count" class="cart-count">0</span>
         </button>
         <button type="button" class="nav-button" data-view="history">Historial</button>
+        <button type="button" class="nav-button" data-view="admin">Administración</button>
       </nav>
       <label class="role-select">
         <span class="sr-only">Rol activo</span>
@@ -79,6 +80,14 @@
           <p class="view-subtitle">Documentos de venta por cliente.</p>
         </header>
         <div id="history"></div>
+      </section>
+
+      <section id="view-admin" class="view" hidden aria-labelledby="admin-title">
+        <header class="view-header">
+          <h1 id="admin-title">Panel de administración</h1>
+          <p class="view-subtitle">Actualiza precios y administra las ofertas del catálogo.</p>
+        </header>
+        <div id="admin"></div>
       </section>
     </main>
 

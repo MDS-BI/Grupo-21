@@ -175,6 +175,7 @@ Estas son las entidades que realmente persiste la aplicación de `spec.md`. Se a
 | Carrito | `erp.cart` | `src/storage.js` |
 | Cupón | `erp.coupons` | `src/coupons.js` |
 | Uso de cupones | `erp.couponUsage` | `src/coupons.js` |
+| Oferta | `erp.offers` | `src/offers.js`, `src/data/offers.js` |
 | Rol activo | `erp.role` | `src/module-config.js` |
 
 ### Producto
@@ -203,6 +204,32 @@ Estas son las entidades que realmente persiste la aplicación de `spec.md`. Se a
 
 El uso acumulado se guarda en `erp.couponUsage` como `{ [code]: usos }`. Los cupones semilla son `BIENVENIDO10`, `AHORRA5000`, `EXPIRADO` y `AGOTADO`.
 
+### Oferta
+
+Promoción creada por el administrador sobre un producto del catálogo. Mientras está activa y dentro de su vigencia, define el precio efectivo que se muestra en el catálogo y se aplica en el carrito y en el pedido.
+
+| Campo | Tipo | Descripción | Restricciones |
+|---|---|---|---|
+| id | string | Identificador interno | Único, generado automáticamente |
+| productId | string | Referencia al producto ofertado | Obligatorio; debe existir en `erp.products` |
+| type | string | `percent` o `fixed` | Obligatorio |
+| value | number | Porcentaje (0–100) o monto fijo | Mayor que cero; `percent` ≤ 100; `fixed` ≤ precio del producto |
+| startDate | string | Inicio de vigencia `YYYY-MM-DD` | Fecha válida y obligatoria |
+| endDate | string | Fin de vigencia `YYYY-MM-DD` | Fecha válida, igual o posterior a `startDate` |
+| active | boolean | Habilita o desactiva la oferta | Por defecto `true`; desactivarla restaura el precio original |
+| createdAt / updatedAt | string | Marcas de tiempo ISO | Generadas por el sistema |
+
+Reglas de precios:
+
+- Una oferta está vigente cuando `active` es `true` y la fecha actual está dentro de `[startDate, endDate]`.
+- Si varias ofertas están vigentes para el mismo producto, se aplica la que produce el menor precio final.
+- `precioOferta = round(precio * (1 - value / 100))` para `percent`; `precioOferta = max(0, precio - value)` para `fixed`.
+- El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta».
+- El carrito y los totales usan el precio efectivo; si la oferta se desactiva o vence, se recalcula automáticamente con el precio original.
+- Solo el rol `admin` (`canManageCatalog`) puede modificar precios y crear, editar, activar o desactivar ofertas. Los demás roles reciben un mensaje de permisos al entrar al panel.
+- Los precios de producto se validan como numéricos y no negativos antes de guardarse.
+- Las ofertas semilla son `offer-cargador-10` (10 % en `prod-accessory-01`), `offer-tablet-50000` (monto fijo en `prod-tablet-01`) y `offer-parlante-vencida` (vencida, usada como caso de prueba).
+
 ### Pedido
 
 | Campo | Tipo | Descripción | Restricciones |
@@ -228,6 +255,8 @@ El uso acumulado se guarda en `erp.couponUsage` como `{ [code]: usos }`. Los cup
 - El stock se descuenta al confirmar el pago. Si alguna línea no tiene stock suficiente, la compra se rechaza y el carrito se conserva.
 - El cupón se valida contra subtotal, vigencia y límite de uso; al confirmar el pedido se incrementa su uso.
 - El carrito es single-user (un solo espacio de trabajo) y se vacía tras una compra exitosa.
+- Cada oferta referencia un producto existente (`Oferta.productId → Producto.id`); al crear o editar una oferta se valida el producto, el tipo, el valor y la vigencia. Las ofertas no eliminan productos.
+- El pedido guarda el precio efectivo de cada línea, por lo que un cambio posterior de precio u oferta no altera pedidos ya confirmados.
 - `creditLimit` es informativo: se muestra en el historial y se enmascara (`•••••`) para roles sin permiso financiero (`sales`, `warehouse`, `admin`); solo `finance` lo ve.
 
 ### Equivalencias con el modelo B2B de referencia

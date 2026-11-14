@@ -15,7 +15,23 @@ export const DEFAULT_CONFIG = {
     continueToCheckout: 'Continuar al pago',
     confirmOrder: 'Confirmar pedido',
     emptyCart: 'Tu carrito está vacío.',
-    emptyHistory: 'No hay documentos de venta para este cliente.'
+    emptyHistory: 'No hay documentos de venta para este cliente.',
+    admin: 'Administración',
+    adminPanel: 'Panel de administración',
+    prices: 'Precios',
+    offers: 'Ofertas',
+    offer: 'Oferta',
+    offerBadge: 'Oferta',
+    newOffer: 'Nueva oferta',
+    editOffer: 'Editar oferta',
+    saveOffer: 'Guardar oferta',
+    savePrice: 'Guardar precio',
+    activateOffer: 'Activar',
+    deactivateOffer: 'Desactivar',
+    deleteOffer: 'Eliminar',
+    originalPrice: 'Precio original',
+    permissionDenied: 'No tienes permisos para administrar el catálogo.',
+    emptyOffers: 'No hay ofertas registradas.'
   },
   customFields: [],
   statusLifecycle: {
@@ -30,8 +46,10 @@ export const DEFAULT_CONFIG = {
     accentColor: '#1F7A3E'
   },
   roles: {
-    sales: { label: 'Ventas', canViewFinancials: false },
-    finance: { label: 'Finanzas', canViewFinancials: true }
+    sales: { label: 'Ventas', canViewFinancials: false, canManageCatalog: false },
+    warehouse: { label: 'Bodega', canViewFinancials: false, canManageCatalog: false },
+    finance: { label: 'Finanzas', canViewFinancials: true, canManageCatalog: false },
+    admin: { label: 'Administración', canViewFinancials: false, canManageCatalog: true }
   }
 };
 
@@ -154,6 +172,10 @@ export function setRole(role) {
 
 export function canViewFinancials(role = getRole()) {
   return Boolean(getConfig().roles?.[role]?.canViewFinancials);
+}
+
+export function canManageCatalog(role = getRole()) {
+  return Boolean(getConfig().roles?.[role]?.canManageCatalog);
 }
 
 export function maskCreditLimit(value, role = getRole()) {

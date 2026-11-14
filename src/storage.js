@@ -1,5 +1,7 @@
 import { seedProducts } from './data/products.js';
+import { seedOffers } from './data/offers.js';
 import { generateOrderNumber } from './checkout.js';
+import { resolveProductPrice, validateOffer } from './offers.js';
 import { isValidEmail, normalizeText, toNumber } from './utils.js';
 
 export const KEYS = {
@@ -9,7 +11,8 @@ export const KEYS = {
   cart: 'erp.cart',
   role: 'erp.role',
   coupons: 'erp.coupons',
-  couponUsage: 'erp.couponUsage'
+  couponUsage: 'erp.couponUsage',
+  offers: 'erp.offers'
 };
 
 const seedClient = {
@@ -124,6 +127,128 @@ export function decreaseStock(id, quantity = 1) {
   product.updatedAt = now();
   saveProducts(products);
   return true;
+}
+
+export function validateProductPrice(value) {
+  if (value === '' || value === null || value === undefined) {
+    return { valid: false, error: 'Ingresa un precio numérico.', value: null };
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return { valid: false, error: 'El precio debe ser un número.', value: null };
+  }
+  if (parsed < 0) {
+    return { valid: false, error: 'El precio no puede ser negativo.', value: null };
+  }
+  return { valid: true, error: '', value: parsed };
+}
+
+export function updateProductPrice(id, value) {
+  const validation = validateProductPrice(value);
+  if (!validation.valid) {
+    const error = new Error(validation.error);
+    error.validation = validation;
+    throw error;
+  }
+  return updateProduct(id, { price: validation.value });
+}
+
+/* --------------------------------- Ofertas -------------------------------- */
+
+export function loadOffers() {
+  const stored = read(KEYS.offers, null);
+  if (Array.isArray(stored)) return stored;
+  const seeded = seedOffers.map((offer) => ({ ...offer, createdAt: now(), updatedAt: now() }));
+  write(KEYS.offers, seeded);
+  return seeded;
+}
+
+export function saveOffers(offers) {
+  write(KEYS.offers, offers || []);
+}
+
+export function getOffer(id) {
+  return loadOffers().find((offer) => offer.id === id) || null;
+}
+
+function invalidOfferError(errors) {
+  const error = new Error(Object.values(errors).join(' '));
+  error.errors = errors;
+  return error;
+}
+
+export function addOffer(data = {}) {
+  const product = getProduct(data.productId);
+  const validation = validateOffer(data, { product });
+  if (!validation.valid) throw invalidOfferError(validation.errors);
+
+  const offers = loadOffers();
+  const offer = {
+    id: data.id || genId('offer'),
+    productId: product.id,
+    type: String(data.type).trim(),
+    value: toNumber(data.value, 0),
+    startDate: String(data.startDate).slice(0, 10),
+    endDate: String(data.endDate).slice(0, 10),
+    active: data.active === undefined ? true : Boolean(data.active),
+    createdAt: now(),
+    updatedAt: now()
+  };
+  offers.push(offer);
+  saveOffers(offers);
+  return offer;
+}
+
+export function updateOffer(id, updates = {}) {
+  const offers = loadOffers();
+  const offer = offers.find((entry) => entry.id === id);
+  if (!offer) return null;
+
+  const merged = { ...offer, ...updates };
+  const product = getProduct(merged.productId);
+  const validation = validateOffer(merged, { product });
+  if (!validation.valid) throw invalidOfferError(validation.errors);
+
+  Object.assign(offer, {
+    productId: product.id,
+    type: String(merged.type).trim(),
+    value: toNumber(merged.value, 0),
+    startDate: String(merged.startDate).slice(0, 10),
+    endDate: String(merged.endDate).slice(0, 10),
+    active: Boolean(merged.active),
+    updatedAt: now()
+  });
+  saveOffers(offers);
+  return offer;
+}
+
+export function setOfferActive(id, active) {
+  return updateOffer(id, { active: Boolean(active) });
+}
+
+export function deleteOffer(id) {
+  const offers = loadOffers();
+  const next = offers.filter((offer) => offer.id !== id);
+  saveOffers(next);
+  return next.length !== offers.length;
+}
+
+export function offersForProduct(productId) {
+  return loadOffers().filter((offer) => offer.productId === productId);
+}
+
+export function getProductPrice(productOrId, date = new Date()) {
+  const product = typeof productOrId === 'string' ? getProduct(productOrId) : productOrId;
+  if (!product) return { price: 0, originalPrice: 0, discount: 0, offer: null };
+  return resolveProductPrice(product, loadOffers(), date);
+}
+
+export function applyOffersToProducts(products, date = new Date()) {
+  const offers = loadOffers();
+  return (products || []).map((product) => ({
+    ...product,
+    ...resolveProductPrice(product, offers, date)
+  }));
 }
 
 /* -------------------------------- Clientes -------------------------------- */
@@ -341,17 +466,22 @@ export function clearCartCoupon() {
 export function getCartDetails() {
   const cart = loadCart();
   const products = loadProducts();
+  const offers = loadOffers();
   const items = cart.items
     .map((entry) => {
       const product = products.find((candidate) => candidate.id === entry.productId);
       if (!product) return null;
       const quantity = Math.max(1, toNumber(entry.quantity, 1));
+      const pricing = resolveProductPrice(product, offers);
       return {
         productId: product.id,
         name: product.name,
-        price: toNumber(product.price, 0),
+        price: pricing.price,
+        originalPrice: pricing.originalPrice,
+        hasOffer: Boolean(pricing.offer),
+        offerId: pricing.offer?.id || null,
         quantity,
-        lineTotal: toNumber(product.price, 0) * quantity
+        lineTotal: pricing.price * quantity
       };
     })
     .filter(Boolean);
