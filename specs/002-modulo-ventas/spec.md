@@ -94,12 +94,38 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
    
 ---
 
+### Historia de Usuario 7 - Administración de precios y generación de ofertas (Prioridad: P7)
+
+**Descripción**: Como administrador de la página, quiero modificar los precios de los productos y generar ofertas o promociones para mantener actualizado el catálogo y atraer a más clientes.
+
+**¿Por qué esta prioridad?**: Permite al negocio adaptar su estrategia comercial sin depender de un desarrollador, aunque la compra puede completarse aunque el administrador nunca modifique precios ni cree ofertas.
+
+**Prueba independiente**: Se puede probar ingresando al panel de administración, cambiando el precio de un producto y verificando que el nuevo valor se refleje en el catálogo; luego creando una oferta y comprobando que el descuento se muestre y se aplique al total.
+
+**Escenarios de Aceptación**:
+
+1. **Dado** que el administrador está autenticado y accede al panel de administración, **cuando** modifica el precio de un producto y guarda el cambio, **entonces** el sistema valida que el precio sea un valor numérico mayor o igual a cero y actualiza el precio mostrado en el catálogo y en el carrito de compras.
+
+2. **Dado** que el administrador introduce un precio inválido (vacío, negativo o no numérico), **cuando** intenta guardar, **entonces** el sistema impide la actualización y muestra un mensaje de error claro indicando el valor esperado.
+
+3. **Dado** que el administrador crea una oferta indicando producto, porcentaje o monto de descuento y fecha de vigencia, **cuando** guarda la oferta, **entonces** el sistema la registra y el producto muestra el precio con descuento junto a su precio original en el catálogo.
+
+4. **Dado** que una oferta está vigente, **cuando** el cliente agrega el producto ofertado al carrito, **entonces** el carrito aplica automáticamente el precio de oferta y el total refleja el descuento.
+
+5. **Dado** que una oferta alcanza su fecha de fin o el administrador la desactiva, **cuando** el cliente visualiza el catálogo, **entonces** el producto vuelve a mostrarse con su precio original y la oferta deja de aplicarse.
+
+6. **Dado** que un usuario sin rol de administrador intenta acceder al panel de administración, **cuando** navega a esa sección, **entonces** el sistema le deniega el acceso y muestra un mensaje indicando que no tiene los permisos necesarios.
+
+---
+
 
 
 ### Casos Límite
 - ¿Qué sucede cuando dos usuarios intentan comprar la última unidad de un producto con stock crítico exactamente al mismo tiempo?
 - ¿Cómo maneja el sistema una caída de conexión o un timeout de la pasarela de pagos externa justo en el momento de confirmar la transacción?
 - ¿Qué ocurre si un cupón de descuento expira exactamente mientras el usuario tiene el producto en el carrito de compras pero aún no finaliza el pago?
+- ¿Qué ocurre si el administrador modifica el precio de un producto mientras un cliente lo tiene en el carrito o una oferta se activa y desactiva durante la compra?
+- ¿Qué ocurre si el administrador intenta crear una oferta cuyo descuento supera el 100% del precio del producto o cuya fecha de fin es anterior a la de inicio?
 
 ## Requisitos *(obligatorio)*
 
@@ -109,7 +135,8 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 - **FR-002**: El sistema DEBE [calcular y actualizar automáticamente el subtotal y total del carrito de compras cuando se modifican las cantidades o se eliminan productos.]
 - **FR-003**: El sistema DEBE [validar la vigencia de los cupones promocionales y aplicar el descuento correspondiente sobre el monto total del pedido.]
 - **FR-004**: El sistema DEBE [procesar los datos de envío y derivar el pago a una pasarela segura, generando un número de confirmación tras el éxito.]
-- **FR-005**: EL sistema DEBE [egistrar el historial de documentos de venta (Cotización, Pedido, Facturado) y restringir datos sensibles según el rol del usuario (ej. Ejecutivo de Ventas).]
+- **FR-005**: EL sistema DEBE [registrar el historial de documentos de venta (Cotización, Pedido, Facturado) y restringir datos sensibles según el rol del usuario (ej. Ejecutivo de Ventas).]
+- **FR-006**: El sistema DEBE [permitir al administrador modificar los precios de los productos y crear, editar o desactivar ofertas con vigencia, validando los valores ingresados y aplicando automáticamente el descuento en el catálogo y el carrito.]
 ### Requisitos de Extensibilidad *(obligaciones del módulo base)*
 
 Los módulos personalizados construidos sobre esta base DEBEN poder:
@@ -129,6 +156,7 @@ Los módulos personalizados construidos sobre esta base DEBEN poder:
 -  **[Producto]**: [Representa el artículo disponible en la tienda. Atributos clave: ID, nombre, descripción, precio, stock disponible, categoría, etiqueta (destacado/normal).]
 - **[Pedido(documento de venta)]**: [Representa la transacción comercial en sus distintos estados. Atributos clave: ID, cliente_id, fecha, monto_total, estado (cotización, pagado, facturado), cupon_aplicado.]
 - **[Cliente]**:[Representa al usuario comprador. Atributos clave: ID, nombre, correo electrónico, dirección_envío, limite_credito.]
+- **[Oferta]**: [Representa una promoción creada por el administrador sobre un producto. Atributos clave: ID, producto_id, tipo_descuento (porcentaje/monto), valor_descuento, fecha_inicio, fecha_fin, activa.]
 
 ## Criterios de Éxito *(obligatorio)*
 
