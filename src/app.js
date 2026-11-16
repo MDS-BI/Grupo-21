@@ -562,7 +562,16 @@ function handleAdminClick(event) {
 
 function bindStaticControls() {
   globalThis.document?.querySelectorAll('[data-view]').forEach((button) => {
-    button.addEventListener('click', () => showView(button.dataset.view));
+    button.addEventListener('click', () => {
+      if (button.dataset.view === 'admin') {
+        const code = globalThis.prompt?.('Ingresa el código de acceso:');
+        if (code !== '1234') {
+          globalThis.alert?.('Acceso denegado');
+          return;
+        }
+      }
+      showView(button.dataset.view);
+    });
   });
 
   const roleSelect = qs('role-select');
