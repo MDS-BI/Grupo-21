@@ -9,7 +9,7 @@ import { featuredProducts, filterProducts, productCategories } from './catalog.j
 import { validateCoupon, recordCouponUse } from './coupons.js';
 import {
   normalizeConfig, setActiveConfig, getConfig, getRole, setRole, maskCreditLimit,
-  applyTheme, canManageCatalog
+  applyTheme
 } from './module-config.js';
 import { validateOffer } from './offers.js';
 import { validateCheckout } from './checkout.js';
@@ -414,7 +414,7 @@ function renderAdmin() {
   const host = qs('admin');
   if (!host) return;
   host.innerHTML = adminPanel({
-    allowed: canManageCatalog(),
+    allowed: true,
     products: loadProducts(),
     offers: loadOffers(),
     message: state.admin.message,
@@ -444,12 +444,6 @@ function readOfferData(form) {
 function handleAdminSubmit(event) {
   if (event.target.id !== 'offer-form') return;
   event.preventDefault();
-
-  if (!canManageCatalog()) {
-    state.admin.message = { type: 'error', text: 'No tienes permisos para administrar el catálogo.' };
-    renderAdmin();
-    return;
-  }
 
   const data = readOfferData(event.target);
   const product = getProduct(data.productId);
@@ -483,12 +477,6 @@ function handleAdminSubmit(event) {
 }
 
 function handleAdminClick(event) {
-  if (!canManageCatalog()) {
-    state.admin.message = { type: 'error', text: 'No tienes permisos para administrar el catálogo.' };
-    renderAdmin();
-    return;
-  }
-
   const button = event.target.closest('[data-action]');
   if (!button) return;
   const action = button.dataset.action;
@@ -560,16 +548,19 @@ function handleAdminClick(event) {
 
 /* ---------------------------------- Arranque ------------------------------- */
 
+const ADMIN_ACCESS_CODE = '1234';
+
+function requestAdminAccess() {
+  const code = globalThis.prompt?.('Ingresa el código de acceso:');
+  if (code === ADMIN_ACCESS_CODE) return true;
+  globalThis.alert?.('Acceso denegado');
+  return false;
+}
+
 function bindStaticControls() {
   globalThis.document?.querySelectorAll('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
-      if (button.dataset.view === 'admin') {
-        const code = globalThis.prompt?.('Ingresa el código de acceso:');
-        if (code !== '1234') {
-          globalThis.alert?.('Acceso denegado');
-          return;
-        }
-      }
+      if (button.dataset.view === 'admin' && !requestAdminAccess()) return;
       showView(button.dataset.view);
     });
   });

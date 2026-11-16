@@ -1,16 +1,22 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   mountMarkup, startApp, clickNav, submitForm, buyFromCatalog
 } from '../helpers/app-fixture.js';
 import { formatCurrency } from '../../src/utils.js';
 
-function loginAs(role = 'admin') {
-  localStorage.setItem('erp.role', role);
+function stubPrompt(value) {
+  vi.stubGlobal('prompt', vi.fn(() => value));
 }
 
-async function openAdmin(role = 'admin') {
-  loginAs(role);
+function stubAlert() {
+  const alert = vi.fn();
+  vi.stubGlobal('alert', alert);
+  return alert;
+}
+
+async function openAdmin(code = '1234') {
+  stubPrompt(code);
   await startApp();
   clickNav('admin');
 }
@@ -33,16 +39,26 @@ beforeEach(() => {
   mountMarkup();
 });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('admin panel access control', () => {
-  it('denies access to roles without catalog permissions', async () => {
-    await openAdmin('sales');
-    expect(document.getElementById('admin-denied')).not.toBeNull();
-    expect(document.getElementById('admin-denied').textContent).toMatch(/permisos/i);
+  it('prompts for the access code and denies entry when it is wrong', async () => {
+    const alert = stubAlert();
+    stubPrompt('9999');
+    await startApp();
+
+    clickNav('admin');
+
+    expect(alert).toHaveBeenCalledWith('Acceso denegado');
+    expect(document.getElementById('view-admin').hidden).toBe(true);
     expect(document.getElementById('offer-form')).toBeNull();
   });
 
-  it('shows the administration controls to an admin', async () => {
-    await openAdmin('admin');
+  it('shows the administration controls after entering the correct code', async () => {
+    await openAdmin('1234');
+    expect(document.getElementById('view-admin').hidden).toBe(false);
     expect(document.getElementById('admin-denied')).toBeNull();
     expect(document.getElementById('offer-form')).not.toBeNull();
     expect(document.getElementById('offers-list')).not.toBeNull();
