@@ -100,7 +100,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 **¿Por qué esta prioridad?**: Permite al negocio adaptar su estrategia comercial sin depender de un desarrollador, aunque la compra puede completarse aunque el administrador nunca modifique precios ni cree ofertas.
 
-**Prueba independiente**: Se puede probar ingresando al panel de administración, cambiando el precio de un producto y verificando que el nuevo valor se refleje en el catálogo; luego creando una oferta y comprobando que el descuento se muestre y se aplique al total.
+**Prueba independiente**: Se puede probar ingresando al panel de administración con el código de acceso "1234", cambiando el precio de un producto y verificando que el nuevo valor se refleje en el catálogo; luego creando una oferta y comprobando que el descuento se muestre y se aplique al total.
 
 **Escenarios de Aceptación**:
 
@@ -115,6 +115,12 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 5. **Dado** que una oferta alcanza su fecha de fin o el administrador la desactiva, **cuando** el cliente visualiza el catálogo, **entonces** el producto vuelve a mostrarse con su precio original y la oferta deja de aplicarse.
 
 6. **Dado** que un usuario sin rol de administrador intenta acceder al panel de administración, **cuando** navega a esa sección, **entonces** el sistema le deniega el acceso y muestra un mensaje indicando que no tiene los permisos necesarios.
+
+7. **Dado** que un usuario intenta acceder al área de administración, **cuando** navega a esa sección, **entonces** el sistema le solicita ingresar un código de acceso.
+
+8. **Dado** que el sistema solicita el código de acceso del área de administración, **cuando** el usuario ingresa el código "1234", **entonces** el sistema le permite el acceso al panel de administración.
+
+9. **Dado** que el sistema solicita el código de acceso del área de administración, **cuando** el usuario ingresa un código distinto de "1234", **entonces** el sistema le deniega el acceso y muestra un mensaje de error indicando que el código es incorrecto.
 
 ---
 
