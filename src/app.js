@@ -565,18 +565,7 @@ function bindStaticControls() {
     });
   });
 
-  const roleSelect = qs('role-select');
-  if (roleSelect) {
-    roleSelect.value = getRole();
-    roleSelect.addEventListener('change', () => {
-      setRole(roleSelect.value);
-      if (state.view === 'history') renderHistory();
-      if (state.view === 'admin') {
-        state.admin.message = null;
-        renderAdmin();
-      }
-    });
-  }
+
 
   qs('product-catalog')?.addEventListener('click', handleCatalogClick);
   qs('product-filters')?.addEventListener('change', handleFilterChange);
