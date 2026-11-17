@@ -68,9 +68,25 @@ export function clearAll() {
 
 /* ------------------------------- Productos ------------------------------- */
 
+function backfillProductImages(products) {
+  const imagesById = new Map(seedProducts.map(({ id, image }) => [id, image]));
+  let changed = false;
+  const merged = products.map((product) => {
+    if (!product || typeof product !== 'object') return product;
+    if (String(product.image || '').trim() || !imagesById.has(product.id)) return product;
+    changed = true;
+    return { ...product, image: imagesById.get(product.id) };
+  });
+  return { products: merged, changed };
+}
+
 export function loadProducts() {
   const stored = read(KEYS.products, null);
-  if (Array.isArray(stored)) return stored;
+  if (Array.isArray(stored)) {
+    const { products, changed } = backfillProductImages(stored);
+    if (changed) write(KEYS.products, products);
+    return products;
+  }
   const seeded = seedProducts.map((product) => ({ ...product, createdAt: now(), updatedAt: now() }));
   write(KEYS.products, seeded);
   return seeded;
