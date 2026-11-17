@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `002-modulo-ventas`
 **Creada**: 2026-10-26  
-**Estado**: Borrador  
+**Estado**: Finalizado  
 **Entrada**: Construir un módulo de ventas para un sistema ERP que permita gestionar datos maestros de clientes y el ciclo de documentos transaccionales vinculados (cotizaciones, pedidos, facturas) con capacidades de crear, editar, eliminar y buscar.
 
 ## Propósito
@@ -24,7 +24,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 ---
 
-### Historial de usuario 2 - Filtrado de productos por categoria y precio  (Priority: P2)
+### Historia de usuario 2 - Filtrado de productos por categoria y precio  (Priority: P2)
 
 **Descripción**: Como cliente, tengo la necesidad de filtar el catalogo de ventas por categorias y el rango de precio para poder encontrar un producto en especifico que deseo comprar sin la necesidad de ir pestaña tras pestaña.
 
@@ -34,7 +34,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 1. **Dado** que el usuario esta en el catalogo, **cuando** selecciona la categoria de "smartphone" y establece un precio maximo, **entonces** el listado se actualiza mostrando solo los artículos que cumplen con ambos criterios
 ⁠2. **Dado** si es que no llegan a existir productos en el rango de precios seleccionados, **cuando** el usuario aplica el filtro, **entonces** el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
 
-### Historial de usuario 3 - Gestión de carrito de compras (Prioridad: P3)
+### Historia de usuario 3 - Gestión de carrito de compras (Prioridad: P3)
 **Descripción**: Como comprador, quiero agregar productos al carrito, ajustar las cantidades o quitar artículos para revisar mi pedido antes de proceder al pago.
 
 **¿Por qué esta prioridad?**: Constituye una etapa clave en el embudo de conversión que le permite al usuario simular su compra y calcular el monto total a pagar.
@@ -63,7 +63,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 **Dado** que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
 
-### Historial de usuario 5 - Proceso de pago seguro (Priority: P5)
+### Historia de usuario 5 - Proceso de pago seguro (Priority: P5)
 
 **Descripción**: Como cliente, quiero ingresar mis datos de envío y seleccionar un método de pago seguro para finalizar mi compra de forma confiable.
 
@@ -79,7 +79,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 ---
 
-### Historial de usuario 6 - Historial y seguimiento de Documentos de Venta  (Prioriridad: P6)
+### Historia de usuario 6 - Historial y seguimiento de Documentos de Venta  (Prioriridad: P6)
 **Descripción**: Como Ejecutivo de Ventas, quiero consultar el historial de documentos de un Cliente específico para saber el estado de cada operación comercial (Cotización, Pedido, Facturado) y hacer seguimiento.
 
 **¿Por qué esta prioridad?** Aporta valor inmediato para la gestión de cartera y atención al cliente, reduciendo fricciones en el embudo de ventas, y permite probar la integridad 1:N entre Cliente y Documento definida en el plan.
