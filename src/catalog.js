@@ -1,7 +1,15 @@
-import { normalizeText, toNumber } from './utils.js';
+import { escapeHtml, normalizeText, toNumber } from './utils.js';
 
 export function isAvailable(product) {
   return toNumber(product?.stock, 0) > 0;
+}
+
+export function productMedia(product) {
+  const image = String(product?.image || '').trim();
+  if (image) {
+    return `<img class="product-card__media product-card__image" src="${escapeHtml(image)}" alt="${escapeHtml(product.name || '')}" loading="lazy" />`;
+  }
+  return `<div class="product-card__media" aria-hidden="true">${escapeHtml((product?.name || '?').slice(0, 2).toUpperCase())}</div>`;
 }
 
 export function featuredProducts(products) {

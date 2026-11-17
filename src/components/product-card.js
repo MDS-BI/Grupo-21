@@ -1,6 +1,6 @@
 import { escapeHtml, formatCurrency } from '../utils.js';
 import { labelFor } from '../module-config.js';
-import { isAvailable } from '../catalog.js';
+import { isAvailable, productMedia } from '../catalog.js';
 
 export function productCard(product) {
   const available = isAvailable(product);
@@ -11,7 +11,7 @@ export function productCard(product) {
     : formatCurrency(product.price);
   return `
     <article class="product-card${soldOut ? ' is-sold-out' : ''}" data-product-id="${escapeHtml(product.id)}">
-      <div class="product-card__media" aria-hidden="true">${escapeHtml((product.name || '?').slice(0, 2).toUpperCase())}</div>
+      ${productMedia(product)}
       <div class="product-card__body">
         <p class="product-card__category">${escapeHtml(product.category || '')}</p>
         <h3 class="product-card__name">${escapeHtml(product.name)}</h3>
