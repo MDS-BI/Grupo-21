@@ -7,7 +7,8 @@
 
 ## Propósito
 
-Este proyecto sirve como módulo base reutilizable para construir módulos ERP personalizados. Establece los patrones comunes que todo módulo ERP necesita: gestionar registros de datos maestros (**Entidades**) y sus **Documentos** transaccionales asociados, con navegación, validación, persistencia y búsqueda ya implementadas, de modo que los módulos personalizados solo necesiten definir sus campos y reglas específicos del dominio.
+Este módulo permite gestionar el catálogo de productos, el carrito de compras y el ciclo de documentos transaccionales para facilitar la compra de los clientes y la administración comercial.
+
 
 ## Escenarios de Usuario y Pruebas *(obligatorio)*
 
@@ -57,11 +58,11 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 **Escenarios de Aceptación:**
 
-**Dado** que el usuario introduce un código de cupón activo y vigente en el campo correspondiente, cuando hace clic en el botón "Aplicar", entonces el sistema valida el código, descuenta de forma dinámica el monto o porcentaje correspondiente del total y muestra una notificación visual de éxito.
+1. **Dado** que el usuario introduce un código de cupón activo y vigente en el campo correspondiente, cuando hace clic en el botón "Aplicar", entonces el sistema valida el código, descuenta de forma dinámica el monto o porcentaje correspondiente del total y muestra una notificación visual de éxito.
 
-**Dado** que el usuario ingresa un código inválido, mal escrito, vencido o que ya superó su límite de uso, cuando hace clic en "Aplicar", entonces el sistema bloquea la aplicación del descuento y muestra un mensaje de error claro indicando que el cupón no es válido.
+2. **Dado** que el usuario ingresa un código inválido, mal escrito, vencido o que ya superó su límite de uso, cuando hace clic en "Aplicar", entonces el sistema bloquea la aplicación del descuento y muestra un mensaje de error claro indicando que el cupón no es válido.
 
-**Dado** Dado que el usuario ha aplicado exitosamente un cupón de descuento, cuando refresca la página, entonces el sistema mantiene el descuento aplicado gracias al almacenamiento local, y solo restablece el valor original total si el usuario hace clic explícitamente en eliminarlo.
+3. **Dado** Dado que el usuario ha aplicado exitosamente un cupón de descuento, cuando refresca la página, entonces el sistema mantiene el descuento aplicado gracias al almacenamiento local, y solo restablece el valor original total si el usuario hace clic explícitamente en eliminarlo.
 
 ### Historia de usuario 5 - Proceso de pago seguro (Prioridad: P5)
 
