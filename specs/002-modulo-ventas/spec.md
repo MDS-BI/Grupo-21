@@ -24,7 +24,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 ---
 
-### Historial de usuario 2 - Filtrado de productos por categoria y precio  (Priority: P2)
+### Historial de usuario 2 - Filtrado de productos por categoria y precio  (Prioridad: P2)
 
 **Descripción**: Como cliente, tengo la necesidad de filtar el catalogo de ventas por categorias y el rango de precio para poder encontrar un producto en especifico que deseo comprar sin la necesidad de ir pestaña tras pestaña.
 
@@ -63,7 +63,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 **Dado** que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
 
-### Historial de usuario 5 - Proceso de pago seguro (Priority: P5)
+### Historial de usuario 5 - Proceso de pago seguro (Prioridad: P5)
 
 **Descripción**: Como cliente, quiero ingresar mis datos de envío y seleccionar un método de pago seguro para finalizar mi compra de forma confiable.
 
