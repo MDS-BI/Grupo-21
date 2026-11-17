@@ -43,7 +43,7 @@ export const DEFAULT_CONFIG = {
     }
   },
   theme: {
-    accentColor: '#1F7A3E'
+    accentColor: '#8B7462'
   },
   roles: {
     sales: { label: 'Ventas', canViewFinancials: false, canManageCatalog: false },
@@ -55,7 +55,7 @@ export const DEFAULT_CONFIG = {
 
 export const userConfig = {
   moduleName: 'Módulo de Ventas',
-  theme: { accentColor: '#1F7A3E' }
+  theme: { accentColor: '#8B7462' }
 };
 
 const ROLES = Object.keys(DEFAULT_CONFIG.roles);

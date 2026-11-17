@@ -1,26 +1,30 @@
+@import url("https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap");
+
 :root {
-  --accent: #2b7551;
-  --accent-dark: #1f5a3f;
-  --accent-deep: #1a4d38;
-  --lime: #39ff14;
-  --yellow: #ffee5b;
-  --bg: #f5f5f5;
+  --accent: #8b7462;
+  --accent-dark: #755f4f;
+  --accent-deep: #5c4a3d;
+  --olive: #6b705c;
+  --cream: #f5f2eb;
+  --burgundy: #6b2d3a;
+  --inverse: #242833;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-dim: #f0f0f0;
-  --surface-lowest: #fafafa;
-  --text: #1a1a1a;
+  --surface-dim: #f5f2eb;
+  --surface-lowest: #ffffff;
+  --text: #34373f;
   --muted: #6b6b6b;
-  --border: #c4c4c4;
-  --border-soft: #bfbfbf;
-  --danger: #d32f2f;
-  --success: #16a34a;
-  --radius: 16px;
-  --radius-md: 12px;
+  --border: #bfbfbf;
+  --border-soft: #e6e2dc;
+  --danger: #a13838;
+  --success: #6b705c;
+  --radius: 0px;
+  --radius-md: 8px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --font: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --hero-image: url("https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1920&q=80");
-  --editorial-image: url("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80");
+  --font: "Assistant", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --hero-image: url("https://rootsouth.cl/cdn/shop/files/disponible_38b2296c-6e8c-4cb5-86ec-b90a05409c13.png?v=1789240984&width=3200");
+  --editorial-image: url("https://rootsouth.cl/cdn/shop/files/DSC9080_a327ada6-80dd-42b3-a972-799573ff20a2.jpg?v=1789240747&width=1800");
 }
 
 * {
@@ -42,8 +46,8 @@ body {
   align-items: center;
   height: 32px;
   overflow: hidden;
-  background: var(--yellow);
-  color: #1a1a1a;
+  background: var(--inverse);
+  color: #ffffff;
 }
 
 .announcement-bar__track {
@@ -109,8 +113,8 @@ body {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 4px;
-  background: #1a1a1a;
-  color: var(--lime);
+  background: var(--inverse);
+  color: var(--cream);
   font-size: 0.75rem;
   letter-spacing: 0.02em;
 }
@@ -143,7 +147,7 @@ body {
 .nav-button:hover,
 .nav-button.is-active {
   color: var(--text);
-  border-bottom-color: var(--lime);
+  border-bottom-color: var(--olive);
 }
 
 .cart-count {
@@ -186,8 +190,8 @@ body {
   padding: clamp(2rem, 6vw, 4rem);
   overflow: hidden;
   border-radius: var(--radius);
-  background-color: #1a1a1a;
-  background-image: linear-gradient(90deg, rgba(10, 10, 10, 0.94) 0%, rgba(10, 10, 10, 0.7) 48%, rgba(10, 10, 10, 0.15) 100%), var(--hero-image);
+  background-color: var(--inverse);
+  background-image: linear-gradient(90deg, rgba(36, 40, 51, 0.94) 0%, rgba(36, 40, 51, 0.68) 48%, rgba(36, 40, 51, 0.12) 100%), var(--hero-image);
   background-position: center, center 35%;
   background-size: cover;
   color: #fff;
@@ -200,7 +204,7 @@ body {
   bottom: 0;
   left: 0;
   height: 6px;
-  background: linear-gradient(90deg, var(--lime) 0 28%, var(--yellow) 28% 44%, var(--accent) 44% 100%);
+  background: linear-gradient(90deg, var(--olive) 0 28%, var(--cream) 28% 44%, var(--burgundy) 44% 100%);
 }
 
 .hero__content {
@@ -213,8 +217,8 @@ body {
   margin: 0 0 1rem;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: var(--lime);
-  color: #1a1a1a;
+  background: var(--cream);
+  color: var(--inverse);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -265,7 +269,7 @@ body {
   flex: 0 0 auto;
   width: 14px;
   height: 14px;
-  background: var(--lime);
+  background: var(--olive);
 }
 
 .featured-section {
@@ -340,7 +344,7 @@ body {
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 24px;
+  gap: 8px;
 }
 
 .product-card {
@@ -366,7 +370,7 @@ body {
 .product-card__media {
   display: grid;
   place-items: center;
-  height: 260px;
+  height: 320px;
   overflow: hidden;
   background: var(--surface-dim);
   color: var(--text);
@@ -444,12 +448,12 @@ body {
 }
 
 .badge--soldout {
-  background: #1a1a1a;
+  background: var(--inverse);
   color: #fff;
 }
 
 .badge--status {
-  background: #d4f0e8;
+  background: var(--cream);
   color: var(--accent-deep);
 }
 
@@ -498,7 +502,7 @@ body {
 }
 
 .btn--ghost:hover {
-  background: #d4f0e8;
+  background: var(--cream);
   color: var(--accent-deep);
 }
 
@@ -767,8 +771,8 @@ body {
 }
 
 .badge--offer {
-  background: var(--lime);
-  color: #1a1a1a;
+  background: var(--burgundy);
+  color: #ffffff;
 }
 
 .admin-grid {

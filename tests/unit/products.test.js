@@ -39,6 +39,19 @@ describe('product storage', () => {
     expect(JSON.parse(localStorage.getItem('erp.products'))[0].image).toBe(phone.image);
   });
 
+  it('refreshes stored seed products when the catalog version changes', () => {
+    const seed = seedProducts.find((product) => product.id === 'prod-phone-01');
+    localStorage.setItem('erp.products', JSON.stringify([
+      { ...seed, name: 'Smartphone Nova X', category: 'Smartphones', image: 'https://old.example.jpg' }
+    ]));
+
+    const products = loadProducts();
+    expect(products[0].name).toBe(seed.name);
+    expect(products[0].category).toBe(seed.category);
+    expect(products[0].image).toBe(seed.image);
+    expect(localStorage.getItem('erp.seedVersion')).toBeTruthy();
+  });
+
   it('adds a product with normalized numeric fields', () => {
     const product = addProduct({ name: 'Teclado Mecánico', price: '89990', stock: '7', category: 'Accesorios' });
     expect(product.id).toBeTruthy();

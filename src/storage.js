@@ -12,8 +12,11 @@ export const KEYS = {
   role: 'erp.role',
   coupons: 'erp.coupons',
   couponUsage: 'erp.couponUsage',
-  offers: 'erp.offers'
+  offers: 'erp.offers',
+  seedVersion: 'erp.seedVersion'
 };
+
+const SEED_VERSION = 'rootsouth-2026-11';
 
 const seedClient = {
   id: 'client-demo',
@@ -68,27 +71,52 @@ export function clearAll() {
 
 /* ------------------------------- Productos ------------------------------- */
 
+const seedById = new Map(seedProducts.map((product) => [product.id, product]));
+
 function backfillProductImages(products) {
-  const imagesById = new Map(seedProducts.map(({ id, image }) => [id, image]));
   let changed = false;
   const merged = products.map((product) => {
-    if (!product || typeof product !== 'object') return product;
-    if (String(product.image || '').trim() || !imagesById.has(product.id)) return product;
+    const seed = seedById.get(product?.id);
+    if (!product || typeof product !== 'object' || !seed || String(product.image || '').trim()) return product;
     changed = true;
-    return { ...product, image: imagesById.get(product.id) };
+    return { ...product, image: seed.image };
   });
   return { products: merged, changed };
+}
+
+function refreshSeedProducts(products) {
+  return products.map((product) => {
+    const seed = seedById.get(product?.id);
+    if (!seed) return product;
+    return {
+      ...product,
+      ...seed,
+      createdAt: product.createdAt || now(),
+      updatedAt: now()
+    };
+  });
 }
 
 export function loadProducts() {
   const stored = read(KEYS.products, null);
   if (Array.isArray(stored)) {
+    if (store()?.getItem(KEYS.seedVersion) !== SEED_VERSION) {
+      const refreshed = refreshSeedProducts(stored);
+      write(KEYS.products, refreshed);
+      try {
+        store()?.setItem(KEYS.seedVersion, SEED_VERSION);
+      } catch {}
+      return refreshed;
+    }
     const { products, changed } = backfillProductImages(stored);
     if (changed) write(KEYS.products, products);
     return products;
   }
   const seeded = seedProducts.map((product) => ({ ...product, createdAt: now(), updatedAt: now() }));
   write(KEYS.products, seeded);
+  try {
+    store()?.setItem(KEYS.seedVersion, SEED_VERSION);
+  } catch {}
   return seeded;
 }
 
