@@ -61,7 +61,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 **Dado** que el usuario ingresa un código inválido, mal escrito, vencido o que ya superó su límite de uso, cuando hace clic en "Aplicar", entonces el sistema bloquea la aplicación del descuento y muestra un mensaje de error claro indicando que el cupón no es válido.
 
-**Dado** que el usuario ha aplicado exitosamente un cupón de descuento, cuando decide eliminarlo o refresca la vista del documento de venta, entonces el sistema restablece el valor original total del pedido de manera inmediata.
+**Dado** Dado que el usuario ha aplicado exitosamente un cupón de descuento, cuando refresca la página, entonces el sistema mantiene el descuento aplicado gracias al almacenamiento local, y solo restablece el valor original total si el usuario hace clic explícitamente en eliminarlo.
 
 ### Historia de usuario 5 - Proceso de pago seguro (Prioridad: P5)
 
@@ -143,16 +143,6 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 - **FR-004**: El sistema DEBE [procesar los datos de envío y derivar el pago a una pasarela segura, generando un número de confirmación tras el éxito.]
 - **FR-005**: EL sistema DEBE [registrar el historial de documentos de venta (Cotización, Pedido, Facturado) y restringir datos sensibles según el rol del usuario (ej. Ejecutivo de Ventas).]
 - **FR-006**: El sistema DEBE [permitir al administrador modificar los precios de los productos y crear, editar o desactivar ofertas con vigencia, validando los valores ingresados y aplicando automáticamente el descuento en el catálogo y el carrito.]
-### Requisitos de Extensibilidad *(obligaciones del módulo base)*
-
-Los módulos personalizados construidos sobre esta base DEBEN poder:
-
-- **XR-001**: Extender los registros de entidad y documento con campos adicionales específicos del dominio sin cambiar la estructura de almacenamiento base.
-- **XR-002**: Reetiquetar pantallas, pestañas, formularios y listas con terminología específica del módulo sin alterar el comportamiento de navegación.
-- **XR-003**: Añadir reglas de validación específicas del módulo junto a las reglas de validación base.
-- **XR-004**: Apoyarse en el módulo base para generación de identidad, marcas de tiempo, integridad referencial entre entidades y documentos, y eliminación en cascada.
-- **XR-005**: Remarcar el espacio de trabajo —nombre del módulo, logotipo derivado y color de acento— únicamente mediante configuración.
-
 
 ### Entidades Clave *(incluir si la funcionalidad implica datos)*
 
