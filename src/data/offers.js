@@ -1,6 +1,6 @@
 export const seedOffers = [
   {
-    id: 'offer-cargador-10',
+    id: 'offer-knit-10',
     productId: 'prod-accessory-01',
     type: 'percent',
     value: 10,
@@ -9,7 +9,7 @@ export const seedOffers = [
     active: true
   },
   {
-    id: 'offer-tablet-50000',
+    id: 'offer-poleron-50000',
     productId: 'prod-tablet-01',
     type: 'fixed',
     value: 50000,
@@ -18,7 +18,7 @@ export const seedOffers = [
     active: true
   },
   {
-    id: 'offer-parlante-vencida',
+    id: 'offer-layers-vencida',
     productId: 'prod-audio-02',
     type: 'percent',
     value: 20,

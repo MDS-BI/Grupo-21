@@ -8,6 +8,23 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
+    <div class="announcement-bar" aria-hidden="true">
+      <div class="announcement-bar__track">
+        <div class="announcement-bar__group">
+          <span>Envío gratis desde $100.000</span>
+          <span>Wear consciously</span>
+          <span>Drops limitados · algodón orgánico</span>
+          <span>Hecho en Chile</span>
+        </div>
+        <div class="announcement-bar__group">
+          <span>Envío gratis desde $100.000</span>
+          <span>Wear consciously</span>
+          <span>Drops limitados · algodón orgánico</span>
+          <span>Hecho en Chile</span>
+        </div>
+      </div>
+    </div>
+
     <header class="site-header">
       <div class="brand">
         <span class="brand__mark" aria-hidden="true">ERP</span>
@@ -27,8 +44,11 @@
     <main class="site-main">
       <section id="view-catalog" class="view" aria-labelledby="catalog-title">
         <header class="view-header">
-          <h1 id="catalog-title">Catálogo de productos</h1>
-          <p class="view-subtitle">Explora, filtra y agrega productos al carrito.</p>
+          <div class="hero__content">
+            <p class="hero__eyebrow">New arrivals / Roots South</p>
+            <h1 id="catalog-title">Catálogo de productos</h1>
+            <p id="catalog-subtitle" class="view-subtitle">Explora, filtra y agrega productos al carrito.</p>
+          </div>
         </header>
         <div id="product-filters"></div>
         <p id="catalog-message" class="notice" role="status" hidden></p>

@@ -23,6 +23,35 @@ describe('product storage', () => {
     expect(loadProducts()).toHaveLength(seedProducts.length);
   });
 
+  it('backfills missing images on stored seed products without overwriting existing ones', () => {
+    const phone = seedProducts.find((product) => product.id === 'prod-phone-01');
+    const custom = { id: 'custom-01', name: 'Teclado', image: 'https://example.com/custom.jpg' };
+    localStorage.setItem('erp.products', JSON.stringify([
+      { ...phone, image: undefined },
+      { ...seedProducts.find((product) => product.id === 'prod-laptop-01'), image: '' },
+      custom
+    ]));
+
+    const products = loadProducts();
+    expect(products[0].image).toBe(phone.image);
+    expect(products[1].image).toBe(seedProducts.find((product) => product.id === 'prod-laptop-01').image);
+    expect(products[2].image).toBe(custom.image);
+    expect(JSON.parse(localStorage.getItem('erp.products'))[0].image).toBe(phone.image);
+  });
+
+  it('refreshes stored seed products when the catalog version changes', () => {
+    const seed = seedProducts.find((product) => product.id === 'prod-phone-01');
+    localStorage.setItem('erp.products', JSON.stringify([
+      { ...seed, name: 'Smartphone Nova X', category: 'Smartphones', image: 'https://old.example.jpg' }
+    ]));
+
+    const products = loadProducts();
+    expect(products[0].name).toBe(seed.name);
+    expect(products[0].category).toBe(seed.category);
+    expect(products[0].image).toBe(seed.image);
+    expect(localStorage.getItem('erp.seedVersion')).toBeTruthy();
+  });
+
   it('adds a product with normalized numeric fields', () => {
     const product = addProduct({ name: 'Teclado Mecánico', price: '89990', stock: '7', category: 'Accesorios' });
     expect(product.id).toBeTruthy();
