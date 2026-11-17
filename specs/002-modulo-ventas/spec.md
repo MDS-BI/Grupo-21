@@ -146,9 +146,6 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 ### Entidades Clave *(incluir si la funcionalidad implica datos)*
 
-- **Entidad**: Un registro de datos maestros gestionado por el módulo, que incluye su nombre, código de negocio, detalles descriptivos, categoría de clasificación, una fecha objetivo opcional y un entity_id autogenerado. Los módulos personalizados definen qué representa una Entidad en el mundo real (p. ej., cliente, producto, activo).
-- **Documento**: Detalles transaccionales adjuntos a una entidad, vinculados a ella por el entity_id de la entidad. Los módulos personalizados definen qué representa un Documento (p. ej., pedido, factura, contrato).
-- **ModuleConfig**: El objeto de adaptación cargado al arrancar que define el nombre del módulo, las etiquetas de terminología, las definiciones de campos personalizados y el ciclo de vida de estados de documentos. Consulte data-model.md para su forma completa.
 -  **[Producto]**: [Representa el artículo disponible en la tienda. Atributos clave: ID, nombre, descripción, precio, stock disponible, categoría, etiqueta (destacado/normal).]
 - **[Pedido(documento de venta)]**: [Representa la transacción comercial en sus distintos estados. Atributos clave: ID, cliente_id, fecha, monto_total, estado (cotización, pagado, facturado), cupon_aplicado.]
 - **[Cliente]**:[Representa al usuario comprador. Atributos clave: ID, nombre, correo electrónico, dirección_envío, limite_credito.]
