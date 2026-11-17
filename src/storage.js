@@ -1,5 +1,6 @@
 import { seedProducts } from './data/products.js';
 import { seedOffers } from './data/offers.js';
+import { buildSalesHistory } from './data/sales-history.js';
 import { generateOrderNumber } from './checkout.js';
 import { resolveProductPrice, validateOffer } from './offers.js';
 import { isValidEmail, normalizeText, toNumber } from './utils.js';
@@ -12,7 +13,8 @@ export const KEYS = {
   role: 'erp.role',
   coupons: 'erp.coupons',
   couponUsage: 'erp.couponUsage',
-  offers: 'erp.offers'
+  offers: 'erp.offers',
+  salesHistory: 'erp.salesHistory'
 };
 
 const seedClient = {
@@ -390,6 +392,16 @@ export function ordersForClient(clientId) {
   return loadOrders()
     .filter((order) => order.clientId === clientId)
     .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+
+/* ---------------------------- Historial simulado --------------------------- */
+
+export function loadSalesHistory() {
+  const stored = read(KEYS.salesHistory, null);
+  if (Array.isArray(stored)) return stored;
+  const seeded = buildSalesHistory();
+  write(KEYS.salesHistory, seeded);
+  return seeded;
 }
 
 /* -------------------------------- Carrito -------------------------------- */

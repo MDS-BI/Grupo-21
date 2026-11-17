@@ -3,7 +3,7 @@ import {
   clearCart, setCartCoupon, clearCartCoupon, loadCart, decreaseStock, addOrder,
   findOrCreateClient, ordersForClient, getCartCount, loadOffers, getOffer, addOffer,
   updateOffer, deleteOffer, setOfferActive, updateProductPrice, getProduct,
-  applyOffersToProducts
+  applyOffersToProducts, loadSalesHistory
 } from './storage.js';
 import { featuredProducts, filterProducts, productCategories } from './catalog.js';
 import { validateCoupon, recordCouponUse } from './coupons.js';
@@ -14,6 +14,7 @@ import {
 import { validateOffer } from './offers.js';
 import { validateCheckout } from './checkout.js';
 import { processPayment } from './payments.js';
+import { computeDashboardData } from './metrics.js';
 import { escapeHtml, formatCurrency, toNumber } from './utils.js';
 import { productCatalog } from './components/product-catalog.js';
 import { productFilters } from './components/product-filters.js';
@@ -23,6 +24,7 @@ import { checkoutForm } from './components/checkout-form.js';
 import { orderConfirmation } from './components/order-confirmation.js';
 import { orderHistory } from './components/order-history.js';
 import { adminPanel } from './components/admin-panel.js';
+import { metricsDashboard } from './components/metrics-dashboard.js';
 
 const state = {
   view: 'catalog',
@@ -82,6 +84,7 @@ export function showView(view) {
   if (view === 'checkout') renderCheckout();
   if (view === 'confirmation') renderConfirmation();
   if (view === 'history') renderHistory();
+  if (view === 'metrics') renderMetrics();
   if (view === 'admin') renderAdmin();
 
   updateCartCount();
@@ -406,6 +409,16 @@ function handleHistoryChange(event) {
   if (event.target.id !== 'history-client') return;
   state.historyClientId = event.target.value;
   renderHistory();
+}
+
+/* --------------------------------- Métricas -------------------------------- */
+
+function renderMetrics() {
+  const host = qs('metrics');
+  if (!host) return;
+  const orders = loadSalesHistory();
+  const data = computeDashboardData(orders, loadProducts());
+  host.innerHTML = metricsDashboard(data);
 }
 
 /* ------------------------------ Administración ----------------------------- */

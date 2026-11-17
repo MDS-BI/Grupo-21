@@ -7,6 +7,7 @@ export const DEFAULT_CONFIG = {
     cart: 'Carrito',
     checkout: 'Pago',
     history: 'Historial',
+    metrics: 'Métricas',
     buy: 'Comprar',
     soldOut: 'Agotado',
     addToCart: 'Agregar al carrito',

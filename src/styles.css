@@ -684,6 +684,216 @@ body {
   margin-top: 0.25rem;
 }
 
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.kpi-card {
+  padding: 1rem 1.15rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.kpi-card__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.kpi-card__value {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.highlight-card {
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.highlight-card--best {
+  border-left-color: var(--success);
+}
+
+.highlight-card--worst {
+  border-left-color: var(--danger);
+}
+
+.highlight-card__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.highlight-card__name {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.highlight-card__detail {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.chart-card {
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.chart-card__title {
+  margin: 0 0 1.1rem;
+  font-size: 1rem;
+}
+
+.bar-chart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.bar-chart__item {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.1fr) minmax(70px, 2fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.bar-chart__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.bar-chart__badge {
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.bar-chart__badge--best {
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+  color: color-mix(in srgb, var(--success) 80%, #000);
+}
+
+.bar-chart__badge--worst {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+}
+
+.bar-chart__track {
+  display: block;
+  height: 0.8rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 10%, #fff);
+  overflow: hidden;
+}
+
+.bar-chart__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.bar-chart__item--best .bar-chart__fill {
+  background: var(--success);
+}
+
+.bar-chart__item--worst .bar-chart__fill {
+  background: var(--danger);
+}
+
+.bar-chart__value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.column-chart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.column-chart__item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.column-chart__value {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.column-chart__plot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 160px;
+}
+
+.column-chart__bar {
+  display: block;
+  width: 100%;
+  max-width: 44px;
+  min-height: 4px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #0f172a));
+}
+
+.column-chart__label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 @media (max-width: 720px) {
   .site-header {
     flex-wrap: wrap;
@@ -708,5 +918,21 @@ body {
   .cart-line__controls {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .bar-chart__item {
+    grid-template-columns: 1fr auto;
+  }
+
+  .bar-chart__track {
+    grid-column: 1 / -1;
+  }
+
+  .column-chart {
+    overflow-x: auto;
+  }
+
+  .column-chart__item {
+    min-width: 4.5rem;
   }
 }
