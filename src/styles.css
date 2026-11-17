@@ -84,13 +84,17 @@ body {
   color: var(--muted);
   font: inherit;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: all 0.3s ease;
 }
 
 .nav-button:hover,
 .nav-button.is-active {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
+}
+
+.nav-button:hover {
+  transform: scale(1.04);
 }
 
 .cart-count {
@@ -201,12 +205,12 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: all 0.3s ease;
 }
 
 .product-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+  transform: translateY(-5px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
 }
 
 .product-card.is-sold-out {
@@ -222,6 +226,13 @@ body {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
+}
+
+.product-card__image {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  background: #e2e8f0;
 }
 
 .product-card__body {
@@ -292,7 +303,7 @@ body {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: all 0.3s ease;
 }
 
 .btn--primary {
@@ -302,7 +313,8 @@ body {
 }
 
 .btn--primary:hover:not(:disabled) {
-  filter: brightness(1.08);
+  background: color-mix(in srgb, var(--accent) 82%, #000);
+  transform: scale(1.04);
 }
 
 .btn--primary:disabled {
