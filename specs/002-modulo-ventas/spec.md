@@ -122,41 +122,42 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 8. **Dado** que el sistema solicita el código de acceso del área de administración, **cuando** el usuario ingresa el código "1234", **entonces** el sistema le permite el acceso al panel de administración.
 
 9. **Dado** que el sistema solicita el código de acceso del área de administración, **cuando** el usuario ingresa un código distinto de "1234", **entonces** el sistema le deniega el acceso y muestra un mensaje de error indicando que el código es incorrecto.
-Historia de Usuario 8 - Panel de métricas e indicadores de ventas (Prioridad: P8)
-Descripción: Como dueño de la empresa o administrador, quiero visualizar un panel con métricas clave del negocio (ingresos totales, cantidad de ventas, ticket promedio, desglose de documentos por estado, productos más vendidos y alertas de stock bajo) para evaluar el rendimiento comercial y tomar decisiones basadas en datos.
 
-¿Por qué esta prioridad?: Convierte los registros transaccionales del módulo en información útil para la gestión, diferenciando la plataforma de una tienda simple y aportando valor real de sistema ERP.
+### Historia de Usuario 8 - Panel de métricas e indicadores de ventas (Prioridad: P8)
+**Descripción**: Como dueño de la empresa o administrador, quiero visualizar un panel con métricas clave del negocio (ingresos totales, cantidad de ventas, ticket promedio, desglose de documentos por estado, productos más vendidos y alertas de stock bajo) para evaluar el rendimiento comercial y tomar decisiones basadas en datos.
 
-Prueba independiente: Se puede probar accediendo al panel de métricas con perfil de dueño/administrador, comprobando que los indicadores reflejen los pedidos existentes y luego registrando una compra nueva para verificar que los montos, conteos y rankings se actualicen automáticamente.
+**¿Por qué esta prioridad?**: Convierte los registros transaccionales del módulo en información útil para la gestión, diferenciando la plataforma de una tienda simple y aportando valor real de sistema ERP.
 
-Escenarios de Aceptación:
+**Prueba independiente**: Se puede probar accediendo al panel de métricas con perfil de dueño/administrador, comprobando que los indicadores reflejen los pedidos existentes y luego registrando una compra nueva para verificar que los montos, conteos y rankings se actualicen automáticamente.
 
-Dado que existen pedidos registrados en el sistema, cuando el dueño ingresa al panel de métricas, entonces el sistema calcula y muestra los ingresos totales acumulados, la cantidad de ventas completadas, el ticket promedio y el total de documentos agrupados por estado (Cotización, Pedido, Facturado).
+**Escenarios de Aceptación:**
 
-Dado que existen ventas de distintos artículos, cuando el dueño consulta el desempeño del catálogo, entonces el sistema muestra un ranking de los productos más vendidos (por unidades e ingresos) y una alerta visual con los productos que tienen stock crítico o agotado.
+1.**Dado** que existen pedidos registrados en el sistema, cuando el dueño ingresa al panel de métricas, entonces el sistema calcula y muestra los ingresos totales acumulados, la cantidad de ventas completadas, el ticket promedio y el total de documentos agrupados por estado (Cotización, Pedido, Facturado).
 
-Dado que el dueño quiere analizar el rendimiento de un segmento específico, cuando aplica un filtro por rango de fechas o por categoría de producto, entonces todas las métricas e indicadores se recalculan mostrando únicamente la información correspondiente a ese filtro.
+2.**Dado** que existen ventas de distintos artículos, cuando el dueño consulta el desempeño del catálogo, entonces el sistema muestra un ranking de los productos más vendidos (por unidades e ingresos) y una alerta visual con los productos que tienen stock crítico o agotado.
 
-Dado que un cliente finaliza una nueva compra o utiliza un cupón de descuento, cuando el dueño recarga o abre el panel de métricas, entonces el sistema refleja inmediatamente la nueva transacción, incluyendo el monto neto recaudado y el uso acumulado de cupones/ofertas.
+3.**Dado** que el dueño quiere analizar el rendimiento de un segmento específico, cuando aplica un filtro por rango de fechas o por categoría de producto, entonces todas las métricas e indicadores se recalculan mostrando únicamente la información correspondiente a ese filtro.
 
-Dado que no existen ventas registradas dentro del rango o categoría seleccionados, cuando el panel termina de cargar, entonces muestra los indicadores en cero junto a un estado vacío informativo sin arrojar errores de cálculo.
+4.**Dado** que un cliente finaliza una nueva compra o utiliza un cupón de descuento, cuando el dueño recarga o abre el panel de métricas, entonces el sistema refleja inmediatamente la nueva transacción, incluyendo el monto neto recaudado y el uso acumulado de cupones/ofertas.
 
-Historia de Usuario 9 - Vistas y navegación diferenciadas por rol de usuario (Prioridad: P9)
-Descripción: Como usuario del sistema (Cliente, Vendedor o Dueño de la empresa), quiero que la interfaz se adapte automáticamente a mi perfil mostrando únicamente las secciones, datos y acciones que me corresponden, para facilitar mi flujo de trabajo y resguardar la información sensible del negocio.
+5.**Dado** que no existen ventas registradas dentro del rango o categoría seleccionados, cuando el panel termina de cargar, entonces muestra los indicadores en cero junto a un estado vacío informativo sin arrojar errores de cálculo.
 
-¿Por qué esta prioridad?: Garantiza una separación clara de responsabilidades propia de un ERP real, evitando que clientes accedan a herramientas administrativas o que perfiles operativos modifiquen precios o visualicen métricas financieras reservadas a gerencia.
+### Historia de Usuario 9 - Vistas y navegación diferenciadas por rol de usuario (Prioridad: P9)
+**Descripción:** Como usuario del sistema (Cliente, Vendedor o Dueño de la empresa), quiero que la interfaz se adapte automáticamente a mi perfil mostrando únicamente las secciones, datos y acciones que me corresponden, para facilitar mi flujo de trabajo y resguardar la información sensible del negocio.
 
-Prueba independiente: Se puede probar accediendo al sistema con cada perfil (Cliente, Vendedor y Dueño) y verificando que la barra de navegación, las pantallas accesibles y las acciones habilitadas cambien de acuerdo con los permisos de cada rol.
+**¿Por qué esta prioridad?:** Garantiza una separación clara de responsabilidades propia de un ERP real, evitando que clientes accedan a herramientas administrativas o que perfiles operativos modifiquen precios o visualicen métricas financieras reservadas a gerencia.
 
-Escenarios de Aceptación:
+**Prueba independiente:** Se puede probar accediendo al sistema con cada perfil (Cliente, Vendedor y Dueño) y verificando que la barra de navegación, las pantallas accesibles y las acciones habilitadas cambien de acuerdo con los permisos de cada rol.
 
-Dado que un usuario ingresa con el rol de Cliente, cuando navega por la aplicación, entonces la interfaz muestra únicamente las vistas orientadas a la compra (Catálogo de productos, Carrito y Pago) y oculta las pestañas internas de Historial global, Administración y Métricas.
+**Escenarios de Aceptación:**
 
-Dado que un usuario ingresa con el rol de Vendedor (Ejecutivo de Ventas), cuando accede a su espacio de trabajo, entonces visualiza el catálogo, la disponibilidad de stock y el historial y seguimiento de documentos de clientes (Cotización, Pedido, Facturado), pero mantiene bloqueada la edición de precios/ofertas, el panel de métricas financieras globales y los datos sensibles como el límite de crédito (creditLimit).
+1.**Dado** que un usuario ingresa con el rol de Cliente, cuando navega por la aplicación, entonces la interfaz muestra únicamente las vistas orientadas a la compra (Catálogo de productos, Carrito y Pago) y oculta las pestañas internas de Historial global, Administración y Métricas.
 
-Dado que un usuario ingresa con el rol de Dueño de la empresa (Administrador) validando su acceso, cuando carga la plataforma, entonces visualiza la vista gerencial completa con acceso al Panel de Métricas, la Administración de precios y ofertas, y el historial íntegro de clientes y ventas.
+2.**Dado** que un usuario ingresa con el rol de Vendedor (Ejecutivo de Ventas), cuando accede a su espacio de trabajo, entonces visualiza el catálogo, la disponibilidad de stock y el historial y seguimiento de documentos de clientes (Cotización, Pedido, Facturado), pero mantiene bloqueada la edición de precios/ofertas, el panel de métricas financieras globales y los datos sensibles como el límite de crédito (creditLimit).
 
-Dado que un usuario con rol de Cliente o Vendedor intenta abrir directamente una vista restringida (como Métricas o Administración), cuando el sistema evalúa sus permisos, entonces bloquea la visualización del contenido, muestra un aviso claro de acceso restringido y ofrece regresar a su vista autorizada.
+3.**Dado** que un usuario ingresa con el rol de Dueño de la empresa (Administrador) validando su acceso, cuando carga la plataforma, entonces visualiza la vista gerencial completa con acceso al Panel de Métricas, la Administración de precios y ofertas, y el historial íntegro de clientes y ventas.
+
+4.**Dado** que un usuario con rol de Cliente o Vendedor intenta abrir directamente una vista restringida (como Métricas o Administración), cuando el sistema evalúa sus permisos, entonces bloquea la visualización del contenido, muestra un aviso claro de acceso restringido y ofrece regresar a su vista autorizada.
 
 Dado que un Vendedor o el Dueño cierra su sesión interna, cuando se confirma la salida, entonces el sistema revoca la vista privilegiada y retorna automáticamente a la vista pública de Cliente.
 ---
@@ -170,7 +171,6 @@ Dado que un Vendedor o el Dueño cierra su sesión interna, cuando se confirma l
 - ¿Qué ocurre si el administrador modifica el precio de un producto mientras un cliente lo tiene en el carrito o una oferta se activa y desactiva durante la compra?
 - ¿Qué ocurre si el administrador intenta crear una oferta cuyo descuento supera el 100% del precio del producto o cuya fecha de fin es anterior a la de inicio?
 - ¿Qué ocurre con el cálculo de ingresos y el ranking de productos más vendidos si un pedido es anulado o cancelado después de haberse confirmado?
-
 - ¿Qué sucede si expira la sesión del Dueño o del Vendedor mientras tiene abierto el panel de métricas o editando una oferta?
 ## Requisitos *(obligatorio)*
 
@@ -182,9 +182,8 @@ Dado que un Vendedor o el Dueño cierra su sesión interna, cuando se confirma l
 - **FR-004**: El sistema DEBE [procesar los datos de envío y derivar el pago a una pasarela segura, generando un número de confirmación tras el éxito.]
 - **FR-005**: EL sistema DEBE [registrar el historial de documentos de venta (Cotización, Pedido, Facturado) y restringir datos sensibles según el rol del usuario (ej. Ejecutivo de Ventas).]
 - **FR-006**: El sistema DEBE [permitir al administrador modificar los precios de los productos y crear, editar o desactivar ofertas con vigencia, validando los valores ingresados y aplicando automáticamente el descuento en el catálogo y el carrito.]
-FR-007: El sistema DEBE calcular y presentar un panel de métricas comerciales (ingresos totales, ticket promedio, distribución de documentos por estado, ranking de productos más vendidos y alertas de stock) con filtros por categoría o rango de fechas.
-
-FR-008: El sistema DEBE adaptar la barra de navegación, las vistas disponibles y los permisos de visualización o edición según el rol del usuario (Cliente, Vendedor y Dueño/Administrador), impidiendo el acceso no autorizado a secciones restringidas.
+- **FR-007**: El sistema DEBE calcular y presentar un panel de métricas comerciales (ingresos totales, ticket promedio, distribución de documentos por estado, ranking de productos más vendidos y alertas de stock) con filtros por categoría o rango de fechas.
+- **FR-008**: El sistema DEBE adaptar la barra de navegación, las vistas disponibles y los permisos de visualización o edición según el rol del usuario (Cliente, Vendedor y Dueño/Administrador), impidiendo el acceso no autorizado a secciones restringidas.
 ### Entidades Clave *(incluir si la funcionalidad implica datos)*
 
 -  **[Producto]**: [Representa el artículo disponible en la tienda. Atributos clave: ID, nombre, descripción, precio, stock disponible, categoría, etiqueta (destacado/normal).]
