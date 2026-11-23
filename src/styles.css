@@ -1,9 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap");
 
 :root {
-  --accent: #8b7462;
-  --accent-dark: #755f4f;
-  --accent-deep: #5c4a3d;
+  --accent: #1f7a3e;
+  --accent-dark: #17632f;
+  --accent-deep: #0f4a23;
   --olive: #6b705c;
   --cream: #f5f2eb;
   --burgundy: #6b2d3a;
@@ -23,8 +23,8 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --font: "Assistant", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --hero-image: url("https://rootsouth.cl/cdn/shop/files/disponible_38b2296c-6e8c-4cb5-86ec-b90a05409c13.png?v=1789240984&width=3200");
-  --editorial-image: url("https://rootsouth.cl/cdn/shop/files/DSC9080_a327ada6-80dd-42b3-a972-799573ff20a2.jpg?v=1789240747&width=1800");
+  --hero-image: none;
+  --editorial-image: none;
 }
 
 * {
@@ -39,37 +39,6 @@ body {
   font-size: 16px;
   line-height: 24px;
   letter-spacing: 0.01em;
-}
-
-.announcement-bar {
-  display: flex;
-  align-items: center;
-  height: 32px;
-  overflow: hidden;
-  background: var(--inverse);
-  color: #ffffff;
-}
-
-.announcement-bar__track {
-  display: flex;
-  width: max-content;
-  animation: marquee 40s linear infinite;
-}
-
-.announcement-bar__group {
-  display: flex;
-  gap: 3rem;
-  padding-right: 3rem;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
 }
 
 .sr-only {
@@ -1080,10 +1049,6 @@ body {
 }
 
 @media (max-width: 720px) {
-  .announcement-bar {
-    height: 28px;
-  }
-
   .site-header {
     flex-wrap: wrap;
     gap: 0.75rem;
@@ -1146,10 +1111,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .announcement-bar__track {
-    animation: none;
-  }
-
   .product-card,
   .product-card__image,
   .btn,

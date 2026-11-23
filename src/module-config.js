@@ -7,7 +7,6 @@ export const DEFAULT_CONFIG = {
     cart: 'Carrito',
     checkout: 'Pago',
     history: 'Historial',
-    metrics: 'Métricas',
     buy: 'Comprar',
     soldOut: 'Agotado',
     addToCart: 'Agregar al carrito',
@@ -44,7 +43,7 @@ export const DEFAULT_CONFIG = {
     }
   },
   theme: {
-    accentColor: '#8B7462'
+    accentColor: '#1F7A3E'
   },
   roles: {
     sales: { label: 'Ventas', canViewFinancials: false, canManageCatalog: false },
@@ -56,7 +55,7 @@ export const DEFAULT_CONFIG = {
 
 export const userConfig = {
   moduleName: 'Módulo de Ventas',
-  theme: { accentColor: '#8B7462' }
+  theme: { accentColor: '#1F7A3E' }
 };
 
 const ROLES = Object.keys(DEFAULT_CONFIG.roles);

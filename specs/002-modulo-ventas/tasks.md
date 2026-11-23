@@ -352,4 +352,15 @@ Task: "Dar estilo al panel de administración en src/styles.css"
 - Evitar tareas vagas, conflictos en el mismo archivo y dependencias entre historias que rompan la independencia.
 - `data-model.md` describe el módulo base ERP (Cliente/Documento); T065 lo reconcilia con Producto, Cupón y Pedido, y T067 añade la entidad Oferta y el rol administrador de US7.
 - El rol `admin` aparece en `index.html` y en `DEFAULT_CONFIG.roles` con `canManageCatalog: true`; los demás roles no pueden administrar el catálogo.
+
+---
+
+## Phase 11: Convergence
+
+- [X] T069 CRITICAL: Restaurar `npm run test:002` a verde corrigiendo las 6 pruebas fallidas (`tests/integration/product-filters.test.js`, `tests/integration/purchase-funnel.test.js`, `tests/integration/order-history.test.js`, `tests/unit/metrics.test.js`) y verificar de nuevo `npm test`/`npm run build` antes de dar por completa la entrega per Constitution II (contradicts)
+- [X] T070 Alinear los datos semilla de `src/data/products.js` y las pruebas de `tests/integration/product-filters.test.js` con el escenario de filtrado por categoría "smartphone" y precio máximo de US2/AC1 y FR-001, recuperando el mensaje de resultados vacíos y la acción de reinicio (contradicts)
+- [X] T071 Restaurar el selector de roles `#role-select` en `index.html`, cablear `setRole` en `src/app.js` y actualizar `tests/integration/order-history.test.js` para verificar el enmascaramiento de `creditLimit` al cambiar a `finance` en `src/components/order-history.js` (partial)
+- [X] T072 Restaurar la guarda de acceso por rol en `renderAdmin` de `src/app.js` usando `canManageCatalog`, mostrando el mensaje de permisos de `src/components/admin-panel.js` para roles sin `admin`, sin eliminar el código de acceso "1234", y cubrirlo con `tests/integration/admin-panel.test.js` (contradicts)
+- [X] T073 Revisar y justificar o retirar el panel de métricas no solicitado (`src/metrics.js`, `src/components/metrics-dashboard.js`, `src/data/sales-history.js`, `#view-metrics` en `index.html` y `tests/unit/metrics.test.js`), actualizando `test:002` en `package.json` según la decisión (unrequested)
+- [X] T074 Revisar y justificar o alinear con `DEFAULT_CONFIG` la marca "Roots South", el announcement bar y las imágenes externas introducidas en `index.html` y `src/data/products.js`, que no figuran en spec.md, plan.md ni tasks.md (unrequested)
 - US7 no rompe las pruebas heredadas de US1–US6: el script `test:002` es la referencia de verificación del alcance implementado.

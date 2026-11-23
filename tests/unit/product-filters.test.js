@@ -5,7 +5,7 @@ import { seedProducts } from '../../src/data/products.js';
 describe('catalog filters', () => {
   it('lists categories sorted alphabetically', () => {
     expect(productCategories(seedProducts)).toEqual([
-      'Chalecos (Knit)', 'Polerones'
+      'Accesorios', 'Audio', 'Laptops', 'Smartphones', 'Tablets'
     ]);
   });
 
@@ -16,9 +16,9 @@ describe('catalog filters', () => {
   });
 
   it('filters by category', () => {
-    const chalecos = filterProducts(seedProducts, { category: 'Chalecos (Knit)' });
-    expect(chalecos).toHaveLength(2);
-    expect(chalecos.every((product) => product.category === 'Chalecos (Knit)')).toBe(true);
+    const smartphones = filterProducts(seedProducts, { category: 'Smartphones' });
+    expect(smartphones).toHaveLength(1);
+    expect(smartphones.every((product) => product.category === 'Smartphones')).toBe(true);
   });
 
   it('filters by maximum price', () => {
@@ -27,8 +27,8 @@ describe('catalog filters', () => {
   });
 
   it('combines category and price filters', () => {
-    expect(filterProducts(seedProducts, { category: 'Chalecos (Knit)', maxPrice: '100000' })).toHaveLength(0);
-    expect(filterProducts(seedProducts, { category: 'Chalecos (Knit)', maxPrice: '600000' })).toHaveLength(2);
+    expect(filterProducts(seedProducts, { category: 'Smartphones', maxPrice: '100000' })).toHaveLength(0);
+    expect(filterProducts(seedProducts, { category: 'Laptops', maxPrice: '900000' })).toHaveLength(1);
   });
 
   it('treats empty filters as no restriction', () => {

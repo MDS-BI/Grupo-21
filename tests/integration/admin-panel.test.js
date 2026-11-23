@@ -17,6 +17,7 @@ function stubAlert() {
 
 async function openAdmin(code = '1234') {
   stubPrompt(code);
+  localStorage.setItem('erp.role', 'admin');
   await startApp();
   clickNav('admin');
 }
@@ -47,6 +48,7 @@ describe('admin panel access control', () => {
   it('prompts for the access code and denies entry when it is wrong', async () => {
     const alert = stubAlert();
     stubPrompt('9999');
+    localStorage.setItem('erp.role', 'admin');
     await startApp();
 
     clickNav('admin');
@@ -63,6 +65,16 @@ describe('admin panel access control', () => {
     expect(document.getElementById('offer-form')).not.toBeNull();
     expect(document.getElementById('offers-list')).not.toBeNull();
     expect(document.getElementById('price-prod-phone-01')).not.toBeNull();
+  });
+
+  it('denies the panel to roles without catalog permissions', async () => {
+    stubPrompt('1234');
+    await startApp();
+    clickNav('admin');
+
+    expect(document.getElementById('view-admin').hidden).toBe(false);
+    expect(document.getElementById('admin-denied').textContent).toMatch(/permisos/i);
+    expect(document.getElementById('offer-form')).toBeNull();
   });
 });
 

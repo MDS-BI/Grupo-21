@@ -19,7 +19,7 @@ describe('cart view', () => {
   it('shows cart lines and a subtotal equal to the line total', async () => {
     await openCartWithPhone();
     expect(document.querySelectorAll('#cart-items .cart-line')).toHaveLength(1);
-    expect(document.querySelector('#cart-items .cart-line__name').textContent).toContain('Steel Zip Knit');
+    expect(document.querySelector('#cart-items .cart-line__name').textContent).toContain('Smartphone Nova X');
     expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(499990));
     expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(499990));
   });

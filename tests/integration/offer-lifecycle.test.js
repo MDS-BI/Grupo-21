@@ -12,6 +12,7 @@ function storedOffers() {
 beforeEach(() => {
   vi.resetModules();
   localStorage.clear();
+  localStorage.setItem('erp.role', 'admin');
   mountMarkup();
   vi.stubGlobal('prompt', vi.fn(() => '1234'));
 });
