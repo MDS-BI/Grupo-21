@@ -32,7 +32,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 **¿Por qué esta prioridad?**: Mejora la experiencia del cliente y acelera el proceso de decision de la compra.
 
 **Escenario de aceptación**:
-1. **Dado** que el usuario esta en el catalogo, **cuando** selecciona la categoria de "smartphone" y establece un precio maximo, **entonces** el listado se actualiza mostrando solo los artículos que cumplen con ambos criterios
+1. **Dado** que el usuario esta en el catalogo, **cuando** selecciona la categoria de "Poleras" de RootSouth y establece un precio maximo, **entonces** el listado se actualiza mostrando solo los artículos que cumplen con ambos criterios
 ⁠2. **Dado** si es que no llegan a existir productos en el rango de precios seleccionados, **cuando** el usuario aplica el filtro, **entonces** el sistema muestra un mensaje el cual indica que no hay resultados disponibles.
 
 ### Historia de usuario 3 - Gestión de carrito de compras (Prioridad: P3)
@@ -184,9 +184,11 @@ Dado que un Vendedor o el Dueño cierra su sesión interna, cuando se confirma l
 - **FR-006**: El sistema DEBE [permitir al administrador modificar los precios de los productos y crear, editar o desactivar ofertas con vigencia, validando los valores ingresados y aplicando automáticamente el descuento en el catálogo y el carrito.]
 - **FR-007**: El sistema DEBE calcular y presentar un panel de métricas comerciales (ingresos totales, ticket promedio, distribución de documentos por estado, ranking de productos más vendidos y alertas de stock) con filtros por categoría o rango de fechas.
 - **FR-008**: El sistema DEBE adaptar la barra de navegación, las vistas disponibles y los permisos de visualización o edición según el rol del usuario (Cliente, Vendedor y Dueño/Administrador), impidiendo el acceso no autorizado a secciones restringidas.
+- **FR-009**: El catálogo DEBE ser una tienda de ropa con 8 productos reales de RootSouth e imágenes reales renderizadas mediante `<img>`, y los pedidos iniciales de historial/métricas DEBEN coincidir con estas prendas (limpiando datos antiguos de tecnología en `localStorage` mediante un versionado de esquema).
+- **FR-010**: La interfaz DEBE seguir una estética minimalista editorial inspirada en `https://scuffers.com/es` (fondo blanco `#FFFFFF`, fotos verticales 3:4 con fondo `#F4F4F4`, bordes rectos `0px`, paleta monocromática en negro `#111111` y grises neutros, tipografía sans-serif con textos de navegación/categorías en mayúsculas espaciadas y zoom sutil al pasar el cursor por las fotos).
 ### Entidades Clave *(incluir si la funcionalidad implica datos)*
 
--  **[Producto]**: [Representa el artículo disponible en la tienda. Atributos clave: ID, nombre, descripción, precio, stock disponible, categoría, etiqueta (destacado/normal).]
+-  **[Producto]**: [Representa el artículo disponible en la tienda. Atributos clave: ID, nombre, descripción, imagen, precio, stock disponible, categoría, etiqueta (destacado/normal).]
 - **[Pedido(documento de venta)]**: [Representa la transacción comercial en sus distintos estados. Atributos clave: ID, cliente_id, fecha, monto_total, estado (cotización, pagado, facturado), cupon_aplicado.]
 - **[Cliente]**:[Representa al usuario comprador. Atributos clave: ID, nombre, correo electrónico, dirección_envío, limite_credito.]
 - **[Oferta]**: [Representa una promoción creada por el administrador sobre un producto. Atributos clave: ID, producto_id, tipo_descuento (porcentaje/monto), valor_descuento, fecha_inicio, fecha_fin, activa.]
