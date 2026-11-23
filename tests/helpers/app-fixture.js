@@ -10,6 +10,7 @@ export function mountMarkup() {
 }
 
 export async function startApp({ config, paymentBehavior } = {}) {
+  globalThis.localStorage?.removeItem('erp.seedVersion');
   const app = await import('../../src/app.js');
   if (paymentBehavior) app.__setPaymentBehavior(paymentBehavior);
   await app.boot(config);
@@ -41,7 +42,7 @@ export function buyFromCatalog(productId) {
 
 export async function completePurchase({ config, paymentBehavior, overrides } = {}) {
   const app = await startApp({ config, paymentBehavior });
-  buyFromCatalog('prod-phone-01');
+  buyFromCatalog('prod-steel-zip-knit');
   clickNav('cart');
   document.getElementById('go-checkout').click();
   fillCheckout(overrides);

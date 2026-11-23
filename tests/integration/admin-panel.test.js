@@ -9,16 +9,10 @@ function stubPrompt(value) {
   vi.stubGlobal('prompt', vi.fn(() => value));
 }
 
-function stubAlert() {
-  const alert = vi.fn();
-  vi.stubGlobal('alert', alert);
-  return alert;
-}
-
 async function openAdmin(code = '1234') {
-  stubPrompt(code);
   localStorage.setItem('erp.role', 'admin');
   await startApp();
+  document.getElementById('admin-code').value = code;
   clickNav('admin');
 }
 
@@ -46,14 +40,13 @@ afterEach(() => {
 
 describe('admin panel access control', () => {
   it('prompts for the access code and denies entry when it is wrong', async () => {
-    const alert = stubAlert();
     stubPrompt('9999');
     localStorage.setItem('erp.role', 'admin');
     await startApp();
 
     clickNav('admin');
 
-    expect(alert).toHaveBeenCalledWith('Acceso denegado');
+    expect(document.getElementById('admin-access-error').textContent).toMatch(/acceso denegado/i);
     expect(document.getElementById('view-admin').hidden).toBe(true);
     expect(document.getElementById('offer-form')).toBeNull();
   });
@@ -64,16 +57,15 @@ describe('admin panel access control', () => {
     expect(document.getElementById('admin-denied')).toBeNull();
     expect(document.getElementById('offer-form')).not.toBeNull();
     expect(document.getElementById('offers-list')).not.toBeNull();
-    expect(document.getElementById('price-prod-phone-01')).not.toBeNull();
+    expect(document.getElementById('price-prod-jockey')).not.toBeNull();
   });
 
   it('denies the panel to roles without catalog permissions', async () => {
-    stubPrompt('1234');
     await startApp();
+    expect(document.querySelector('[data-view="admin"]').hidden).toBe(true);
     clickNav('admin');
 
-    expect(document.getElementById('view-admin').hidden).toBe(false);
-    expect(document.getElementById('admin-denied').textContent).toMatch(/permisos/i);
+    expect(document.getElementById('view-admin').hidden).toBe(true);
     expect(document.getElementById('offer-form')).toBeNull();
   });
 });
@@ -81,22 +73,22 @@ describe('admin panel access control', () => {
 describe('admin price management', () => {
   it('updates a product price and reflects it in the catalog', async () => {
     await openAdmin();
-    document.getElementById('price-prod-phone-01').value = '450000';
-    document.querySelector('[data-action="save-price"][data-product-id="prod-phone-01"]').click();
+    document.getElementById('price-prod-jockey').value = '15000';
+    document.querySelector('[data-action="save-price"][data-product-id="prod-jockey"]').click();
 
     const product = JSON.parse(localStorage.getItem('erp.products'))
-      .find((entry) => entry.id === 'prod-phone-01');
-    expect(product.price).toBe(450000);
+      .find((entry) => entry.id === 'prod-jockey');
+    expect(product.price).toBe(15000);
 
     clickNav('catalog');
-    const card = document.querySelector('#catalog-grid [data-product-id="prod-phone-01"]');
-    expect(card.querySelector('.product-card__price').textContent).toContain(formatCurrency(450000));
+    const card = document.querySelector('#catalog-grid [data-product-id="prod-jockey"]');
+    expect(card.querySelector('.product-card__price').textContent).toContain(formatCurrency(15000));
   });
 
   it('rejects negative or non-numeric prices with a clear message', async () => {
     await openAdmin();
-    const input = document.getElementById('price-prod-phone-01');
-    const save = document.querySelector('[data-action="save-price"][data-product-id="prod-phone-01"]');
+    const input = document.getElementById('price-prod-jockey');
+    const save = document.querySelector('[data-action="save-price"][data-product-id="prod-jockey"]');
 
     input.value = '-10';
     save.click();
@@ -107,26 +99,26 @@ describe('admin price management', () => {
     expect(document.getElementById('admin-message').textContent).toMatch(/precio/i);
 
     const product = JSON.parse(localStorage.getItem('erp.products'))
-      .find((entry) => entry.id === 'prod-phone-01');
-    expect(product.price).toBe(499990);
+      .find((entry) => entry.id === 'prod-jockey');
+    expect(product.price).toBe(16990);
   });
 });
 
 describe('admin offer management', () => {
   it('creates an offer and shows the discount in the catalog', async () => {
     await openAdmin();
-    fillOfferForm({ productId: 'prod-accessory-02', value: 50 });
+    fillOfferForm({ productId: 'prod-jockey', value: 50 });
     submitForm(document.getElementById('offer-form'));
 
-    const offer = storedOffers().find((entry) => entry.productId === 'prod-accessory-02');
+    const offer = storedOffers().find((entry) => entry.productId === 'prod-jockey');
     expect(offer).toBeTruthy();
     expect(offer.type).toBe('percent');
     expect(offer.value).toBe(50);
 
     clickNav('catalog');
-    const card = document.querySelector('#catalog-grid [data-product-id="prod-accessory-02"]');
-    expect(card.querySelector('.price--offer').textContent).toContain(formatCurrency(9995));
-    expect(card.querySelector('.price--original').textContent).toContain(formatCurrency(19990));
+    const card = document.querySelector('#catalog-grid [data-product-id="prod-jockey"]');
+    expect(card.querySelector('.price--offer').textContent).toContain(formatCurrency(8495));
+    expect(card.querySelector('.price--original').textContent).toContain(formatCurrency(16990));
     expect(card.querySelector('.badge--offer')).not.toBeNull();
   });
 
@@ -134,13 +126,13 @@ describe('admin offer management', () => {
     await openAdmin();
     const before = storedOffers().length;
 
-    fillOfferForm({ productId: 'prod-laptop-02', value: 150 });
+    fillOfferForm({ productId: 'prod-tarjetero-rootsouth', value: 150 });
     submitForm(document.getElementById('offer-form'));
     expect(storedOffers()).toHaveLength(before);
     expect(document.getElementById('admin-message').textContent).toMatch(/100/);
 
     fillOfferForm({
-      productId: 'prod-laptop-02',
+      productId: 'prod-tarjetero-rootsouth',
       value: 10,
       startDate: '2026-06-10',
       endDate: '2026-06-01'
@@ -152,10 +144,10 @@ describe('admin offer management', () => {
 
   it('edits an offer and lets the admin deactivate it', async () => {
     await openAdmin();
-    fillOfferForm({ productId: 'prod-accessory-02', value: 10 });
+    fillOfferForm({ productId: 'prod-jockey', value: 10 });
     submitForm(document.getElementById('offer-form'));
 
-    const created = storedOffers().find((entry) => entry.productId === 'prod-accessory-02');
+    const created = storedOffers().find((entry) => entry.productId === 'prod-jockey');
     document.querySelector(`[data-offer-id="${created.id}"] [data-action="edit-offer"]`).click();
     document.getElementById('offer-value').value = '20';
     submitForm(document.getElementById('offer-form'));
@@ -164,8 +156,8 @@ describe('admin offer management', () => {
     expect(edited.value).toBe(20);
 
     clickNav('catalog');
-    const discounted = document.querySelector('#catalog-grid [data-product-id="prod-accessory-02"] .price--offer');
-    expect(discounted.textContent).toContain(formatCurrency(15992));
+    const discounted = document.querySelector('#catalog-grid [data-product-id="prod-jockey"] .price--offer');
+    expect(discounted.textContent).toContain(formatCurrency(13592));
 
     clickNav('admin');
     document.querySelector(`[data-offer-id="${created.id}"] [data-action="toggle-offer"]`).click();
@@ -174,25 +166,25 @@ describe('admin offer management', () => {
     expect(deactivated.active).toBe(false);
 
     clickNav('catalog');
-    const card = document.querySelector('#catalog-grid [data-product-id="prod-accessory-02"]');
+    const card = document.querySelector('#catalog-grid [data-product-id="prod-jockey"]');
     expect(card.querySelector('.price--offer')).toBeNull();
-    expect(card.querySelector('.product-card__price').textContent).toContain(formatCurrency(19990));
+    expect(card.querySelector('.product-card__price').textContent).toContain(formatCurrency(16990));
   });
 
   it('applies the offer in the cart and recalculates when deactivated', async () => {
     await openAdmin();
-    fillOfferForm({ productId: 'prod-accessory-02', value: 50 });
+    fillOfferForm({ productId: 'prod-jockey', value: 50 });
     submitForm(document.getElementById('offer-form'));
 
     clickNav('catalog');
-    buyFromCatalog('prod-accessory-02');
+    buyFromCatalog('prod-jockey');
     clickNav('cart');
-    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(9995));
+    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(8495));
 
-    const created = storedOffers().find((entry) => entry.productId === 'prod-accessory-02');
+    const created = storedOffers().find((entry) => entry.productId === 'prod-jockey');
     clickNav('admin');
     document.querySelector(`[data-offer-id="${created.id}"] [data-action="toggle-offer"]`).click();
     clickNav('cart');
-    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(19990));
+    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(16990));
   });
 });

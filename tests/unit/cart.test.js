@@ -11,45 +11,46 @@ beforeEach(() => {
 
 describe('cart storage', () => {
   it('adds products and computes totals', () => {
-    addToCart('prod-phone-01', 1);
+    addToCart('prod-black-zipper-layers', 1);
     const details = getCartDetails();
     expect(details.items).toHaveLength(1);
+    expect(details.items[0].name).toBe('Black Zipper Layers');
     expect(details.count).toBe(1);
-    expect(details.subtotal).toBe(499990);
+    expect(details.subtotal).toBe(67990);
     expect(getCartCount()).toBe(1);
   });
 
   it('increments quantity when the same product is added twice', () => {
-    addToCart('prod-phone-01');
-    addToCart('prod-phone-01');
+    addToCart('prod-black-zipper-layers');
+    addToCart('prod-black-zipper-layers');
     expect(getCartDetails().items[0].quantity).toBe(2);
-    expect(getCartDetails().subtotal).toBe(999980);
+    expect(getCartDetails().subtotal).toBe(135980);
   });
 
   it('rejects products without stock or with insufficient stock', () => {
-    expect(() => addToCart('prod-audio-01')).toThrow(/stock/i);
-    addToCart('prod-laptop-02', 2);
-    expect(() => addToCart('prod-laptop-02', 1)).toThrow(/stock/i);
+    expect(() => addToCart('prod-bandanas')).toThrow(/stock/i);
+    addToCart('prod-steel-zip-knit', 12);
+    expect(() => addToCart('prod-steel-zip-knit', 1)).toThrow(/stock/i);
     expect(() => addToCart('missing-product')).toThrow(/no encontrado/i);
   });
 
   it('updates quantities and removes lines when quantity reaches zero', () => {
-    addToCart('prod-phone-01');
-    updateCartItem('prod-phone-01', 3);
+    addToCart('prod-black-zipper-layers');
+    updateCartItem('prod-black-zipper-layers', 3);
     expect(getCartDetails().items[0].quantity).toBe(3);
-    updateCartItem('prod-phone-01', 0);
+    updateCartItem('prod-black-zipper-layers', 0);
     expect(getCartDetails().items).toHaveLength(0);
   });
 
   it('prevents updating beyond available stock', () => {
-    addToCart('prod-laptop-01');
-    expect(() => updateCartItem('prod-laptop-01', 99)).toThrow(/stock/i);
+    addToCart('prod-steel-zip-knit');
+    expect(() => updateCartItem('prod-steel-zip-knit', 99)).toThrow(/stock/i);
   });
 
   it('removes and clears items', () => {
-    addToCart('prod-phone-01');
-    addToCart('prod-tablet-01');
-    removeFromCart('prod-phone-01');
+    addToCart('prod-black-zipper-layers');
+    addToCart('prod-jockey');
+    removeFromCart('prod-black-zipper-layers');
     expect(getCartDetails().items).toHaveLength(1);
     clearCart();
     expect(getCartDetails().items).toHaveLength(0);

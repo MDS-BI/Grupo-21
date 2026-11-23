@@ -72,15 +72,17 @@ describe('module configuration', () => {
     expect(Object.keys(DEFAULT_CONFIG.roles)).toEqual(
       expect.arrayContaining(['customer', 'sales', 'warehouse', 'finance', 'admin'])
     );
-    expect(getRole()).toBe('sales');
+    expect(getRole()).toBe('customer');
     expect(setRole('customer')).toBe('customer');
     expect(getRole()).toBe('customer');
   });
 
   it('derives every permission from the active role', () => {
     expect(canViewFinancials('finance')).toBe(true);
+    expect(canViewFinancials('admin')).toBe(true);
     expect(canViewFinancials('sales')).toBe(false);
     expect(canManageCatalog('admin')).toBe(true);
+    expect(canViewHistory('customer')).toBe(true);
     expect(canViewHistory('sales')).toBe(true);
     expect(canViewStock('sales')).toBe(true);
     expect(canViewStock('customer')).toBe(false);

@@ -1,12 +1,12 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   OFFER_TYPES, validateOffer, isOfferActive, offerPriceFor, resolveProductPrice
 } from '../../src/offers.js';
 
 const baseOffer = {
-  productId: 'prod-phone-01',
+  productId: 'prod-steel-zip-knit',
   type: 'percent',
-  value: 15,
+  value: 10,
   startDate: '2026-01-01',
   endDate: '2026-12-31',
   active: true
@@ -22,7 +22,7 @@ describe('offer validation', () => {
   it('accepts a valid fixed offer within the product price', () => {
     const result = validateOffer(
       { ...baseOffer, type: 'fixed', value: 50000 },
-      { product: { id: 'prod-phone-01', price: 499990 } }
+      { product: { id: 'prod-steel-zip-knit', price: 77990 } }
     );
     expect(result.valid).toBe(true);
   });
@@ -59,8 +59,8 @@ describe('offer validation', () => {
 
   it('rejects a fixed discount greater than the product price', () => {
     const result = validateOffer(
-      { ...baseOffer, type: 'fixed', value: 600000 },
-      { product: { id: 'prod-phone-01', price: 499990 } }
+      { ...baseOffer, type: 'fixed', value: 90000 },
+      { product: { id: 'prod-steel-zip-knit', price: 77990 } }
     );
     expect(result.valid).toBe(false);
     expect(result.errors.value).toMatch(/precio/i);
@@ -88,40 +88,40 @@ describe('offer activity and pricing', () => {
   });
 
   it('calculates percentage and fixed prices', () => {
-    expect(offerPriceFor(100000, { type: 'percent', value: 25 })).toBe(75000);
-    expect(offerPriceFor(100000, { type: 'fixed', value: 30000 })).toBe(70000);
-    expect(offerPriceFor(100000, { type: 'fixed', value: 300000 })).toBe(0);
+    expect(offerPriceFor(77990, { type: 'percent', value: 10 })).toBe(70191);
+    expect(offerPriceFor(77990, { type: 'fixed', value: 5000 })).toBe(72990);
+    expect(offerPriceFor(77990, { type: 'fixed', value: 90000 })).toBe(0);
   });
 
   it('returns the original price when there is no active offer', () => {
-    const product = { id: 'prod-phone-01', price: 499990 };
+    const product = { id: 'prod-steel-zip-knit', price: 77990 };
     const resolved = resolveProductPrice(product, [baseOffer], new Date('2020-01-01T00:00:00.000Z'));
-    expect(resolved.price).toBe(499990);
+    expect(resolved.price).toBe(77990);
     expect(resolved.discount).toBe(0);
     expect(resolved.offer).toBeNull();
   });
 
   it('ignores inactive or expired offers', () => {
-    const product = { id: 'prod-phone-01', price: 499990 };
+    const product = { id: 'prod-steel-zip-knit', price: 77990 };
     const offers = [
       { ...baseOffer, id: 'inactive', active: false },
       { ...baseOffer, id: 'expired', endDate: '2025-12-31' }
     ];
     const resolved = resolveProductPrice(product, offers, now);
-    expect(resolved.price).toBe(499990);
+    expect(resolved.price).toBe(77990);
     expect(resolved.offer).toBeNull();
   });
 
   it('applies the best active offer when several are available', () => {
-    const product = { id: 'prod-phone-01', price: 100000 };
+    const product = { id: 'prod-steel-zip-knit', price: 77990 };
     const offers = [
       { ...baseOffer, id: 'ten', value: 10 },
-      { ...baseOffer, id: 'forty', type: 'fixed', value: 40000 }
+      { ...baseOffer, id: 'twenty-thousand', type: 'fixed', value: 20000 }
     ];
     const resolved = resolveProductPrice(product, offers, now);
-    expect(resolved.offer.id).toBe('forty');
-    expect(resolved.price).toBe(60000);
-    expect(resolved.originalPrice).toBe(100000);
-    expect(resolved.discount).toBe(40000);
+    expect(resolved.offer.id).toBe('twenty-thousand');
+    expect(resolved.price).toBe(57990);
+    expect(resolved.originalPrice).toBe(77990);
+    expect(resolved.discount).toBe(20000);
   });
 });

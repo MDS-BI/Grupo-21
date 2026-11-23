@@ -9,9 +9,9 @@ beforeEach(() => {
   mountMarkup();
 });
 
-async function openCartWithPhone() {
+async function openCartWithSteel() {
   await startApp();
-  buyFromCatalog('prod-phone-01');
+  buyFromCatalog('prod-steel-zip-knit');
   clickNav('cart');
 }
 
@@ -22,45 +22,45 @@ function applyCoupon(code) {
 
 describe('coupon flow', () => {
   it('applies a percentage coupon and updates discount and total', async () => {
-    await openCartWithPhone();
+    await openCartWithSteel();
     applyCoupon('bienvenido10');
     expect(document.getElementById('coupon-message').textContent).toContain('Cupón aplicado');
-    expect(document.getElementById('cart-discount').textContent).toBe(formatCurrency(49999));
-    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(449991));
+    expect(document.getElementById('cart-discount').textContent).toBe(formatCurrency(7019));
+    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(63172));
     expect(JSON.parse(localStorage.getItem('erp.cart')).couponCode).toBe('BIENVENIDO10');
   });
 
   it('applies a fixed coupon', async () => {
-    await openCartWithPhone();
+    await openCartWithSteel();
     applyCoupon('AHORRA5000');
     expect(document.getElementById('cart-discount').textContent).toBe(formatCurrency(5000));
-    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(494990));
+    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(65191));
   });
 
   it('rejects an unknown coupon without changing the total', async () => {
-    await openCartWithPhone();
+    await openCartWithSteel();
     applyCoupon('NOEXISTE');
     const message = document.getElementById('coupon-message');
     expect(message.className).toContain('notice--error');
     expect(message.textContent).toMatch(/no existe/i);
     expect(document.getElementById('cart-discount').textContent).toBe(formatCurrency(0));
-    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(499990));
+    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(70191));
   });
 
   it('reports an expired coupon', async () => {
-    await openCartWithPhone();
+    await openCartWithSteel();
     applyCoupon('EXPIRADO');
     expect(document.getElementById('coupon-message').textContent).toMatch(/vencido/i);
     expect(document.getElementById('cart-discount').textContent).toBe(formatCurrency(0));
   });
 
   it('removes an applied coupon and restores the total', async () => {
-    await openCartWithPhone();
+    await openCartWithSteel();
     applyCoupon('BIENVENIDO10');
     expect(document.getElementById('remove-coupon')).not.toBeNull();
     document.getElementById('remove-coupon').click();
     expect(document.getElementById('cart-discount').textContent).toBe(formatCurrency(0));
-    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(499990));
+    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(70191));
     expect(JSON.parse(localStorage.getItem('erp.cart')).couponCode).toBeNull();
   });
 });

@@ -15,27 +15,34 @@ function cardIds() {
 describe('catalog filters', () => {
   it('filters by category and keeps the selection visible', async () => {
     await startApp();
-    changeValue(document.getElementById('filter-category'), 'Smartphones');
-    expect(cardIds()).toEqual(['prod-phone-01']);
-    expect(document.getElementById('filter-category').value).toBe('Smartphones');
+    changeValue(document.getElementById('filter-category'), 'Knit');
+    expect(cardIds()).toEqual(['prod-steel-zip-knit']);
+    expect(document.getElementById('filter-category').value).toBe('Knit');
   });
 
   it('filters by maximum price', async () => {
     await startApp();
     changeValue(document.getElementById('filter-max-price'), '50000');
-    expect(cardIds().sort()).toEqual(['prod-accessory-01', 'prod-accessory-02']);
+    expect(cardIds().sort()).toEqual([
+      'prod-bandanas',
+      'prod-jockey',
+      'prod-llavero-rootsouth',
+      'prod-polera-coach-c',
+      'prod-tarjetero-rootsouth',
+      'prod-vaso-matero'
+    ]);
   });
 
   it('combines category and price filters', async () => {
     await startApp();
-    changeValue(document.getElementById('filter-category'), 'Laptops');
+    changeValue(document.getElementById('filter-category'), 'Polerones');
     changeValue(document.getElementById('filter-max-price'), '900000');
-    expect(cardIds()).toEqual(['prod-laptop-01']);
+    expect(cardIds()).toEqual(['prod-black-zipper-layers']);
   });
 
   it('shows an empty message when no product matches', async () => {
     await startApp();
-    changeValue(document.getElementById('filter-category'), 'Smartphones');
+    changeValue(document.getElementById('filter-category'), 'Knit');
     changeValue(document.getElementById('filter-max-price'), '100');
     expect(cardIds()).toHaveLength(0);
     const message = document.getElementById('catalog-message');
@@ -45,8 +52,8 @@ describe('catalog filters', () => {
 
   it('resets filters back to the full catalog', async () => {
     await startApp();
-    changeValue(document.getElementById('filter-category'), 'Audio');
-    expect(cardIds().sort()).toEqual(['prod-audio-01', 'prod-audio-02']);
+    changeValue(document.getElementById('filter-category'), 'Poleras');
+    expect(cardIds()).toEqual(['prod-polera-coach-c']);
     document.getElementById('filter-reset').click();
     expect(cardIds()).toHaveLength(8);
     expect(document.getElementById('filter-category').value).toBe('all');

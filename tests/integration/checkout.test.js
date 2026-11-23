@@ -10,9 +10,13 @@ beforeEach(() => {
   mountMarkup();
 });
 
+function storedOrders() {
+  return JSON.parse(localStorage.getItem('erp.orders') || '[]');
+}
+
 async function openCheckout() {
   await startApp();
-  buyFromCatalog('prod-phone-01');
+  buyFromCatalog('prod-steel-zip-knit');
   clickNav('cart');
   document.getElementById('go-checkout').click();
 }
@@ -28,7 +32,7 @@ describe('checkout flow', () => {
     expect(document.getElementById('error-city')).not.toBeNull();
     expect(document.getElementById('error-postalCode')).not.toBeNull();
     expect(document.getElementById('error-paymentMethod')).not.toBeNull();
-    expect(localStorage.getItem('erp.orders')).toBeNull();
+    expect(storedOrders()).toHaveLength(4);
   });
 
   it('keeps the entered values after a validation error', async () => {
@@ -36,7 +40,7 @@ describe('checkout flow', () => {
     fillCheckout({ email: '' });
     submitForm(document.getElementById('checkout-form'));
     expect(document.getElementById('checkout-fullName').value).toBe('Ana Pérez');
-    expect(document.getElementById('checkout-fullName').value).toBe('Ana Pérez');
+    expect(document.getElementById('checkout-address').value).toBe('Calle Falsa 123');
     expect(document.getElementById('error-email')).not.toBeNull();
   });
 
@@ -46,27 +50,28 @@ describe('checkout flow', () => {
     expect(document.getElementById('order-number').textContent).toMatch(/^PED-\d{8}-\d{4}$/);
     expect(document.getElementById('cart-count').textContent).toBe('0');
 
-    const orders = JSON.parse(localStorage.getItem('erp.orders'));
-    expect(orders).toHaveLength(1);
-    expect(orders[0].total).toBe(499990);
-    expect(orders[0].subtotal).toBe(499990);
-    expect(orders[0].discount).toBe(0);
-    expect(orders[0].status).toBe('Pedido');
-    expect(orders[0].documentType).toBe('Pedido');
-    expect(orders[0].paymentMethod).toBe('Tarjeta');
-    expect(orders[0].clientId).toBeTruthy();
+    expect(storedOrders()).toHaveLength(5);
+    const order = storedOrders().find((entry) => entry.shipping?.email === 'ana@example.com');
+    expect(order.total).toBe(70191);
+    expect(order.subtotal).toBe(70191);
+    expect(order.discount).toBe(0);
+    expect(order.status).toBe('Pedido');
+    expect(order.documentType).toBe('Pedido');
+    expect(order.paymentMethod).toBe('Tarjeta');
+    expect(order.clientId).toBeTruthy();
 
     const products = JSON.parse(localStorage.getItem('erp.products'));
-    expect(products.find((product) => product.id === 'prod-phone-01').stock).toBe(11);
+    expect(products.find((product) => product.id === 'prod-steel-zip-knit').stock).toBe(11);
 
     const clients = JSON.parse(localStorage.getItem('erp.clients'));
-    expect(clients.some((client) => client.name === 'Ana Pérez')).toBe(true);
+    expect(clients.some((client) => client.id === order.clientId)).toBe(true);
+    expect(order.shipping.fullName).toBe('Ana Pérez');
     expect(JSON.parse(localStorage.getItem('erp.cart')).items).toHaveLength(0);
   });
 
   it('records coupon usage when checking out with a coupon', async () => {
     await startApp();
-    buyFromCatalog('prod-phone-01');
+    buyFromCatalog('prod-steel-zip-knit');
     clickNav('cart');
     const couponInput = document.getElementById('coupon-code');
     couponInput.value = 'BIENVENIDO10';
@@ -78,9 +83,9 @@ describe('checkout flow', () => {
 
     const usage = JSON.parse(localStorage.getItem('erp.couponUsage'));
     expect(usage.BIENVENIDO10).toBe(1);
-    const orders = JSON.parse(localStorage.getItem('erp.orders'));
-    expect(orders[0].discount).toBe(49999);
-    expect(orders[0].total).toBe(449991);
+    const order = storedOrders().find((entry) => entry.shipping?.email === 'ana@example.com');
+    expect(order.discount).toBe(7019);
+    expect(order.total).toBe(63172);
   });
 
   it('keeps the cart when the payment is declined', async () => {
@@ -89,7 +94,7 @@ describe('checkout flow', () => {
     const message = document.getElementById('checkout-message');
     expect(message.className).toContain('notice--error');
     expect(message.textContent).toMatch(/rechazado/i);
-    expect(localStorage.getItem('erp.orders')).toBeNull();
+    expect(storedOrders()).toHaveLength(4);
     expect(JSON.parse(localStorage.getItem('erp.cart')).items).toHaveLength(1);
   });
 });

@@ -13,7 +13,7 @@ import {
 } from './module-config.js';
 import { computeMetrics } from './metrics.js';
 import { validateOffer } from './offers.js';
-import { validateCheckout } from './checkout.js';
+import { completeCheckout, validateCheckout } from './checkout.js';
 import { processPayment } from './payments.js';
 import { escapeHtml, formatCurrency, toNumber } from './utils.js';
 import { productCatalog } from './components/product-catalog.js';
@@ -35,6 +35,7 @@ const state = {
   checkoutMessage: null,
   lastOrder: null,
   historyClientId: null,
+  adminUnlocked: false,
   paymentBehavior: 'success',
   metrics: { from: '', to: '', category: '' },
   admin: {
@@ -69,6 +70,8 @@ function setNotice(element, message) {
 
 export function showView(view) {
   const allowed = canAccessView(getRole(), view);
+  const activeView = allowed ? view : 'catalog';
+
   setNotice(qs('role-denied'), allowed ? null : {
     type: 'error',
     text: `${labelFor('accessRestricted', 'Acceso restringido')} (${labelFor(view, view)})`
@@ -78,25 +81,25 @@ export function showView(view) {
   const deniedReturn = qs('role-denied-return');
   if (deniedReturn) deniedReturn.hidden = allowed;
 
-  state.view = view;
+  state.view = activeView;
   globalThis.document?.querySelectorAll('.view').forEach((section) => {
-    section.hidden = section.id !== `view-${view}`;
+    section.hidden = section.id !== `view-${activeView}`;
   });
 
   globalThis.document?.querySelectorAll('[data-view]').forEach((button) => {
-    const active = button.dataset.view === view;
+    const active = button.dataset.view === activeView;
     button.classList.toggle('is-active', active);
     if (active) button.setAttribute('aria-current', 'page');
     else button.removeAttribute('aria-current');
   });
 
-  if (view === 'catalog') renderCatalog();
-  if (view === 'cart') renderCart();
-  if (view === 'checkout') renderCheckout();
-  if (view === 'confirmation') renderConfirmation();
-  if (view === 'history') renderHistory();
-  if (view === 'admin') renderAdmin();
-  if (view === 'metrics') renderMetrics();
+  if (activeView === 'catalog') renderCatalog();
+  if (activeView === 'cart') renderCart();
+  if (activeView === 'checkout') renderCheckout();
+  if (activeView === 'confirmation') renderConfirmation();
+  if (activeView === 'history') renderHistory();
+  if (activeView === 'admin') renderAdmin();
+  if (activeView === 'metrics') renderMetrics();
 
   updateCartCount();
 }
@@ -322,59 +325,37 @@ async function handleCheckoutSubmit(event) {
   }
 
   const coupon = currentCoupon(details.subtotal);
-  const discount = coupon.valid ? coupon.discount : 0;
-  const total = Math.max(0, details.subtotal - discount);
-
   setNotice(qs('checkout-message'), { type: 'info', text: 'Procesando pago…' });
 
-  try {
-    await processPayment({ amount: total, method: data.paymentMethod, behavior: state.paymentBehavior });
-  } catch (error) {
-    state.checkoutMessage = { type: 'error', text: error.message };
-    renderCheckout();
-    return;
-  }
-
-  const stockOk = details.items.every((item) => decreaseStock(item.productId, item.quantity));
-  if (!stockOk) {
-    state.checkoutMessage = { type: 'error', text: 'Un producto se quedó sin stock mientras confirmabas. Revisa el carrito.' };
-    renderCheckout();
-    return;
-  }
-
-  const client = findOrCreateClient({
-    name: data.fullName,
-    email: data.email,
-    address: data.address,
-    city: data.city,
-    phone: data.phone
-  });
-
-  const order = addOrder({
-    clientId: client.id,
-    documentType: 'Pedido',
-    status: 'Pedido',
-    items: details.items,
-    subtotal: details.subtotal,
-    discount,
-    total,
-    couponCode: coupon.valid ? coupon.code : null,
-    paymentMethod: data.paymentMethod,
-    shipping: {
-      fullName: data.fullName,
-      email: data.email,
-      address: data.address,
-      city: data.city,
-      postalCode: data.postalCode,
-      phone: data.phone
+  const result = await completeCheckout({
+    data,
+    details,
+    coupon,
+    payment: ({ amount, method }) => processPayment({
+      amount,
+      method,
+      behavior: state.paymentBehavior
+    }),
+    actions: {
+      decreaseStock: (items) => items.every((item) => decreaseStock(item.productId, item.quantity)),
+      createClient: (clientData) => findOrCreateClient(clientData),
+      createOrder: (orderData) => addOrder(orderData),
+      recordCouponUse,
+      clearCart
     }
   });
 
-  if (coupon.valid) recordCouponUse(coupon.code);
+  if (!result.ok) {
+    state.checkoutMessage = {
+      type: 'error',
+      text: result.message || 'No se pudo procesar el pago. Intenta nuevamente.'
+    };
+    renderCheckout();
+    return;
+  }
 
-  clearCart();
-  state.lastOrder = order;
-  state.historyClientId = client.id;
+  state.lastOrder = result.order;
+  state.historyClientId = result.client.id;
   state.checkoutValues = {};
   state.checkoutErrors = {};
   state.checkoutMessage = null;
@@ -648,11 +629,29 @@ function applyRolePermissions() {
     logout.hidden = role === 'customer';
     logout.textContent = labelFor('logout', 'Cerrar sesión');
   }
+
+  const adminAccess = qs('admin-access');
+  if (adminAccess) adminAccess.hidden = role !== 'admin';
+}
+
+function resetPrivilegedState() {
+  state.adminUnlocked = false;
+  state.filters = { category: 'all', maxPrice: '' };
+  state.metrics = { from: '', to: '', category: '' };
+  state.admin.message = null;
+  state.admin.offerValues = {};
+  state.admin.offerErrors = {};
+  state.admin.priceErrors = {};
+  state.admin.editingOfferId = null;
+  const adminCode = qs('admin-code');
+  if (adminCode) adminCode.value = '';
+  setNotice(qs('admin-access-error'), null);
 }
 
 function handleRoleChange(event) {
   if (event.target.id !== 'role-select') return;
   setRole(event.target.value);
+  resetPrivilegedState();
   renderRoleSelector();
   applyRolePermissions();
   showView(state.view);
@@ -660,6 +659,7 @@ function handleRoleChange(event) {
 
 function handleRoleLogout() {
   setRole('customer');
+  resetPrivilegedState();
   renderRoleSelector();
   applyRolePermissions();
   showView('catalog');
@@ -674,9 +674,16 @@ function handleRoleDeniedReturn() {
 }
 
 function requestAdminAccess() {
-  const code = globalThis.prompt?.('Ingresa el código de acceso:');
-  if (code === ADMIN_ACCESS_CODE) return true;
-  globalThis.alert?.('Acceso denegado');
+  if (!canManageCatalog(getRole())) return false;
+  if (state.adminUnlocked) return true;
+  const inputCode = String(qs('admin-code')?.value || '').trim();
+  const code = inputCode || globalThis.prompt?.('Ingresa el código de acceso:');
+  if (String(code || '').trim() === ADMIN_ACCESS_CODE) {
+    state.adminUnlocked = true;
+    setNotice(qs('admin-access-error'), null);
+    return true;
+  }
+  setNotice(qs('admin-access-error'), { type: 'error', text: 'Acceso denegado' });
   return false;
 }
 
@@ -693,6 +700,10 @@ function bindStaticControls() {
   qs('role-select')?.addEventListener('change', handleRoleChange);
   qs('role-logout')?.addEventListener('click', handleRoleLogout);
   qs('role-denied-return')?.addEventListener('click', handleRoleDeniedReturn);
+  qs('admin-access')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (requestAdminAccess()) showView('admin');
+  });
   viewElement('metrics')?.addEventListener('change', handleMetricsChange);
   viewElement('metrics')?.addEventListener('click', handleMetricsClick);
   viewElement('metrics')?.addEventListener('submit', handleMetricsSubmit);
@@ -721,6 +732,7 @@ export async function boot(config) {
   loadProducts();
   loadClients();
   loadOffers();
+  loadOrders();
 
   bindStaticControls();
   showView('catalog');

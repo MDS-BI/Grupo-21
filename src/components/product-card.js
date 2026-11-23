@@ -1,6 +1,6 @@
 import { escapeHtml, formatCurrency } from '../utils.js';
 import { labelFor, canViewStock } from '../module-config.js';
-import { isAvailable } from '../catalog.js';
+import { isAvailable, productMedia } from '../catalog.js';
 
 export function productCard(product, { role } = {}) {
   const available = isAvailable(product);
@@ -10,10 +10,7 @@ export function productCard(product, { role } = {}) {
   const priceMarkup = hasOffer
     ? `<span class="price--offer">${formatCurrency(product.price)}</span> <span class="price--original">${formatCurrency(product.originalPrice)}</span>`
     : formatCurrency(product.price);
-  const image = String(product?.image || '').trim();
-  const mediaMarkup = image
-    ? `<img class="product-card__media product-card__image" src="${escapeHtml(image)}" alt="${escapeHtml(product.name || '')}" loading="lazy" />`
-    : `<div class="product-card__media" aria-hidden="true">${escapeHtml((product?.name || '?').slice(0, 2).toUpperCase())}</div>`;
+  const mediaMarkup = productMedia(product);
   return `
     <article class="product-card${soldOut ? ' is-sold-out' : ''}" data-product-id="${escapeHtml(product.id)}">
       ${mediaMarkup}

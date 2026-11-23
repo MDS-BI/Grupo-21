@@ -36,7 +36,10 @@ export const DEFAULT_CONFIG = {
     metricsPanel: 'Panel de métricas',
     logout: 'Cerrar sesión',
     accessRestricted: 'Acceso restringido: no tienes permisos para ver esta sección.',
-    stockAvailable: 'Unidades disponibles'
+    stockAvailable: 'Unidades disponibles',
+    allCategories: 'Todas las categorías',
+    returnedToCustomer: 'Volviste a la vista pública de cliente.',
+    adminCode: 'Código de administración'
   },
   customFields: [],
   statusLifecycle: {
@@ -48,14 +51,14 @@ export const DEFAULT_CONFIG = {
     }
   },
   theme: {
-    accentColor: '#1F7A3E'
+    accentColor: '#111111'
   },
   roles: {
     customer: {
       label: 'Cliente',
       canViewFinancials: false,
       canManageCatalog: false,
-      canViewHistory: false,
+      canViewHistory: true,
       canViewStock: false,
       canViewMetrics: false
     },
@@ -84,8 +87,8 @@ export const DEFAULT_CONFIG = {
       canViewMetrics: false
     },
     admin: {
-      label: 'Administración',
-      canViewFinancials: false,
+      label: 'Dueño/Administrador',
+      canViewFinancials: true,
       canManageCatalog: true,
       canViewHistory: true,
       canViewStock: true,
@@ -96,7 +99,7 @@ export const DEFAULT_CONFIG = {
 
 export const userConfig = {
   moduleName: 'Módulo de Ventas',
-  theme: { accentColor: '#1F7A3E' }
+  theme: { accentColor: '#111111' }
 };
 
 const ROLES = Object.keys(DEFAULT_CONFIG.roles);
@@ -195,14 +198,14 @@ export function labelFor(key, fallback = '') {
 export function getRole() {
   try {
     const stored = globalThis.localStorage?.getItem(ROLE_KEY);
-    return ROLES.includes(stored) ? stored : 'sales';
+    return ROLES.includes(stored) ? stored : 'customer';
   } catch {
-    return 'sales';
+    return 'customer';
   }
 }
 
 export function setRole(role) {
-  const next = ROLES.includes(role) ? role : 'sales';
+  const next = ROLES.includes(role) ? role : 'customer';
   try {
     globalThis.localStorage?.setItem(ROLE_KEY, next);
   } catch {

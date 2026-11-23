@@ -1,7 +1,7 @@
 export const seedOffers = [
   {
-    id: 'offer-cargador-10',
-    productId: 'prod-accessory-01',
+    id: 'offer-steel-zip-10',
+    productId: 'prod-steel-zip-knit',
     type: 'percent',
     value: 10,
     startDate: '2020-01-01',
@@ -9,17 +9,17 @@ export const seedOffers = [
     active: true
   },
   {
-    id: 'offer-tablet-50000',
-    productId: 'prod-tablet-01',
+    id: 'offer-coach-c-5000',
+    productId: 'prod-polera-coach-c',
     type: 'fixed',
-    value: 50000,
+    value: 5000,
     startDate: '2020-01-01',
     endDate: '2099-12-31',
     active: true
   },
   {
-    id: 'offer-parlante-vencida',
-    productId: 'prod-audio-02',
+    id: 'offer-vaso-vencida',
+    productId: 'prod-vaso-matero',
     type: 'percent',
     value: 20,
     startDate: '2025-01-01',

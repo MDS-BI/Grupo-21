@@ -9,40 +9,40 @@ beforeEach(() => {
   mountMarkup();
 });
 
-async function openCartWithPhone() {
+async function openCartWithJacket() {
   await startApp();
-  buyFromCatalog('prod-phone-01');
+  buyFromCatalog('prod-black-zipper-layers');
   clickNav('cart');
 }
 
 describe('cart view', () => {
   it('shows cart lines and a subtotal equal to the line total', async () => {
-    await openCartWithPhone();
+    await openCartWithJacket();
     expect(document.querySelectorAll('#cart-items .cart-line')).toHaveLength(1);
-    expect(document.querySelector('#cart-items .cart-line__name').textContent).toContain('Smartphone Nova X');
-    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(499990));
-    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(499990));
+    expect(document.querySelector('#cart-items .cart-line__name').textContent).toContain('Black Zipper Layers');
+    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(67990));
+    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(67990));
   });
 
   it('updates totals when quantity changes', async () => {
-    await openCartWithPhone();
+    await openCartWithJacket();
     changeValue(document.querySelector('.qty-input'), '2');
-    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(999980));
-    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(999980));
+    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(135980));
+    expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(135980));
     expect(document.getElementById('cart-count').textContent).toBe('2');
   });
 
   it('reports when quantity exceeds available stock', async () => {
-    await openCartWithPhone();
+    await openCartWithJacket();
     changeValue(document.querySelector('.qty-input'), '99');
-    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(499990));
+    expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(67990));
     const message = document.getElementById('coupon-message');
     expect(message.hidden).toBe(false);
     expect(message.textContent).toMatch(/stock/i);
   });
 
   it('removes lines and shows the empty state', async () => {
-    await openCartWithPhone();
+    await openCartWithJacket();
     document.querySelector('[data-action="remove"]').click();
     expect(document.getElementById('cart-items')).toBeNull();
     expect(document.getElementById('cart-empty')).not.toBeNull();

@@ -1288,3 +1288,152 @@ body {
     gap: 0.25rem;
   }
 }
+
+:root {
+  --accent: #111111;
+  --accent-dark: #000000;
+  --accent-deep: #111111;
+  --olive: #666666;
+  --cream: #f4f4f4;
+  --burgundy: #111111;
+  --inverse: #ffffff;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-dim: #f4f4f4;
+  --surface-lowest: #ffffff;
+  --text: #111111;
+  --muted: #6b6b6b;
+  --border: #d9d9d9;
+  --border-soft: #ececec;
+  --danger: #111111;
+  --success: #111111;
+  --radius: 0px;
+  --radius-md: 0px;
+  --shadow: none;
+  --shadow-md: none;
+  --hero-image: none;
+  --editorial-image: none;
+}
+
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  background: #ffffff;
+  color: #111111;
+}
+
+.site-header,
+.view-header,
+.hero,
+.featured-section,
+.catalog-section {
+  background-image: none !important;
+  background-color: #ffffff !important;
+  color: #111111;
+}
+
+.site-header {
+  border-bottom: 1px solid #111111;
+}
+
+.brand__mark {
+  color: #ffffff;
+  background: #111111;
+}
+
+.nav-button,
+.product-card__category,
+.product-group__title,
+.section-title,
+.filter-label,
+.badge {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.btn--primary {
+  color: #ffffff;
+  background: #111111;
+  border: 1px solid #111111;
+}
+
+.btn--secondary,
+.btn--ghost {
+  color: #111111;
+  background: #ffffff;
+  border: 1px solid #111111;
+}
+
+.product-card {
+  background: #ffffff;
+  border: 1px solid #ececec;
+}
+
+.product-card__media {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: #f4f4f4;
+  transition: transform 180ms ease;
+}
+
+.product-card:hover .product-card__media {
+  transform: scale(1.03);
+}
+
+.badge,
+.badge--stock {
+  color: #111111;
+  background: #f4f4f4;
+  border: 1px solid #111111;
+}
+
+.badge--offer,
+.badge--soldout {
+  color: #ffffff;
+  background: #111111;
+}
+
+.product-card__price,
+.price--offer,
+.price--original {
+  color: #111111;
+}
+
+.admin-access {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-access input {
+  width: 120px;
+  padding: 0.45rem 0.6rem;
+  color: #111111;
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+}
+
+.product-grid--grouped {
+  gap: 2rem;
+}
+
+.product-group {
+  width: 100%;
+}
+
+.product-group__title {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

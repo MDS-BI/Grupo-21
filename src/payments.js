@@ -4,6 +4,7 @@ export async function processPayment({ amount = 0, method = 'Tarjeta', behavior 
   await new Promise((resolve) => setTimeout(resolve, 0));
 
   if (behavior === 'timeout') {
+    await new Promise((resolveTimeout) => setTimeout(resolveTimeout, GATEWAY_TIMEOUT_MS));
     const error = new Error('La pasarela de pago agotó el tiempo de espera. Intenta nuevamente.');
     error.code = 'TIMEOUT';
     throw error;

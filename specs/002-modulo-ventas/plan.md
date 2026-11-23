@@ -1,6 +1,6 @@
 # Plan para el Módulo de Ventas (Basado en el Módulo Base ERP)
 
-> **Reconciliación con `spec.md` (T050)**: la implementación final de esta entrega es una **tienda en línea** (catálogo con stock, filtros, carrito, cupones, checkout e historial de pedidos), tal como se define en `spec.md`. Las secciones 1–4 conservan el diseño B2B original (Clientes y Documentos de Venta) como referencia de negocio y de stack; la sección 2.1 y la sección 10 describen el alcance realmente construido y su trazabilidad con las historias de usuario.
+> **Reconciliación con `spec.md` (T050)**: la implementación final de esta entrega es una **tienda en línea** (catálogo con stock, filtros, carrito, cupones, checkout e historial de pedidos), tal como se define en `spec.md`. Las secciones 1–4 conservan el diseño B2B original (Clientes y Documentos de Venta) como referencia de negocio y de stack; la sección 2.1 y la sección 10 describen el alcance realmente construido y su trazabilidad con las historias de usuario. El FR-009 del plan B2B (eliminación en cascada de documentos al borrar un cliente) se mantiene como referencia histórica: el FR-009 vigente en `spec.md` exige la tienda RootSouth con ocho productos reales y datos semilla coherentes. El FR-010 define la estética editorial Scuffers. Ambos requisitos se detallan en la sección 5.1 y se verifican en la sección 11.
 
 ## Resumen
 
@@ -24,6 +24,8 @@ Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-mo
 - Confirmación e historial: página de confirmación con resumen y número de pedido; historial de documentos de venta por cliente con tipo, fecha, número, monto y estado; límite de crédito enmascarado para roles sin permisos financieros.
 - Administración de precios y ofertas: el rol `admin` puede editar el precio de un producto (validado como numérico y no negativo) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta»; el carrito aplica el precio efectivo y lo recalcula si la oferta cambia. Los roles sin `canManageCatalog` reciben un mensaje de permisos.
 - Personalización por configuración y roles: nombre del módulo, etiquetas, color de acento y control de acceso a datos financieros y a la administración del catálogo desde `src/module-config.js`.
+- Catálogo RootSouth (FR-009): ocho productos reales con imágenes `/images/producto-1.jpg` a `/images/producto-8.jpg`, categorías `Knit`, `Poleras`, `Polerones` y `Accesorios`, ofertas semilla y pedidos iniciales coherentes con las prendas.
+- Estética editorial (FR-010): fondo `#FFFFFF`, marcos 3:4 con fondo `#F4F4F4`, paleta monocromática `#111111`, bordes `0px`, etiquetas en mayúsculas espaciadas y zoom sutil al pasar el cursor.
 
 ### Fuera del alcance
 
@@ -58,6 +60,9 @@ El diseño original contemplaba gestión de Clientes y Documentos de Venta (Coti
 | Historial | `src/components/order-history.js`, `src/app.js` | Documentos de venta por cliente y enmascaramiento de `creditLimit` por rol. |
 | Oferta | `src/offers.js`, `src/data/offers.js`, `src/storage.js` | Validación, vigencia, resolución de la mejor oferta activa y precio efectivo por producto. |
 | Panel de administración | `src/components/admin-panel.js`, `src/app.js` | Edición de precios, CRUD de ofertas y restricción de acceso por rol (`canManageCatalog`). |
+| Catálogo RootSouth (FR-009) | `src/data/products.js`, `public/images/`, `src/catalog.js` | Ocho prendas reales con `<img>` y categorías de la tienda. |
+| Pedidos semilla (FR-009) | `src/data/seed-orders.js`, `src/storage.js` | Cuatro documentos iniciales para `client-demo` y versión de esquema `rootsouth-2026-11`. |
+| Tokens visuales (FR-010) | `src/styles.css`, `src/module-config.js` | Estética editorial Scuffers y rol por defecto `customer`. |
 
 ## 4. Propuesta de Configuración (src/module-config.js)
 
@@ -124,8 +129,32 @@ export const userConfig = {
 | Pedidos de Venta | Seguimiento desde "Pedido" hasta "Facturado", con control de estados y restricciones de transición. | HU10 + HU12 |
 | Búsqueda Comercial | Buscar clientes por nombre, código, RFC/NIT, vendedor o por datos del pedido. También filtrar por estado del documento. | HU8, HU11 |
 | Panel de Ventas | Acciones rápidas: "Nuevo Cliente", "Nueva Cotización", "Gestionar Clientes", "Buscar Clientes/Pedidos". Tarjetas con totales de Clientes, Cotizaciones, Pedidos y Facturados. | HU3 (revisada), HU13 |
-| Integridad Comercial | Al eliminar un cliente, sus cotizaciones/pedidos deben eliminarse automáticamente. | HU10 (FR-009) |
+| Integridad Comercial (FR-009 B2B de referencia) | Al eliminar un cliente, sus cotizaciones/pedidos deben eliminarse automáticamente. | HU10; hoy `deleteOrdersForClient` en `src/storage.js` |
 | Campos Comerciales | Mostrar límite de crédito, condiciones de pago, fecha de entrega y forma de pago en formularios, listas y detalles. | HU7 |
+
+> **FR-009 (reconciliación)**: en el plan B2B original, FR-009 designaba la integridad comercial y la eliminación en cascada de cotizaciones/pedidos al borrar un cliente; ese comportamiento subsiste en la tienda con `deleteOrdersForClient`. El FR-009 de `spec.md` cambia de alcance: exige que el catálogo sea la tienda de ropa RootSouth con ocho productos reales e imágenes, y que los pedidos iniciales de historial y métricas correspondan a esas prendas, limpiando los datos de tecnología mediante versionado de esquema. El FR-009 vigente no debe leerse como un requisito B2B de eliminación en cascada.
+
+### 5.1 Datos y presentación RootSouth (FR-009 y FR-010)
+
+**FR-009.** `src/data/products.js` contiene ocho prendas y accesorios RootSouth con `image` servida desde `public/images/producto-1.jpg` a `public/images/producto-8.jpg` como `/images/producto-1.jpg` a `/images/producto-8.jpg`; `src/catalog.js` las renderiza con `<img>`.
+
+| ID | Producto | Precio (CLP) | Categoría | Stock |
+|---|---|---:|---|---:|
+| `prod-steel-zip-knit` | Steel Zip Knit | 77990 | Knit | 12 |
+| `prod-polera-coach-c` | Polera Coach C - Gris Claro | 25990 | Poleras | 20 |
+| `prod-black-zipper-layers` | Black Zipper Layers | 67990 | Polerones | 14 |
+| `prod-jockey` | Jockey | 16990 | Accesorios | 30 |
+| `prod-bandanas` | Bandanas | 2997 | Accesorios | 0 (Agotado) |
+| `prod-llavero-rootsouth` | Llavero Rootsouth Original | 5000 | Accesorios | 50 |
+| `prod-tarjetero-rootsouth` | Tarjetero Rootsouth | 9790 | Accesorios | 25 |
+| `prod-vaso-matero` | Vaso Matero | 9990 | Accesorios | 18 |
+
+- Categorías: `Knit`, `Poleras`, `Polerones` y `Accesorios`.
+- Ofertas semilla (`src/data/offers.js`): `offer-steel-zip-10` (10 % en `prod-steel-zip-knit`), `offer-coach-c-5000` ($5.000 fijos en `prod-polera-coach-c`) y `offer-vaso-vencida` (vencida, en `prod-vaso-matero`).
+- `src/data/seed-orders.js` exporta `seedOrders`: cuatro documentos iniciales para `client-demo` con ítems de estas prendas. Línea base de `src/metrics.js`: ingresos `416877`, 3 ventas completadas, ticket promedio `138959`, 4 documentos y descuento total `30000`.
+- `src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11'` y guarda la versión en `erp.seedVersion`. Si no coincide, `ensureSeedSchema()` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones, eliminando los datos heredados de tecnología.
+
+**FR-010.** `src/styles.css` aplica la estética Scuffers: fondo blanco `#FFFFFF`, marcos de producto 3:4 con fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, bordes `0px`, tipografía sans-serif con navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen en hover. `src/module-config.js` fija `theme.accentColor = '#111111'`. El rol por defecto es `customer`, con acceso al historial; `admin` reúne permisos financieros, de catálogo y de métricas, y desbloquea el panel con el código `1234` en `#admin-code`.
 
 ## 6. Plan de Implementación por Fases
 
@@ -184,8 +213,26 @@ export const userConfig = {
 | US8 Panel de métricas e indicadores | P8 | Implementado | `src/metrics.js`, `src/components/metrics-dashboard.js`, `src/app.js`, `tests/unit/metrics.test.js`, `tests/unit/metrics-filters.test.js`, `tests/integration/metrics-dashboard.test.js` |
 | US9 Vistas y navegación por rol | P9 | Implementado | `src/module-config.js`, `src/app.js`, `index.html`, `src/components/product-card.js`, `tests/unit/role-permissions.test.js`, `tests/integration/role-views.test.js` |
 
-- Roles implementados en `DEFAULT_CONFIG.roles`: `customer` (Cliente, solo compra), `sales` (Ventas, stock e historial), `warehouse` (Bodega, stock e historial), `finance` (Finanzas, único con `canViewFinancials`) y `admin` (Administración, único con `canManageCatalog` y `canViewMetrics`).
+- Roles implementados en `DEFAULT_CONFIG.roles`: `customer` (Cliente, rol por defecto con catálogo, carrito, pago e historial), `sales` (Ventas, stock e historial), `warehouse` (Bodega, stock e historial), `finance` (Finanzas, con `canViewFinancials`) y `admin` (Dueño/Administrador, con `canViewFinancials`, `canManageCatalog` y `canViewMetrics`). El panel de administración exige el código `1234` en `#admin-code`.
 - La decisión anterior de retirar el panel de métricas por considerarlo no solicitado quedó supersedida por US8 en `spec.md`; el panel se calcula desde `erp.orders`, `erp.products`, `erp.coupons`, `erp.couponUsage` y `erp.offers`, sin almacenar una entidad adicional.
-- Verificación ejecutada: `npm run test:002` (22 archivos, 128 pruebas) y `npm run build` exitosos. `npm test` terminó con 23 archivos/140 pruebas correctos y 11 archivos/88 pruebas fallidos; todos los fallos son de suites heredadas del módulo base 001 (API `addEntity`/`addDocument`, `BASE_FIELDS`, terminología y tema base) fuera del alcance 002.
+- Datos semilla FR-009: `src/data/products.js` (8 prendas RootSouth con `image`), `src/data/offers.js` (3 ofertas) y `src/data/seed-orders.js` (4 documentos para `client-demo`). `SEED_VERSION = 'rootsouth-2026-11'` en `src/storage.js` hace que un cambio de versión limpie y recree productos, pedidos, carrito, ofertas y uso de cupones, descartando los datos de tecnología anteriores.
+- Verificación final T097: `npm run test:002` terminó con 22 archivos y 128 pruebas aprobadas; `npm run build` compiló correctamente; `npm test -- --run` terminó con 23 archivos aprobados, 11 fallidos, 140 pruebas aprobadas y 88 fallidas. Los fallos de `npm test` provienen de suites heredadas del módulo base 001 (API `addEntity`/`addDocument`, `BASE_FIELDS`, terminología y tema base) y quedan fuera del alcance 002; la sección 11 detalla las comprobaciones de FR-009 y FR-010.
 - Los antiguos criterios CV-001 a CV-010 y las fases A–F de la sección 6 corresponden al perfil B2B de referencia; no son criterios de aceptación de esta entrega.
 - Las pruebas heredadas del módulo base 001 permanecen en `tests/` pero dependen de una implementación que no forma parte de este alcance.
+
+## 11. Verificación de FR-009, FR-010 y datos RootSouth
+
+| ID | Comprobación | Evidencia esperada |
+|---|---|---|
+| V-009-1 | Los ocho productos semilla cargan con sus ID, precios, stock y categorías RootSouth. | `src/data/products.js`, `erp.products`, sección 5.1 |
+| V-009-2 | Las ocho tarjetas renderizan `<img>` con `/images/producto-1.jpg` a `/images/producto-8.jpg`, servidos desde `public/images/`. | `src/catalog.js`, `src/components/product-card.js`, `public/images/` |
+| V-009-3 | El filtro ofrece `Knit`, `Poleras`, `Polerones` y `Accesorios`; `prod-bandanas` queda agotado con stock 0. | `src/catalog.js`, `src/components/product-filters.js` |
+| V-009-4 | Las ofertas semilla son `offer-steel-zip-10`, `offer-coach-c-5000` y `offer-vaso-vencida` (vencida). | `src/data/offers.js`, `erp.offers`, `src/offers.js` |
+| V-009-5 | Los cuatro documentos de `src/data/seed-orders.js` pertenecen a `client-demo` y usan solo productos RootSouth. | `src/data/seed-orders.js`, `erp.orders`, `erp.clients` |
+| V-009-6 | El panel arranca con ingresos 416877, 3 ventas completadas, ticket promedio 138959, 4 documentos y descuento 30000. | `src/metrics.js`, `src/components/metrics-dashboard.js` |
+| V-009-7 | Un `erp.seedVersion` distinto de `rootsouth-2026-11` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones. | `SEED_VERSION` y `ensureSeedSchema()` en `src/storage.js` |
+| V-010-1 | Fondo `#FFFFFF`, marcos 3:4 con fondo `#F4F4F4`, paleta `#111111`, bordes `0px` y acento `#111111`. | `src/styles.css`, `src/module-config.js` |
+| V-010-2 | Navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen al pasar el cursor. | `src/styles.css`, `src/components/product-card.js` |
+| V-ROL-1 | El rol por defecto es `customer` con historial; `admin` tiene permisos financieros, de catálogo y de métricas, y usa `1234` en `#admin-code`. | `src/module-config.js`, `src/app.js`, `index.html` |
+
+Resultado de la verificación automatizada T097: `npm run test:002` → 22 archivos / 128 pruebas aprobadas; `npm run build` → compilación correcta; `npm test -- --run` → 23 archivos aprobados, 11 archivos fallidos, 140 pruebas aprobadas y 88 pruebas fallidas de suites heredadas del módulo base 001, fuera del alcance 002.

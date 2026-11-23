@@ -11,14 +11,15 @@ beforeEach(() => {
 });
 
 describe('role permissions', () => {
-  it('exposes a customer role with purchase-only access', () => {
+  it('exposes a customer role with purchase and history access', () => {
     expect(DEFAULT_CONFIG.roles.customer).toBeTruthy();
-    expect(canViewHistory('customer')).toBe(false);
+    expect(canViewHistory('customer')).toBe(true);
     expect(canViewStock('customer')).toBe(false);
     expect(canViewMetrics('customer')).toBe(false);
     expect(canManageCatalog('customer')).toBe(false);
     expect(canAccessView('customer', 'catalog')).toBe(true);
     expect(canAccessView('customer', 'cart')).toBe(true);
+    expect(canAccessView('customer', 'history')).toBe(true);
   });
 
   it('gives sales staff history and stock visibility but no metrics or catalog editing', () => {
@@ -32,18 +33,20 @@ describe('role permissions', () => {
     expect(canViewMetrics('admin')).toBe(true);
     expect(canManageCatalog('admin')).toBe(true);
     expect(canViewHistory('admin')).toBe(true);
+    expect(canViewFinancials('admin')).toBe(true);
     expect(canAccessView('admin', 'metrics')).toBe(true);
   });
 
-  it('restricts financial data to the finance role', () => {
+  it('restricts financial data to the finance and admin roles', () => {
     expect(canViewFinancials('finance')).toBe(true);
+    expect(canViewFinancials('admin')).toBe(true);
     expect(canViewFinancials('sales')).toBe(false);
     expect(canViewMetrics('finance')).toBe(false);
   });
 
   it('blocks direct access to restricted views', () => {
-    expect(canAccessView('customer', 'history')).toBe(false);
     expect(canAccessView('customer', 'admin')).toBe(false);
+    expect(canAccessView('customer', 'metrics')).toBe(false);
     expect(canAccessView('sales', 'metrics')).toBe(false);
     expect(canAccessView('sales', 'admin')).toBe(false);
   });
@@ -55,6 +58,6 @@ describe('role permissions', () => {
     setRole('customer');
     expect(getRole()).toBe('customer');
     setRole('unknown');
-    expect(getRole()).toBe('sales');
+    expect(getRole()).toBe('customer');
   });
 });

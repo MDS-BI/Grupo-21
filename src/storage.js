@@ -1,5 +1,6 @@
 import { seedProducts } from './data/products.js';
 import { seedOffers } from './data/offers.js';
+import { seedOrders } from './data/seed-orders.js';
 import { generateOrderNumber } from './checkout.js';
 import { resolveProductPrice, validateOffer } from './offers.js';
 import { isValidEmail, normalizeText, toNumber } from './utils.js';
@@ -16,7 +17,7 @@ export const KEYS = {
   seedVersion: 'erp.seedVersion'
 };
 
-const SEED_VERSION = 'catalog-2026-11';
+export const SEED_VERSION = 'rootsouth-2026-11';
 
 const seedClient = {
   id: 'client-demo',
@@ -71,52 +72,34 @@ export function clearAll() {
 
 /* ------------------------------- Productos ------------------------------- */
 
-const seedById = new Map(seedProducts.map((product) => [product.id, product]));
-
-function backfillProductImages(products) {
-  let changed = false;
-  const merged = products.map((product) => {
-    const seed = seedById.get(product?.id);
-    if (!product || typeof product !== 'object' || !seed || String(product.image || '').trim()) return product;
-    changed = true;
-    return { ...product, image: seed.image };
-  });
-  return { products: merged, changed };
+function seedTimestamp() {
+  return now();
 }
 
-function refreshSeedProducts(products) {
-  return products.map((product) => {
-    const seed = seedById.get(product?.id);
-    if (!seed) return product;
-    return {
-      ...product,
-      ...seed,
-      createdAt: product.createdAt || now(),
-      updatedAt: now()
-    };
-  });
+function seedCollection(items) {
+  const timestamp = seedTimestamp();
+  return items.map((item) => ({ ...item, createdAt: timestamp, updatedAt: timestamp }));
 }
 
-export function loadProducts() {
-  const stored = read(KEYS.products, null);
-  if (Array.isArray(stored)) {
-    if (store()?.getItem(KEYS.seedVersion) !== SEED_VERSION) {
-      const refreshed = refreshSeedProducts(stored);
-      write(KEYS.products, refreshed);
-      try {
-        store()?.setItem(KEYS.seedVersion, SEED_VERSION);
-      } catch {}
-      return refreshed;
-    }
-    const { products, changed } = backfillProductImages(stored);
-    if (changed) write(KEYS.products, products);
-    return products;
-  }
-  const seeded = seedProducts.map((product) => ({ ...product, createdAt: now(), updatedAt: now() }));
-  write(KEYS.products, seeded);
+export function ensureSeedSchema() {
+  if (store()?.getItem(KEYS.seedVersion) === SEED_VERSION) return false;
+  write(KEYS.products, seedCollection(seedProducts));
+  write(KEYS.offers, seedCollection(seedOffers));
+  write(KEYS.orders, seedCollection(seedOrders));
+  write(KEYS.cart, { items: [], couponCode: null });
+  write(KEYS.couponUsage, {});
   try {
     store()?.setItem(KEYS.seedVersion, SEED_VERSION);
   } catch {}
+  return true;
+}
+
+export function loadProducts() {
+  ensureSeedSchema();
+  const stored = read(KEYS.products, null);
+  if (Array.isArray(stored)) return stored;
+  const seeded = seedCollection(seedProducts);
+  write(KEYS.products, seeded);
   return seeded;
 }
 
@@ -134,6 +117,7 @@ export function addProduct(data = {}) {
     id: data.id || genId('prod'),
     name: String(data.name ?? '').trim(),
     description: String(data.description ?? '').trim(),
+    image: String(data.image ?? '').trim(),
     price: toNumber(data.price, 0),
     stock: toNumber(data.stock, 0),
     category: String(data.category ?? '').trim(),
@@ -200,6 +184,7 @@ export function updateProductPrice(id, value) {
 /* --------------------------------- Ofertas -------------------------------- */
 
 export function loadOffers() {
+  ensureSeedSchema();
   const stored = read(KEYS.offers, null);
   if (Array.isArray(stored)) return stored;
   const seeded = seedOffers.map((offer) => ({ ...offer, createdAt: now(), updatedAt: now() }));
@@ -371,6 +356,7 @@ export function findOrCreateClient({ name, email, address, city, phone } = {}) {
 /* -------------------------------- Pedidos -------------------------------- */
 
 export function loadOrders() {
+  ensureSeedSchema();
   const stored = read(KEYS.orders, null);
   return Array.isArray(stored) ? stored : [];
 }
@@ -380,11 +366,20 @@ export function saveOrders(orders) {
 }
 
 export function nextOrderNumber(date = new Date()) {
-  return generateOrderNumber(date, loadOrders().length + 1);
+  const prefix = `PED-${date.toISOString().slice(0, 10).replace(/-/g, '')}-`;
+  const sequence = loadOrders().reduce((max, order) => {
+    const value = String(order?.orderNumber || '');
+    if (!value.startsWith(prefix)) return max;
+    return Math.max(max, toNumber(value.slice(prefix.length), 0));
+  }, 0) + 1;
+  return generateOrderNumber(date, sequence);
 }
 
 export function addOrder(data = {}) {
   const orders = loadOrders();
+  if (data.clientId && !getClient(data.clientId)) {
+    throw new Error('El cliente del pedido no existe.');
+  }
   const order = {
     id: data.id || genId('ord'),
     orderNumber: data.orderNumber || nextOrderNumber(),
@@ -439,6 +434,7 @@ export function ordersForClient(clientId) {
 /* -------------------------------- Carrito -------------------------------- */
 
 export function loadCart() {
+  ensureSeedSchema();
   const stored = read(KEYS.cart, null);
   if (stored && Array.isArray(stored.items)) return { ...stored, couponCode: stored.couponCode || null };
   return { items: [], couponCode: null };

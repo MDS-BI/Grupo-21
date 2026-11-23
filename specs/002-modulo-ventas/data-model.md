@@ -2,7 +2,7 @@
 
 El módulo de Ventas reutiliza las entidades base `Entity` y `Document` del ERP, adaptándolas como `Cliente` y `Documento de Venta`. La Cotización y el Pedido de Venta son el mismo documento en distintos estados del ciclo de vida, no entidades separadas.
 
-> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B.
+> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B. En la tienda, el FR-009 vigente corresponde al catálogo RootSouth y sus datos semilla (sección «Catálogo semilla RootSouth»), y el FR-010 a la presentación editorial (sección «Presentación editorial»).
 
 ## Entidad: Cliente
 
@@ -171,7 +171,7 @@ Estas son las entidades que realmente persiste la aplicación de `spec.md`. Se a
 |---|---|---|
 | Producto | `erp.products` | `src/storage.js`, `src/data/products.js` |
 | Cliente | `erp.clients` | `src/storage.js` |
-| Pedido | `erp.orders` | `src/storage.js` |
+| Pedido | `erp.orders` | `src/storage.js`, `src/data/seed-orders.js` |
 | Carrito | `erp.cart` | `src/storage.js` |
 | Cupón | `erp.coupons` | `src/coupons.js` |
 | Uso de cupones | `erp.couponUsage` | `src/coupons.js` |
@@ -185,11 +185,29 @@ Estas son las entidades que realmente persiste la aplicación de `spec.md`. Se a
 | id | string | Identificador interno | Único, generado automáticamente |
 | name | string | Nombre comercial | Obligatorio |
 | description | string | Descripción corta | Opcional |
+| image | string | Ruta de la imagen del producto | Opcional en datos antiguos; obligatoria en el catálogo semilla (`/images/producto-N.jpg`) |
 | price | number | Precio unitario en CLP | No negativo |
 | stock | number | Unidades disponibles | Entero no negativo; 0 ⇒ Agotado |
 | category | string | Categoría del catálogo | Opcional |
 | featured | boolean | Aparece en destacados | Por defecto `false` |
 | createdAt / updatedAt | string | Marcas de tiempo ISO | Generadas por el sistema |
+
+### Catálogo semilla RootSouth (FR-009)
+
+Los ocho registros de `src/data/products.js` son productos reales de RootSouth. Sus archivos viven en `public/images/producto-1.jpg` … `public/images/producto-8.jpg` y Vite los sirve como `/images/producto-1.jpg` … `/images/producto-8.jpg`; `productMedia()` de `src/catalog.js` los renderiza con `<img class="product-card__media product-card__image">` cuando `image` está presente, y conserva las iniciales como marcador cuando falta.
+
+| ID | Producto | image | Precio (CLP) | Categoría | Stock |
+|---|---|---|---:|---|---:|
+| `prod-steel-zip-knit` | Steel Zip Knit | `/images/producto-1.jpg` | 77990 | Knit | 12 |
+| `prod-polera-coach-c` | Polera Coach C - Gris Claro | `/images/producto-2.jpg` | 25990 | Poleras | 20 |
+| `prod-black-zipper-layers` | Black Zipper Layers | `/images/producto-3.jpg` | 67990 | Polerones | 14 |
+| `prod-jockey` | Jockey | `/images/producto-4.jpg` | 16990 | Accesorios | 30 |
+| `prod-bandanas` | Bandanas | `/images/producto-5.jpg` | 2997 | Accesorios | 0 |
+| `prod-llavero-rootsouth` | Llavero Rootsouth Original | `/images/producto-6.jpg` | 5000 | Accesorios | 50 |
+| `prod-tarjetero-rootsouth` | Tarjetero Rootsouth | `/images/producto-7.jpg` | 9790 | Accesorios | 25 |
+| `prod-vaso-matero` | Vaso Matero | `/images/producto-8.jpg` | 9990 | Accesorios | 18 |
+
+Las categorías del catálogo son `Knit`, `Poleras`, `Polerones` y `Accesorios`; los ocho productos están marcados como destacados. `prod-bandanas` tiene `stock = 0`, por lo que se muestra como «Agotado» y no se puede comprar.
 
 ### Cupón
 
@@ -228,7 +246,7 @@ Reglas de precios:
 - El carrito y los totales usan el precio efectivo; si la oferta se desactiva o vence, se recalcula automáticamente con el precio original.
 - Solo el rol `admin` (`canManageCatalog`) puede modificar precios y crear, editar, activar o desactivar ofertas. Los demás roles reciben un mensaje de permisos al entrar al panel.
 - Los precios de producto se validan como numéricos y no negativos antes de guardarse.
-- Las ofertas semilla son `offer-cargador-10` (10 % en `prod-accessory-01`), `offer-tablet-50000` (monto fijo en `prod-tablet-01`) y `offer-parlante-vencida` (vencida, usada como caso de prueba).
+- Las ofertas semilla son `offer-steel-zip-10` (10 % en `prod-steel-zip-knit`), `offer-coach-c-5000` (monto fijo de 5000 en `prod-polera-coach-c`) y `offer-vaso-vencida` (20 % en `prod-vaso-matero`, vencida el `2025-12-31` y usada como caso de prueba).
 
 ### Pedido
 
@@ -248,6 +266,25 @@ Reglas de precios:
 | shipping | object | Nombre, correo, dirección, ciudad, código postal y teléfono | Obligatorios salvo teléfono |
 | date | string | Fecha de emisión ISO | Generada al confirmar |
 
+### Pedidos semilla RootSouth (FR-009)
+
+`src/data/seed-orders.js` exporta `seedOrders`, cuatro documentos iniciales que `src/storage.js` escribe en `erp.orders` para el cliente `client-demo` (`erp.clients`). Todos sus ítems referencian productos del catálogo RootSouth y ninguno corresponde a los antiguos artículos de tecnología.
+
+| ID | orderNumber | date | status | subtotal | discount | total |
+|---|---|---|---|---:|---:|---:|
+| `seed-order-001` | `PED-20261001-0001` | 2026-10-01 | `Pedido` | 129970 | 0 | 129970 |
+| `seed-order-002` | `PED-20261005-0001` | 2026-10-05 | `Facturado` | 104967 | 10000 | 94967 |
+| `seed-order-003` | `PED-20261012-0001` | 2026-10-12 | `Cotización` | 44770 | 0 | 44770 |
+| `seed-order-004` | `PED-20261102-0001` | 2026-11-02 | `Pedido` | 211940 | 20000 | 191940 |
+
+La línea base que `computeMetrics()` calcula sobre estos documentos es: ingresos `416877` (129970 + 94967 + 191940), 3 ventas completadas (estados `Pedido` y `Facturado`), ticket promedio `138959`, 4 documentos en total y descuentos por `30000`. `seed-order-003` cuenta como documento pero no aporta ingresos por estar en `Cotización`. Los cupones `ROOT10` y `ROOT20` quedan registrados como `couponCode` histórico de dos de los pedidos.
+
+### Control de versión del esquema de semillas (FR-009)
+
+`src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11'` y persiste la versión activa en la clave `erp.seedVersion`. `ensureSeedSchema()` compara la versión almacenada con la constante: si no coinciden o no existe, reescribe `erp.products`, `erp.offers`, `erp.orders`, `erp.cart` y `erp.couponUsage` con los datos semilla de la tienda RootSouth y actualiza `erp.seedVersion`. `erp.clients`, `erp.coupons` y `erp.role` no se recrean en este proceso.
+
+Este versionado elimina los productos de tecnología de esquemas anteriores junto con sus pedidos, ofertas, carrito y uso acumulado de cupones, de modo que el historial y las métricas arranquen solo con prendas RootSouth. La limpieza ocurre de forma automática en la primera carga tras el cambio de versión.
+
 ### Relaciones y reglas implementadas
 
 - Un cliente puede tener muchos pedidos; cada pedido pertenece a un solo cliente (`Pedido.clientId → Cliente.id`). No se permiten pedidos huérfanos: el checkout crea o reutiliza el cliente antes de guardar el pedido.
@@ -257,7 +294,7 @@ Reglas de precios:
 - El carrito es single-user (un solo espacio de trabajo) y se vacía tras una compra exitosa.
 - Cada oferta referencia un producto existente (`Oferta.productId → Producto.id`); al crear o editar una oferta se valida el producto, el tipo, el valor y la vigencia. Las ofertas no eliminan productos.
 - El pedido guarda el precio efectivo de cada línea, por lo que un cambio posterior de precio u oferta no altera pedidos ya confirmados.
-- `creditLimit` es informativo: se muestra en el historial y se enmascara (`•••••`) para roles sin permiso financiero (`sales`, `warehouse`, `admin`); solo `finance` lo ve.
+- `creditLimit` es informativo: se muestra en el historial y se enmascara (`•••••`) para roles sin permiso financiero (`customer`, `sales`, `warehouse`); lo ven `finance` y `admin` mediante `canViewFinancials`.
 
 ### Equivalencias con el modelo B2B de referencia
 
@@ -270,6 +307,12 @@ Reglas de precios:
 | Partidas del documento (extensión) | `Pedido.items[]` |
 | Estado `Pedido` del ciclo B2B | `Pedido.status = "Pedido"` |
 | Cotización, Aprobado, Facturado, Cancelado, Vencido | No implementados |
+
+### Presentación editorial (FR-010)
+
+Los tokens visuales se aplican en `src/styles.css` siguiendo la referencia de Scuffers: fondo blanco `#FFFFFF`, marcos de producto verticales con `aspect-ratio: 3 / 4` y fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, `border-radius: 0`, tipografía sans-serif, etiquetas de navegación y categorías en mayúsculas con espaciado de letras y un zoom sutil de la imagen (`scale`) al pasar el cursor. `src/module-config.js` fija `theme.accentColor = '#111111'`; el verde `#1F7A3E` del perfil B2B queda solo como referencia histórica del plan.
+
+Estos tokens son de presentación y no alteran el modelo persistido: `Producto.image` conserva la ruta original y el precio, el stock y la categoría no se derivan de la imagen.
 
 ## Indicadores derivados (US8)
 
@@ -290,11 +333,11 @@ Los filtros por rango de fechas (`Pedido.date`) y categoría (vía `Pedido.items
 
 | Rol | Permisos |
 |---|---|
-| `customer` | Catálogo, carrito y pago. No ve historial global, administración ni métricas; no ve cantidades de stock. |
+| `customer` | Rol por defecto: catálogo, carrito, pago e historial. No ve administración ni métricas; no ve cantidades de stock. |
 | `sales` | Catálogo con disponibilidad de stock, carrito, pago e historial de clientes. No administra catálogo ni ve métricas globales. |
 | `warehouse` | Catálogo con stock e historial. Sin administración de precios ni métricas. |
-| `finance` | Historial con límite de crédito sin enmascarar. Sin administración de catálogo ni métricas globales. |
-| `admin` | Dueño/administrador: métricas, administración de precios/ofertas, historial íntegro y stock. |
+| `finance` | Historial con límite de crédito sin enmascarar (`canViewFinancials`). Sin administración de catálogo ni métricas globales. |
+| `admin` | Dueño/administrador: `canViewFinancials`, `canManageCatalog` y `canViewMetrics`; historial íntegro, stock y administración de precios/ofertas. El panel exige el código `1234` en `#admin-code`. |
 
 `src/app.js` filtra los botones de navegación con `data-requires` y aplica una guarda en `showView`; el contenido restringido se sustituye por un aviso con una acción para volver al catálogo. El cierre de sesión interna guarda el rol `customer` y devuelve a la vista pública.
 

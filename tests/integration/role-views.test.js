@@ -14,13 +14,16 @@ beforeEach(() => {
 });
 
 describe('role-based views', () => {
-  it('shows only purchase views to a customer', async () => {
+  it('shows purchase and history views to a customer', async () => {
     await bootAs('customer');
-    expect(document.querySelector('[data-view="history"]').hidden).toBe(true);
+    expect(document.querySelector('[data-view="history"]').hidden).toBe(false);
     expect(document.querySelector('[data-view="admin"]').hidden).toBe(true);
     expect(document.querySelector('[data-view="metrics"]').hidden).toBe(true);
     expect(document.getElementById('view-catalog').hidden).toBe(false);
     expect(document.getElementById('role-logout').hidden).toBe(true);
+
+    clickNav('history');
+    expect(document.querySelectorAll('#history-list tr')).toHaveLength(4);
   });
 
   it('shows history and stock availability to sales staff but hides admin and metrics', async () => {
@@ -44,7 +47,7 @@ describe('role-based views', () => {
     clickNav('metrics');
     expect(document.getElementById('role-denied').textContent).toMatch(/restringido|permisos/i);
     expect(document.getElementById('role-denied-return').hidden).toBe(false);
-    expect(document.getElementById('metrics-content').textContent).toMatch(/restringido|permisos/i);
+    expect(document.getElementById('view-metrics').hidden).toBe(true);
     expect(document.getElementById('metrics-revenue')).toBeNull();
 
     document.getElementById('role-denied-return').click();
@@ -71,7 +74,7 @@ describe('role-based views', () => {
     expect(document.getElementById('view-metrics').hidden).toBe(false);
   });
 
-  it('keeps credit limit masked for customer and sales roles', async () => {
+  it('keeps stock availability hidden for customer and visible for sales roles', async () => {
     await bootAs('sales');
     expect(document.querySelector('.product-card__stock')).not.toBeNull();
     changeValue(document.getElementById('role-select'), 'customer');

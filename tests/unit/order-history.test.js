@@ -15,16 +15,27 @@ function orderFor(clientId, date) {
   return addOrder({
     clientId,
     date,
-    items: [{ productId: 'prod-phone-01', name: 'Smartphone Nova X', quantity: 1, lineTotal: 499990 }],
-    subtotal: 499990,
-    total: 499990
+    items: [{ productId: 'prod-steel-zip-knit', name: 'Steel Zip Knit', quantity: 1, lineTotal: 70191 }],
+    subtotal: 70191,
+    total: 70191
   });
 }
 
 describe('clients and order history', () => {
-  it('seeds a demo client', () => {
+  it('seeds a demo client with the RootSouth order history', () => {
     expect(loadClients()).toHaveLength(1);
     expect(loadClients()[0].code).toBe('CLI-001');
+
+    const orders = loadOrders();
+    expect(orders).toHaveLength(4);
+    expect(orders.map((order) => order.orderNumber)).toEqual([
+      'PED-20261001-0001',
+      'PED-20261005-0001',
+      'PED-20261012-0001',
+      'PED-20261102-0001'
+    ]);
+    expect(orders.map((order) => order.total)).toEqual([129970, 94967, 44770, 191940]);
+    expect(ordersForClient('client-demo')).toHaveLength(4);
   });
 
   it('validates client name, code and email', () => {
@@ -43,18 +54,20 @@ describe('clients and order history', () => {
   });
 
   it('assigns sequential order numbers and filters by client', () => {
-    const a = orderFor('client-demo', '2026-01-01T10:00:00.000Z');
-    const b = orderFor('client-demo', '2026-02-01T10:00:00.000Z');
-    orderFor('client-other', '2026-03-01T10:00:00.000Z');
+    const buyer = addClient({ name: 'Compradora', email: 'compradora@example.com' });
+    const other = addClient({ name: 'Otro cliente', email: 'otro@example.com' });
+    const a = orderFor(buyer.id, '2026-01-01T10:00:00.000Z');
+    const b = orderFor(buyer.id, '2026-02-01T10:00:00.000Z');
+    orderFor(other.id, '2026-03-01T10:00:00.000Z');
 
     expect(a.orderNumber).toMatch(/^PED-\d{8}-0001$/);
     expect(b.orderNumber).toMatch(/^PED-\d{8}-0002$/);
-    expect(loadOrders()).toHaveLength(3);
+    expect(loadOrders()).toHaveLength(7);
 
-    const demoOrders = ordersForClient('client-demo');
-    expect(demoOrders).toHaveLength(2);
-    expect(demoOrders[0].id).toBe(b.id);
-    expect(demoOrders[1].id).toBe(a.id);
+    const buyerOrders = ordersForClient(buyer.id);
+    expect(buyerOrders).toHaveLength(2);
+    expect(buyerOrders[0].id).toBe(b.id);
+    expect(buyerOrders[1].id).toBe(a.id);
   });
 
   it('deletes a single order and cascades orders when deleting a client', () => {
@@ -74,9 +87,10 @@ describe('clients and order history', () => {
   });
 
   it('masks credit limits for non-finance roles', () => {
+    expect(maskCreditLimit('$2.500.000', 'customer')).toBe('•••••');
     expect(maskCreditLimit('$2.500.000', 'sales')).toBe('•••••');
     expect(maskCreditLimit('$2.500.000', 'warehouse')).toBe('•••••');
     expect(maskCreditLimit('$2.500.000', 'finance')).toBe('$2.500.000');
-    expect(maskCreditLimit('$2.500.000', 'admin')).toBe('•••••');
+    expect(maskCreditLimit('$2.500.000', 'admin')).toBe('$2.500.000');
   });
 });

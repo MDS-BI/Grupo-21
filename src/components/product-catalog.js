@@ -1,4 +1,5 @@
 import { escapeHtml } from '../utils.js';
+import { productCategories } from '../catalog.js';
 import { labelFor } from '../module-config.js';
 import { productCard } from './product-card.js';
 
@@ -10,6 +11,17 @@ export function productGrid(products, { role } = {}) {
 }
 
 export function productCatalog({ featured = [], products = [], role } = {}) {
+  const categories = productCategories(products);
+  const groups = categories.map((category) => {
+    const items = products.filter((product) => product.category === category);
+    return `
+      <div class="product-group" data-category="${escapeHtml(category)}">
+        <h3 class="product-group__title">${escapeHtml(category)}</h3>
+        <div class="product-grid">${productGrid(items, { role })}</div>
+      </div>
+    `;
+  }).join('');
+
   return `
     <section class="featured-section" aria-labelledby="featured-title">
       <h2 id="featured-title" class="section-title">${escapeHtml(labelFor('featured', 'Productos destacados'))}</h2>
@@ -17,7 +29,7 @@ export function productCatalog({ featured = [], products = [], role } = {}) {
     </section>
     <section class="catalog-section" aria-labelledby="catalog-grid-title">
       <h2 id="catalog-grid-title" class="section-title">${escapeHtml(labelFor('products', 'Productos'))}</h2>
-      <div id="catalog-grid" class="product-grid">${productGrid(products, { role })}</div>
+      <div id="catalog-grid" class="product-grid product-grid--grouped">${groups || productGrid(products, { role })}</div>
     </section>
   `;
 }
