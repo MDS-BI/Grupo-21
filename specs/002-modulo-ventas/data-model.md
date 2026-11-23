@@ -271,3 +271,30 @@ Reglas de precios:
 | Estado `Pedido` del ciclo B2B | `Pedido.status = "Pedido"` |
 | Cotización, Aprobado, Facturado, Cancelado, Vencido | No implementados |
 
+## Indicadores derivados (US8)
+
+El panel de métricas no introduce una entidad persistida: calcula sus indicadores leyendo `erp.orders`, `erp.products`, `erp.offers`, `erp.coupons` y `erp.couponUsage` en `src/metrics.js`.
+
+| Indicador | Regla de cálculo |
+|---|---|
+| Ingresos totales | Suma de `Pedido.total` de pedidos en estado `Pedido` o `Facturado` que pasen los filtros. |
+| Ventas completadas y ticket promedio | Conteo de esos pedidos y `round(ingresos / ventas)`; sin ventas, el promedio es cero. |
+| Documentos por estado | Conteo de todos los pedidos filtrados agrupados por `Pedido.status`. Los cancelados no aportan ingresos. |
+| Productos más vendidos | Agrupación de `Pedido.items[]` por `productId`, ordenada por ingresos y luego por unidades. |
+| Alertas de stock | Productos con `stock <= 5`, incluidos los agotados (`stock = 0`). |
+| Descuentos y cupones | Suma de `Pedido.discount`, usos acumulados por código y usos de oferta registrados en las líneas. |
+
+Los filtros por rango de fechas (`Pedido.date`) y categoría (vía `Pedido.items[].productId → Producto.category`) son inclusivos y recalculan todos los indicadores. Sin coincidencias se devuelven ceros y un estado vacío sin errores de cálculo.
+
+## Permisos por rol (US9)
+
+| Rol | Permisos |
+|---|---|
+| `customer` | Catálogo, carrito y pago. No ve historial global, administración ni métricas; no ve cantidades de stock. |
+| `sales` | Catálogo con disponibilidad de stock, carrito, pago e historial de clientes. No administra catálogo ni ve métricas globales. |
+| `warehouse` | Catálogo con stock e historial. Sin administración de precios ni métricas. |
+| `finance` | Historial con límite de crédito sin enmascarar. Sin administración de catálogo ni métricas globales. |
+| `admin` | Dueño/administrador: métricas, administración de precios/ofertas, historial íntegro y stock. |
+
+`src/app.js` filtra los botones de navegación con `data-requires` y aplica una guarda en `showView`; el contenido restringido se sustituye por un aviso con una acción para volver al catálogo. El cierre de sesión interna guarda el rol `customer` y devuelve a la vista pública.
+

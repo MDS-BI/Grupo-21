@@ -30,7 +30,8 @@ La entrega de `specs/002-modulo-ventas` es una tienda en línea construida con V
 - **Checkout**: validación de nombre, correo, dirección, ciudad, código postal y método de pago. Pasarela simulada con éxito, rechazo y timeout. Al confirmar se descuenta stock, se guarda el pedido y se genera un número `PED-YYYYMMDD-NNNN`.
 - **Historial**: documentos de venta por cliente con tipo, fecha, número, monto y estado. El límite de crédito se enmascara (`•••••`) para roles sin permisos financieros; solo el rol **Finanzas** lo ve.
 - **Administración de precios y ofertas**: el rol **Administración** puede editar precios (validados como numéricos y no negativos) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta», y el carrito aplica el precio efectivo. Los demás roles ven un mensaje de permisos al entrar al panel.
-- **Roles**: Ventas, Bodega, Finanzas y Administración, seleccionables desde la cabecera; se guardan en `localStorage` (`erp.role`). Solo Administración gestiona el catálogo y solo Finanzas ve el límite de crédito.
+- **Métricas**: panel para el dueño/administrador con ingresos totales, ventas completadas, ticket promedio, documentos por estado, ranking de productos por unidades e ingresos, alertas de stock y uso de cupones/ofertas. Filtros por rango de fechas y categoría; sin datos muestra ceros y un estado vacío.
+- **Roles**: Cliente, Ventas, Bodega, Finanzas y Administración, seleccionables desde la cabecera; se guardan en `localStorage` (`erp.role`). La navegación y las vistas se adaptan al rol: Cliente solo compra; Ventas ve stock e historial; Administración/gestor ve métricas y administra catálogo. Solo Finanzas ve el límite de crédito. El botón «Cerrar sesión» devuelve a la vista pública de Cliente.
 
 ### Ejecutar
 
@@ -44,15 +45,15 @@ npm run preview  # vista previa de la compilación
 ### Pruebas
 
 ```bash
-npm run test:002   # 94 pruebas del alcance 002 (unitarias + integración)
+npm run test:002   # 128 pruebas del alcance 002 (unitarias + integración)
 ```
 
-> `tests/` también contiene pruebas heredadas del módulo base 001 que dependen de una implementación aún no incluida en este repositorio; por eso se usa `test:002` para validar esta entrega. La suite 002 cubre catálogo, filtros, carrito, cupones, checkout, historial, administración de precios/ofertas y flujos de extremo a extremo (embudo de compra y ciclo de oferta).
+> `tests/` también contiene pruebas heredadas del módulo base 001 que dependen de una implementación aún no incluida en este repositorio; por eso se usa `test:002` para validar esta entrega. La suite 002 cubre catálogo, filtros, carrito, cupones, checkout, historial, administración de precios/ofertas, métricas, vistas por rol y flujos de extremo a extremo (embudo de compra y ciclo de oferta).
 
 ### Estructura
 
 ```text
-index.html                 Vistas de catálogo, carrito, checkout, confirmación e historial
+index.html                 Vistas de catálogo, carrito, checkout, confirmación, historial, administración y métricas
 src/main.js                Punto de entrada
 src/app.js                 Arranque, enrutado de vistas y manejo de eventos
 src/storage.js             Persistencia de productos, clientes, pedidos y carrito
@@ -60,11 +61,12 @@ src/catalog.js             Disponibilidad y filtros de catálogo
 src/coupons.js             Cupones, vigencia, límite de uso y descuentos
 src/checkout.js            Validación del checkout y numeración de pedidos
 src/payments.js            Pasarela de pago simulada
-src/module-config.js       Configuración, etiquetas, tema y roles (incluye admin)
+src/module-config.js       Configuración, etiquetas, tema, roles y permisos por vista
+src/metrics.js             Cálculo puro de indicadores y filtros del panel
 src/offers.js              Modelo, validación, vigencia y resolución de ofertas
 src/data/products.js       Catálogo semilla
 src/data/offers.js         Ofertas semilla
-src/components/            Componentes de catálogo, carrito, cupones, checkout, historial y administración
+src/components/            Componentes de catálogo, carrito, cupones, checkout, historial, administración y métricas
 src/styles.css             Estilos responsive
 tests/unit/                Pruebas unitarias 002
 tests/integration/         Pruebas de integración 002

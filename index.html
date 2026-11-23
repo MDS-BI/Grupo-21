@@ -18,16 +18,23 @@
         <button type="button" class="nav-button" data-view="cart">
           Carrito <span id="cart-count" class="cart-count">0</span>
         </button>
-        <button type="button" class="nav-button" data-view="history">Historial</button>
-        <button type="button" class="nav-button" data-view="admin">Administración</button>
+        <button type="button" class="nav-button" data-view="history" data-requires="canViewHistory">Historial</button>
+        <button type="button" class="nav-button" data-view="admin" data-requires="canManageCatalog">Administración</button>
+        <button type="button" class="nav-button" data-view="metrics" data-requires="canViewMetrics">Métricas</button>
       </nav>
       <label class="role-select">
         <span class="sr-only">Rol activo</span>
         <select id="role-select" aria-label="Rol activo"></select>
       </label>
+      <button type="button" id="role-logout" class="btn btn--ghost btn--small" hidden>Cerrar sesión</button>
     </header>
 
     <main class="site-main">
+      <div id="role-access" class="role-access" hidden>
+        <p id="role-denied" class="notice notice--error" role="alert"></p>
+        <button type="button" id="role-denied-return" class="btn btn--secondary btn--small" hidden>Volver al catálogo</button>
+      </div>
+
       <section id="view-catalog" class="view" aria-labelledby="catalog-title">
         <header class="view-header">
           <div class="hero__content">
@@ -85,6 +92,30 @@
           <p class="view-subtitle">Actualiza precios y administra las ofertas del catálogo.</p>
         </header>
         <div id="admin"></div>
+      </section>
+
+      <section id="view-metrics" class="view" hidden aria-labelledby="metrics-title">
+        <header class="view-header">
+          <h1 id="metrics-title">Panel de métricas</h1>
+          <p class="view-subtitle">Indicadores comerciales calculados a partir de los pedidos registrados.</p>
+        </header>
+        <form id="metrics-filter-form" class="metrics-filters">
+          <label class="field">
+            <span>Desde</span>
+            <input type="date" id="metrics-from" />
+          </label>
+          <label class="field">
+            <span>Hasta</span>
+            <input type="date" id="metrics-to" />
+          </label>
+          <label class="field">
+            <span>Categoría</span>
+            <select id="metrics-category"><option value="">Todas las categorías</option></select>
+          </label>
+          <button type="submit" id="metrics-apply" class="btn btn--primary">Aplicar filtros</button>
+          <button type="button" id="metrics-reset" class="btn btn--secondary">Limpiar</button>
+        </form>
+        <div id="metrics-content" class="metrics-content"></div>
       </section>
     </main>
 

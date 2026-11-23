@@ -1,7 +1,11 @@
 import { escapeHtml, formatCurrency } from '../utils.js';
 import { labelFor, maskCreditLimit } from '../module-config.js';
 
-export function orderHistory({ clients = [], selectedClientId = '', orders = [], role = 'sales' } = {}) {
+export function orderHistory({ clients = [], selectedClientId = '', orders = [], role = 'sales', allowed = true } = {}) {
+  if (!allowed) {
+    return `<p class="notice notice--error" role="alert">${escapeHtml(labelFor('accessRestricted', 'Acceso restringido: no tienes permisos para ver esta sección.'))}</p>`;
+  }
+
   const clientOptions = clients.map((client) => {
     const selected = client.id === selectedClientId ? ' selected' : '';
     return `<option value="${escapeHtml(client.id)}"${selected}>${escapeHtml(client.name)}</option>`;

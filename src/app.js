@@ -3,14 +3,15 @@ import {
   clearCart, setCartCoupon, clearCartCoupon, loadCart, decreaseStock, addOrder,
   findOrCreateClient, ordersForClient, getCartCount, loadOffers, getOffer, addOffer,
   updateOffer, deleteOffer, setOfferActive, updateProductPrice, getProduct,
-  applyOffersToProducts
+  applyOffersToProducts, loadOrders
 } from './storage.js';
 import { featuredProducts, filterProducts, productCategories } from './catalog.js';
-import { validateCoupon, recordCouponUse } from './coupons.js';
+import { validateCoupon, recordCouponUse, loadCouponUsage } from './coupons.js';
 import {
   normalizeConfig, setActiveConfig, getConfig, getRole, setRole, maskCreditLimit,
-  canManageCatalog, applyTheme
+  canManageCatalog, canViewHistory, canViewMetrics, canAccessView, labelFor, applyTheme
 } from './module-config.js';
+import { computeMetrics } from './metrics.js';
 import { validateOffer } from './offers.js';
 import { validateCheckout } from './checkout.js';
 import { processPayment } from './payments.js';
@@ -23,6 +24,7 @@ import { checkoutForm } from './components/checkout-form.js';
 import { orderConfirmation } from './components/order-confirmation.js';
 import { orderHistory } from './components/order-history.js';
 import { adminPanel } from './components/admin-panel.js';
+import { metricsDashboard } from './components/metrics-dashboard.js';
 
 const state = {
   view: 'catalog',
@@ -34,6 +36,7 @@ const state = {
   lastOrder: null,
   historyClientId: null,
   paymentBehavior: 'success',
+  metrics: { from: '', to: '', category: '' },
   admin: {
     message: null,
     offerValues: {},
@@ -65,6 +68,16 @@ function setNotice(element, message) {
 }
 
 export function showView(view) {
+  const allowed = canAccessView(getRole(), view);
+  setNotice(qs('role-denied'), allowed ? null : {
+    type: 'error',
+    text: `${labelFor('accessRestricted', 'Acceso restringido')} (${labelFor(view, view)})`
+  });
+  const access = qs('role-access');
+  if (access) access.hidden = allowed;
+  const deniedReturn = qs('role-denied-return');
+  if (deniedReturn) deniedReturn.hidden = allowed;
+
   state.view = view;
   globalThis.document?.querySelectorAll('.view').forEach((section) => {
     section.hidden = section.id !== `view-${view}`;
@@ -83,6 +96,7 @@ export function showView(view) {
   if (view === 'confirmation') renderConfirmation();
   if (view === 'history') renderHistory();
   if (view === 'admin') renderAdmin();
+  if (view === 'metrics') renderMetrics();
 
   updateCartCount();
 }
@@ -123,7 +137,7 @@ function renderCatalog() {
 
   const catalogHost = qs('product-catalog');
   if (catalogHost) {
-    catalogHost.innerHTML = productCatalog({ featured, products: filtered });
+    catalogHost.innerHTML = productCatalog({ featured, products: filtered, role: getRole() });
   }
 
   const message = qs('catalog-message');
@@ -398,7 +412,8 @@ function renderHistory() {
     clients,
     selectedClientId: state.historyClientId || '',
     orders,
-    role: getRole()
+    role: getRole(),
+    allowed: canViewHistory(getRole())
   });
 }
 
@@ -428,6 +443,7 @@ function renderAdmin() {
 function refreshCommerce() {
   renderCatalog();
   renderCart();
+  renderMetrics();
   updateCartCount();
 }
 
@@ -546,6 +562,65 @@ function handleAdminClick(event) {
   }
 }
 
+/* --------------------------------- Métricas -------------------------------- */
+
+function renderMetrics() {
+  const host = qs('metrics-content');
+  if (!host) return;
+
+  const categorySelect = qs('metrics-category');
+  if (categorySelect) {
+    const categories = [...new Set(loadProducts().map((product) => product.category).filter(Boolean))].sort();
+    const options = ['', ...categories];
+    categorySelect.innerHTML = options
+      .map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category || labelFor('allCategories', 'Todas las categorías'))}</option>`)
+      .join('');
+    categorySelect.value = state.metrics.category;
+  }
+
+  const metrics = computeMetrics({
+    orders: loadOrders(),
+    products: loadProducts(),
+    offers: loadOffers(),
+    couponUsage: loadCouponUsage(),
+    filters: state.metrics
+  });
+  host.innerHTML = metricsDashboard({
+    allowed: canAccessView(getRole(), 'metrics'),
+    metrics
+  });
+}
+
+function handleMetricsChange(event) {
+  if (event.target.id === 'metrics-category') {
+    state.metrics.category = event.target.value;
+    renderMetrics();
+  }
+}
+
+function handleMetricsClick(event) {
+  if (event.target.id !== 'metrics-reset') return;
+  state.metrics = { from: '', to: '', category: '' };
+  const from = qs('metrics-from');
+  const to = qs('metrics-to');
+  const category = qs('metrics-category');
+  if (from) from.value = '';
+  if (to) to.value = '';
+  if (category) category.value = '';
+  renderMetrics();
+}
+
+function handleMetricsSubmit(event) {
+  if (event.target.id !== 'metrics-filter-form') return;
+  event.preventDefault();
+  state.metrics = {
+    from: qs('metrics-from')?.value || '',
+    to: qs('metrics-to')?.value || '',
+    category: qs('metrics-category')?.value || ''
+  };
+  renderMetrics();
+}
+
 /* ---------------------------------- Arranque ------------------------------- */
 
 const ADMIN_ACCESS_CODE = '1234';
@@ -560,11 +635,42 @@ function renderRoleSelector() {
   select.value = getRole();
 }
 
+function applyRolePermissions() {
+  const role = getRole();
+  const permissions = { canViewHistory, canManageCatalog, canViewMetrics };
+  globalThis.document?.querySelectorAll('[data-view][data-requires]').forEach((button) => {
+    const check = permissions[button.dataset.requires];
+    button.hidden = typeof check === 'function' ? !check(role) : true;
+  });
+
+  const logout = qs('role-logout');
+  if (logout) {
+    logout.hidden = role === 'customer';
+    logout.textContent = labelFor('logout', 'Cerrar sesión');
+  }
+}
+
 function handleRoleChange(event) {
   if (event.target.id !== 'role-select') return;
   setRole(event.target.value);
-  if (state.view === 'history') renderHistory();
-  if (state.view === 'admin') renderAdmin();
+  renderRoleSelector();
+  applyRolePermissions();
+  showView(state.view);
+}
+
+function handleRoleLogout() {
+  setRole('customer');
+  renderRoleSelector();
+  applyRolePermissions();
+  showView('catalog');
+  setNotice(qs('catalog-feedback'), {
+    type: 'info',
+    text: labelFor('returnedToCustomer', 'Volviste a la vista pública de cliente.')
+  });
+}
+
+function handleRoleDeniedReturn() {
+  showView('catalog');
 }
 
 function requestAdminAccess() {
@@ -585,6 +691,11 @@ function bindStaticControls() {
 
 
   qs('role-select')?.addEventListener('change', handleRoleChange);
+  qs('role-logout')?.addEventListener('click', handleRoleLogout);
+  qs('role-denied-return')?.addEventListener('click', handleRoleDeniedReturn);
+  viewElement('metrics')?.addEventListener('change', handleMetricsChange);
+  viewElement('metrics')?.addEventListener('click', handleMetricsClick);
+  viewElement('metrics')?.addEventListener('submit', handleMetricsSubmit);
   qs('product-catalog')?.addEventListener('click', handleCatalogClick);
   qs('product-filters')?.addEventListener('change', handleFilterChange);
   qs('product-filters')?.addEventListener('click', handleFilterClick);
@@ -601,6 +712,7 @@ export async function boot(config) {
   setActiveConfig(normalizeConfig(config));
   applyTheme();
   renderRoleSelector();
+  applyRolePermissions();
 
   const brand = qs('brand-name');
   if (brand) brand.textContent = getConfig().moduleName;

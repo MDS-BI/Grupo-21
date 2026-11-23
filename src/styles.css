@@ -1123,3 +1123,168 @@ body {
     transform: none;
   }
 }
+
+.btn--small {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.role-access {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.role-access[hidden] {
+  display: none;
+}
+
+.role-access .notice {
+  margin: 0;
+  flex: 1 1 20rem;
+}
+
+.product-card__stock {
+  display: block;
+  margin: 0.35rem 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.metrics-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: var(--surface-dim);
+  border: 1px solid var(--border-soft);
+}
+
+.metrics-filters .field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 10rem;
+}
+
+.metrics-filters .field span {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.metrics-filters input,
+.metrics-filters select {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.metrics-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.kpi-card {
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow);
+}
+
+.kpi-card__label {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.kpi-card__value {
+  margin: 0;
+  color: var(--accent-deep);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.metric-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem;
+}
+
+.highlight-card {
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+}
+
+.highlight-card .section-title {
+  margin-top: 0;
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.metrics-table th,
+.metrics-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+}
+
+.metric-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.badge--stock {
+  white-space: nowrap;
+  color: var(--accent-deep);
+  background: var(--surface-dim);
+}
+
+@media (max-width: 720px) {
+  .metrics-filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .metrics-filters .field {
+    width: 100%;
+  }
+
+  .metric-list li {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

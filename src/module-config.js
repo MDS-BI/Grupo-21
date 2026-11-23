@@ -31,7 +31,12 @@ export const DEFAULT_CONFIG = {
     deleteOffer: 'Eliminar',
     originalPrice: 'Precio original',
     permissionDenied: 'No tienes permisos para administrar el catálogo.',
-    emptyOffers: 'No hay ofertas registradas.'
+    emptyOffers: 'No hay ofertas registradas.',
+    metrics: 'Métricas',
+    metricsPanel: 'Panel de métricas',
+    logout: 'Cerrar sesión',
+    accessRestricted: 'Acceso restringido: no tienes permisos para ver esta sección.',
+    stockAvailable: 'Unidades disponibles'
   },
   customFields: [],
   statusLifecycle: {
@@ -46,10 +51,46 @@ export const DEFAULT_CONFIG = {
     accentColor: '#1F7A3E'
   },
   roles: {
-    sales: { label: 'Ventas', canViewFinancials: false, canManageCatalog: false },
-    warehouse: { label: 'Bodega', canViewFinancials: false, canManageCatalog: false },
-    finance: { label: 'Finanzas', canViewFinancials: true, canManageCatalog: false },
-    admin: { label: 'Administración', canViewFinancials: false, canManageCatalog: true }
+    customer: {
+      label: 'Cliente',
+      canViewFinancials: false,
+      canManageCatalog: false,
+      canViewHistory: false,
+      canViewStock: false,
+      canViewMetrics: false
+    },
+    sales: {
+      label: 'Ventas',
+      canViewFinancials: false,
+      canManageCatalog: false,
+      canViewHistory: true,
+      canViewStock: true,
+      canViewMetrics: false
+    },
+    warehouse: {
+      label: 'Bodega',
+      canViewFinancials: false,
+      canManageCatalog: false,
+      canViewHistory: true,
+      canViewStock: true,
+      canViewMetrics: false
+    },
+    finance: {
+      label: 'Finanzas',
+      canViewFinancials: true,
+      canManageCatalog: false,
+      canViewHistory: true,
+      canViewStock: false,
+      canViewMetrics: false
+    },
+    admin: {
+      label: 'Administración',
+      canViewFinancials: false,
+      canManageCatalog: true,
+      canViewHistory: true,
+      canViewStock: true,
+      canViewMetrics: true
+    }
   }
 };
 
@@ -176,6 +217,26 @@ export function canViewFinancials(role = getRole()) {
 
 export function canManageCatalog(role = getRole()) {
   return Boolean(getConfig().roles?.[role]?.canManageCatalog);
+}
+
+export function canViewHistory(role = getRole()) {
+  return Boolean(getConfig().roles?.[role]?.canViewHistory);
+}
+
+export function canViewStock(role = getRole()) {
+  return Boolean(getConfig().roles?.[role]?.canViewStock);
+}
+
+export function canViewMetrics(role = getRole()) {
+  return Boolean(getConfig().roles?.[role]?.canViewMetrics);
+}
+
+export function canAccessView(role = getRole(), view = '') {
+  if (['catalog', 'cart', 'checkout', 'confirmation'].includes(view)) return true;
+  if (view === 'history') return canViewHistory(role);
+  if (view === 'admin') return canManageCatalog(role);
+  if (view === 'metrics') return canViewMetrics(role);
+  return false;
 }
 
 export function maskCreditLimit(value, role = getRole()) {

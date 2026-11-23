@@ -32,10 +32,10 @@ description: "Task list for feature implementation"
 
 **Purpose**: Inicializar la estructura Vite, dependencias y arnés de pruebas.
 
-- [ ] T001 Crear la estructura del proyecto Vite con `index.html`, `package.json`, `vite.config.js`, `vitest.config.mjs`, `src/`, `src/components/`, `src/data/`, `tests/unit/`, `tests/integration/`, `tests/setup/` y `tests/helpers/`
-- [ ] T002 [P] Configurar scripts y dependencias de Vite, Vitest y jsdom en `package.json`, `vite.config.js` y `vitest.config.mjs`
-- [ ] T003 [P] Crear el arnés de pruebas con jsdom y aislamiento de `localStorage` por prueba en `tests/setup/jsdom.js` y `tests/helpers/app-fixture.js`
-- [ ] T004 [P] Construir el HTML base con cabecera, navegación, selector de rol, contenedores de catálogo/carrito/checkout/confirmación/historial/administración y métricas en `index.html`
+- [X] T001 Crear la estructura del proyecto Vite con `index.html`, `package.json`, `vite.config.js`, `vitest.config.mjs`, `src/`, `src/components/`, `src/data/`, `tests/unit/`, `tests/integration/`, `tests/setup/` y `tests/helpers/`
+- [X] T002 [P] Configurar scripts y dependencias de Vite, Vitest y jsdom en `package.json`, `vite.config.js` y `vitest.config.mjs`
+- [X] T003 [P] Crear el arnés de pruebas con jsdom y aislamiento de `localStorage` por prueba en `tests/setup/jsdom.js` y `tests/helpers/app-fixture.js`
+- [X] T004 [P] Construir el HTML base con cabecera, navegación, selector de rol, contenedores de catálogo/carrito/checkout/confirmación/historial/administración y métricas en `index.html`
 
 ---
 
@@ -45,14 +45,14 @@ description: "Task list for feature implementation"
 
 **⚠️ CRITICAL**: Ninguna historia de usuario puede comenzar hasta completar esta fase.
 
-- [ ] T005 Implementar las primitivas de almacenamiento y el CRUD de productos (stock, precio, categoría, destacado) en `src/storage.js`
-- [ ] T006 Implementar el almacenamiento de clientes y pedidos, la integridad referencial y la eliminación en cascada en `src/storage.js`
-- [ ] T007 Implementar el estado y la persistencia del carrito (añadir, actualizar cantidad, quitar, vaciar) en `src/storage.js`
-- [ ] T008 [P] Implementar el modelo, almacenamiento y validación de cupones (vigencia, tipo, valor, límite de uso) en `src/coupons.js`
-- [ ] T009 [P] Implementar la configuración del módulo, etiquetas, roles, valores predeterminados y ayudantes de permisos en `src/module-config.js`
-- [ ] T010 Implementar el arranque de la aplicación, el enrutado de vistas y los ayudantes de renderizado en `src/app.js`
-- [ ] T011 [P] Crear los tokens de diseño y los estilos base del escaparate, carrito, formularios y estados vacíos en `src/styles.css`
-- [ ] T012 [P] Crear el catálogo semilla de productos con categorías, precios, stock y marca de destacado en `src/data/products.js`
+- [X] T005 Implementar las primitivas de almacenamiento y el CRUD de productos (stock, precio, categoría, destacado) en `src/storage.js`
+- [X] T006 Implementar el almacenamiento de clientes y pedidos, la integridad referencial y la eliminación en cascada en `src/storage.js`
+- [X] T007 Implementar el estado y la persistencia del carrito (añadir, actualizar cantidad, quitar, vaciar) en `src/storage.js`
+- [X] T008 [P] Implementar el modelo, almacenamiento y validación de cupones (vigencia, tipo, valor, límite de uso) en `src/coupons.js`
+- [X] T009 [P] Implementar la configuración del módulo, etiquetas, roles, valores predeterminados y ayudantes de permisos en `src/module-config.js`
+- [X] T010 Implementar el arranque de la aplicación, el enrutado de vistas y los ayudantes de renderizado en `src/app.js`
+- [X] T011 [P] Crear los tokens de diseño y los estilos base del escaparate, carrito, formularios y estados vacíos en `src/styles.css`
+- [X] T012 [P] Crear el catálogo semilla de productos con categorías, precios, stock y marca de destacado en `src/data/products.js`
 
 **Checkpoint**: La base está lista; las historias de usuario pueden comenzar.
 
@@ -66,15 +66,15 @@ description: "Task list for feature implementation"
 
 ### Tests for US1
 
-- [ ] T013 [P] [US1] Añadir pruebas unitarias de selección de destacados y disponibilidad por stock en `tests/unit/products.test.js`
-- [ ] T014 [P] [US1] Añadir la prueba de integración del renderizado del catálogo, precios, botón de compra y estado agotado en `tests/integration/product-catalog.test.js`
+- [X] T013 [P] [US1] Añadir pruebas unitarias de selección de destacados y disponibilidad por stock en `tests/unit/products.test.js`
+- [X] T014 [P] [US1] Añadir la prueba de integración del renderizado del catálogo, precios, botón de compra y estado agotado en `tests/integration/product-catalog.test.js`
 
 ### Implementation for US1
 
-- [ ] T015 [P] [US1] Crear el componente de tarjeta de producto con nombre, precio, botón de compra, insignia de agotado y botón deshabilitado en `src/components/product-card.js`
-- [ ] T016 [P] [US1] Crear el componente de catálogo destacado que agrupa las tarjetas disponibles en `src/components/product-catalog.js`
-- [ ] T017 [US1] Conectar el catálogo destacado con la vista de inicio y el estado de stock en `src/app.js`
-- [ ] T018 [P] [US1] Dar estilo a la sección de destacados, tarjetas e insignias de agotado en `src/styles.css`
+- [X] T015 [P] [US1] Crear el componente de tarjeta de producto con nombre, precio, botón de compra, insignia de agotado y botón deshabilitado en `src/components/product-card.js`
+- [X] T016 [P] [US1] Crear el componente de catálogo destacado que agrupa las tarjetas disponibles en `src/components/product-catalog.js`
+- [X] T017 [US1] Conectar el catálogo destacado con la vista de inicio y el estado de stock en `src/app.js`
+- [X] T018 [P] [US1] Dar estilo a la sección de destacados, tarjetas e insignias de agotado en `src/styles.css`
 
 **Checkpoint**: US1 es funcional y comprobable de forma independiente.
 
@@ -88,14 +88,14 @@ description: "Task list for feature implementation"
 
 ### Tests for US2
 
-- [ ] T019 [P] [US2] Añadir pruebas unitarias del filtrado combinado por categoría y precio máximo y del caso sin resultados en `tests/unit/product-filters.test.js`
-- [ ] T020 [P] [US2] Añadir la prueba de integración de la interfaz de filtros actualizando el catálogo y el estado vacío en `tests/integration/product-filters.test.js`
+- [X] T019 [P] [US2] Añadir pruebas unitarias del filtrado combinado por categoría y precio máximo y del caso sin resultados en `tests/unit/product-filters.test.js`
+- [X] T020 [P] [US2] Añadir la prueba de integración de la interfaz de filtros actualizando el catálogo y el estado vacío en `tests/integration/product-filters.test.js`
 
 ### Implementation for US2
 
-- [ ] T021 [US2] Crear los controles de filtro (categoría y precio máximo) y el mensaje de resultados vacíos con reinicio en `src/components/product-filters.js`
-- [ ] T022 [US2] Implementar el estado de filtros y el renderizado del catálogo filtrado en `src/app.js`
-- [ ] T023 [P] [US2] Dar estilo a la barra de filtros y al estado de resultados vacíos en `src/styles.css`
+- [X] T021 [US2] Crear los controles de filtro (categoría y precio máximo) y el mensaje de resultados vacíos con reinicio en `src/components/product-filters.js`
+- [X] T022 [US2] Implementar el estado de filtros y el renderizado del catálogo filtrado en `src/app.js`
+- [X] T023 [P] [US2] Dar estilo a la barra de filtros y al estado de resultados vacíos en `src/styles.css`
 
 **Checkpoint**: US2 es funcional de forma independiente sobre el catálogo de US1.
 
@@ -109,14 +109,14 @@ description: "Task list for feature implementation"
 
 ### Tests for US3
 
-- [ ] T024 [P] [US3] Añadir pruebas unitarias de añadir, actualizar cantidad, quitar y recalcular totales en `tests/unit/cart.test.js`
-- [ ] T025 [P] [US3] Añadir la prueba de integración de las interacciones del carrito y la actualización de totales en `tests/integration/cart.test.js`
+- [X] T024 [P] [US3] Añadir pruebas unitarias de añadir, actualizar cantidad, quitar y recalcular totales en `tests/unit/cart.test.js`
+- [X] T025 [P] [US3] Añadir la prueba de integración de las interacciones del carrito y la actualización de totales en `tests/integration/cart.test.js`
 
 ### Implementation for US3
 
-- [ ] T026 [P] [US3] Crear el componente del carrito con líneas, controles de cantidad, botón de quitar y totales en `src/components/cart.js`
-- [ ] T027 [US3] Conectar las operaciones del carrito y el recálculo de subtotal/total en `src/storage.js` y `src/app.js`
-- [ ] T028 [P] [US3] Dar estilo al panel del carrito, líneas, controles de cantidad y resumen de totales en `src/styles.css`
+- [X] T026 [P] [US3] Crear el componente del carrito con líneas, controles de cantidad, botón de quitar y totales en `src/components/cart.js`
+- [X] T027 [US3] Conectar las operaciones del carrito y el recálculo de subtotal/total en `src/storage.js` y `src/app.js`
+- [X] T028 [P] [US3] Dar estilo al panel del carrito, líneas, controles de cantidad y resumen de totales en `src/styles.css`
 
 **Checkpoint**: US3 es funcional y persistente de forma independiente.
 
@@ -130,14 +130,14 @@ description: "Task list for feature implementation"
 
 ### Tests for US4
 
-- [ ] T029 [P] [US4] Añadir pruebas unitarias de cupones válidos, inválidos, vencidos y agotados en `tests/unit/coupons.test.js`
-- [ ] T030 [P] [US4] Añadir la prueba de integración de aplicar y quitar cupones con actualización del total en `tests/integration/coupons.test.js`
+- [X] T029 [P] [US4] Añadir pruebas unitarias de cupones válidos, inválidos, vencidos y agotados en `tests/unit/coupons.test.js`
+- [X] T030 [P] [US4] Añadir la prueba de integración de aplicar y quitar cupones con actualización del total en `tests/integration/coupons.test.js`
 
 ### Implementation for US4
 
-- [ ] T031 [P] [US4] Crear el componente de entrada de cupón con notificaciones de éxito y error en `src/components/coupon-form.js`
-- [ ] T032 [US4] Conectar la validación, aplicación, eliminación y restauración del cupón con el total del carrito en `src/app.js` y `src/coupons.js`
-- [ ] T033 [P] [US4] Dar estilo al campo de cupón y a los avisos de éxito/error en `src/styles.css`
+- [X] T031 [P] [US4] Crear el componente de entrada de cupón con notificaciones de éxito y error en `src/components/coupon-form.js`
+- [X] T032 [US4] Conectar la validación, aplicación, eliminación y restauración del cupón con el total del carrito en `src/app.js` y `src/coupons.js`
+- [X] T033 [P] [US4] Dar estilo al campo de cupón y a los avisos de éxito/error en `src/styles.css`
 
 **Checkpoint**: US4 es funcional de forma independiente sobre el carrito de US3.
 
@@ -151,16 +151,16 @@ description: "Task list for feature implementation"
 
 ### Tests for US5
 
-- [ ] T034 [P] [US5] Añadir pruebas unitarias de validación de checkout y generación del número de pedido en `tests/unit/checkout.test.js`
-- [ ] T035 [P] [US5] Añadir la prueba de integración del flujo de checkout, errores de campos obligatorios y confirmación en `tests/integration/checkout.test.js`
+- [X] T034 [P] [US5] Añadir pruebas unitarias de validación de checkout y generación del número de pedido en `tests/unit/checkout.test.js`
+- [X] T035 [P] [US5] Añadir la prueba de integración del flujo de checkout, errores de campos obligatorios y confirmación en `tests/integration/checkout.test.js`
 
 ### Implementation for US5
 
-- [ ] T036 [P] [US5] Crear el formulario de checkout con campos de envío, método de pago y mensajes de validación en `src/components/checkout-form.js`
-- [ ] T037 [US5] Crear la vista de confirmación con número de pedido y resumen de la compra en `src/components/order-confirmation.js`
-- [ ] T038 [US5] Implementar la validación del checkout, descuento de stock, persistencia del pedido y enrutado a la confirmación en `src/app.js` y `src/storage.js`
-- [ ] T039 [US5] Implementar la pasarela de pago simulada con éxito, rechazo y timeout reintentable en `src/payments.js`
-- [ ] T040 [P] [US5] Dar estilo al formulario de checkout, estados de error y vista de confirmación en `src/styles.css`
+- [X] T036 [P] [US5] Crear el formulario de checkout con campos de envío, método de pago y mensajes de validación en `src/components/checkout-form.js`
+- [X] T037 [US5] Crear la vista de confirmación con número de pedido y resumen de la compra en `src/components/order-confirmation.js`
+- [X] T038 [US5] Implementar la validación del checkout, descuento de stock, persistencia del pedido y enrutado a la confirmación en `src/app.js` y `src/storage.js`
+- [X] T039 [US5] Implementar la pasarela de pago simulada con éxito, rechazo y timeout reintentable en `src/payments.js`
+- [X] T040 [P] [US5] Dar estilo al formulario de checkout, estados de error y vista de confirmación en `src/styles.css`
 
 **Checkpoint**: El embudo de compra está completo hasta la confirmación del pedido.
 
@@ -174,14 +174,14 @@ description: "Task list for feature implementation"
 
 ### Tests for US6
 
-- [ ] T041 [P] [US6] Añadir pruebas unitarias de obtención del historial por cliente y enmascaramiento por rol en `tests/unit/order-history.test.js`
-- [ ] T042 [P] [US6] Añadir la prueba de integración de la vista de historial, estados y límite de crédito enmascarado en `tests/integration/order-history.test.js`
+- [X] T041 [P] [US6] Añadir pruebas unitarias de obtención del historial por cliente y enmascaramiento por rol en `tests/unit/order-history.test.js`
+- [X] T042 [P] [US6] Añadir la prueba de integración de la vista de historial, estados y límite de crédito enmascarado en `tests/integration/order-history.test.js`
 
 ### Implementation for US6
 
-- [ ] T043 [P] [US6] Crear el componente de historial con tipo de documento, fecha, monto y estado en `src/components/order-history.js`
-- [ ] T044 [US6] Implementar la consulta del historial por cliente y el enmascaramiento de `creditLimit` según el rol en `src/app.js` y `src/module-config.js`
-- [ ] T045 [P] [US6] Dar estilo a la tabla de historial y a las insignias de estado en `src/styles.css`
+- [X] T043 [P] [US6] Crear el componente de historial con tipo de documento, fecha, monto y estado en `src/components/order-history.js`
+- [X] T044 [US6] Implementar la consulta del historial por cliente y el enmascaramiento de `creditLimit` según el rol en `src/app.js` y `src/module-config.js`
+- [X] T045 [P] [US6] Dar estilo a la tabla de historial y a las insignias de estado en `src/styles.css`
 
 **Checkpoint**: US6 es funcional y comprobable de forma independiente.
 
@@ -195,24 +195,24 @@ description: "Task list for feature implementation"
 
 ### Tests for US7
 
-- [ ] T046 [P] [US7] Añadir pruebas unitarias de validación de ofertas (porcentaje/monto, descuento > 100 %, fecha fin anterior a inicio, inactiva/vencida) en `tests/unit/offers.test.js`
-- [ ] T047 [P] [US7] Añadir pruebas unitarias de resolución de precio con oferta y totales de línea del carrito en `tests/unit/offer-pricing.test.js`
-- [ ] T048 [P] [US7] Añadir pruebas de integración del panel (edición de precio, CRUD de ofertas, restricción por rol y reflejo en catálogo/carrito) en `tests/integration/admin-panel.test.js`
+- [X] T046 [P] [US7] Añadir pruebas unitarias de validación de ofertas (porcentaje/monto, descuento > 100 %, fecha fin anterior a inicio, inactiva/vencida) en `tests/unit/offers.test.js`
+- [X] T047 [P] [US7] Añadir pruebas unitarias de resolución de precio con oferta y totales de línea del carrito en `tests/unit/offer-pricing.test.js`
+- [X] T048 [P] [US7] Añadir pruebas de integración del panel (edición de precio, CRUD de ofertas, restricción por rol y reflejo en catálogo/carrito) en `tests/integration/admin-panel.test.js`
 
 ### Implementation for US7
 
-- [ ] T049 [P] [US7] Extender la configuración con el rol `admin`, etiquetas de administración/ofertas y el ayudante `canManageCatalog` en `src/module-config.js`
-- [ ] T050 [P] [US7] Implementar el modelo de oferta, su validación y la resolución de la mejor oferta activa por producto en `src/offers.js`
-- [ ] T051 [P] [US7] Crear las ofertas semilla con producto, tipo, valor y vigencia en `src/data/offers.js`
-- [ ] T052 [US7] Añadir el CRUD de ofertas (`erp.offers`), la validación de precio numérico no negativo y el cálculo de precios con oferta en `src/storage.js`
-- [ ] T053 [US7] Crear el panel con edición de precios, formulario de ofertas, listado, activación/desactivación y mensajes de validación en `src/components/admin-panel.js`
-- [ ] T054 [US7] Añadir la vista de administración, la entrada de navegación y la guarda de acceso por rol con mensaje de denegación en `index.html` y `src/app.js`
-- [ ] T055 [US7] Conectar los manejadores del panel (precio, alta/edición/desactivación de ofertas y refresco de catálogo/carrito) en `src/app.js`
-- [ ] T056 [P] [US7] Mostrar precio con descuento, precio original tachado e insignia de oferta en `src/components/product-card.js` y `src/components/product-catalog.js`
-- [ ] T057 [US7] Aplicar el precio de oferta en el renderizado y los totales del carrito en `src/components/cart.js` y `src/app.js`
-- [ ] T058 [P] [US7] Dar estilo al panel, formularios de oferta, insignias y precio original tachado en `src/styles.css`
-- [ ] T059 [US7] Cubrir casos límite de US7 (oferta vencida/desactivada restaura precio, descuento > 100 % y fechas inválidas rechazadas, cambio de precio con producto en carrito recalcula total) en `src/offers.js` y `src/app.js`
-- [ ] T060 [US7] Actualizar el script `test:002` en `package.json` para incluir las pruebas de ofertas y administración
+- [X] T049 [P] [US7] Extender la configuración con el rol `admin`, etiquetas de administración/ofertas y el ayudante `canManageCatalog` en `src/module-config.js`
+- [X] T050 [P] [US7] Implementar el modelo de oferta, su validación y la resolución de la mejor oferta activa por producto en `src/offers.js`
+- [X] T051 [P] [US7] Crear las ofertas semilla con producto, tipo, valor y vigencia en `src/data/offers.js`
+- [X] T052 [US7] Añadir el CRUD de ofertas (`erp.offers`), la validación de precio numérico no negativo y el cálculo de precios con oferta en `src/storage.js`
+- [X] T053 [US7] Crear el panel con edición de precios, formulario de ofertas, listado, activación/desactivación y mensajes de validación en `src/components/admin-panel.js`
+- [X] T054 [US7] Añadir la vista de administración, la entrada de navegación y la guarda de acceso por rol con mensaje de denegación en `index.html` y `src/app.js`
+- [X] T055 [US7] Conectar los manejadores del panel (precio, alta/edición/desactivación de ofertas y refresco de catálogo/carrito) en `src/app.js`
+- [X] T056 [P] [US7] Mostrar precio con descuento, precio original tachado e insignia de oferta en `src/components/product-card.js` y `src/components/product-catalog.js`
+- [X] T057 [US7] Aplicar el precio de oferta en el renderizado y los totales del carrito en `src/components/cart.js` y `src/app.js`
+- [X] T058 [P] [US7] Dar estilo al panel, formularios de oferta, insignias y precio original tachado en `src/styles.css`
+- [X] T059 [US7] Cubrir casos límite de US7 (oferta vencida/desactivada restaura precio, descuento > 100 % y fechas inválidas rechazadas, cambio de precio con producto en carrito recalcula total) en `src/offers.js` y `src/app.js`
+- [X] T060 [US7] Actualizar el script `test:002` en `package.json` para incluir las pruebas de ofertas y administración
 
 **Checkpoint**: US7 es funcional y comprobable de forma independiente sobre US1 y US3.
 
@@ -226,20 +226,20 @@ description: "Task list for feature implementation"
 
 ### Tests for US8
 
-- [ ] T061 [P] [US8] Añadir pruebas unitarias de ingresos, cantidad de ventas, ticket promedio y distribución por estado en `tests/unit/metrics.test.js`
-- [ ] T062 [P] [US8] Añadir pruebas unitarias de ranking por unidades/ingresos, alertas de stock, filtros fecha/categoría, uso de cupones/ofertas y estado vacío en `tests/unit/metrics-filters.test.js`
-- [ ] T063 [P] [US8] Añadir la prueba de integración del panel de métricas (renderizado, filtros, guarda por rol y refresco tras una compra) en `tests/integration/metrics-dashboard.test.js`
+- [X] T061 [P] [US8] Añadir pruebas unitarias de ingresos, cantidad de ventas, ticket promedio y distribución por estado en `tests/unit/metrics.test.js`
+- [X] T062 [P] [US8] Añadir pruebas unitarias de ranking por unidades/ingresos, alertas de stock, filtros fecha/categoría, uso de cupones/ofertas y estado vacío en `tests/unit/metrics-filters.test.js`
+- [X] T063 [P] [US8] Añadir la prueba de integración del panel de métricas (renderizado, filtros, guarda por rol y refresco tras una compra) en `tests/integration/metrics-dashboard.test.js`
 
 ### Implementation for US8
 
-- [ ] T064 [US8] Implementar el cálculo puro de métricas a partir de `erp.orders`, `erp.products`, `erp.coupons` y `erp.offers` en `src/metrics.js` (usar `src/storage.js` y `src/utils.js`)
-- [ ] T065 [US8] Añadir las etiquetas del panel y el permiso `canViewMetrics` (solo `admin`) en `src/module-config.js`
-- [ ] T066 [US8] Añadir el botón `button[data-view="metrics"]` y la sección `#view-metrics` con `#metrics-title`, `#metrics-from`, `#metrics-to`, `#metrics-category`, `#metrics-apply`, `#metrics-reset`, `#metrics-kpis`, `#metrics-status`, `#metrics-top-products`, `#metrics-stock-alerts`, `#metrics-discounts` y `#metrics-empty` en `index.html`
-- [ ] T067 [US8] Crear el componente del panel con tarjetas KPI, tabla de estados, rankings, alertas, estado vacío y escape de todos los valores en `src/components/metrics-dashboard.js`
-- [ ] T068 [US8] Cablear `renderMetrics`, los filtros, la guarda por `canViewMetrics` y el refresco tras checkout/cambios de oferta en `src/app.js`
-- [ ] T069 [P] [US8] Dar estilo a las tarjetas KPI, tablas, rankings y alertas reutilizando los estilos `.kpi-grid`, `.kpi-card` y `.metric-highlights` en `src/styles.css`
-- [ ] T070 [US8] Cubrir casos límite (pedidos cancelados fuera de ingresos, división por cero, ofertas vencidas, rango de fechas vacío, cupón usado en el checkout) en `src/metrics.js` y `src/app.js`
-- [ ] T071 [US8] Incluir `tests/unit/metrics.test.js`, `tests/unit/metrics-filters.test.js` y `tests/integration/metrics-dashboard.test.js` en el script `test:002` de `package.json` y verificar `npm run test:002` y `npm run build`
+- [X] T064 [US8] Implementar el cálculo puro de métricas a partir de `erp.orders`, `erp.products`, `erp.coupons` y `erp.offers` en `src/metrics.js` (usar `src/storage.js` y `src/utils.js`)
+- [X] T065 [US8] Añadir las etiquetas del panel y el permiso `canViewMetrics` (solo `admin`) en `src/module-config.js`
+- [X] T066 [US8] Añadir el botón `button[data-view="metrics"]` y la sección `#view-metrics` con `#metrics-title`, `#metrics-from`, `#metrics-to`, `#metrics-category`, `#metrics-apply`, `#metrics-reset`, `#metrics-kpis`, `#metrics-status`, `#metrics-top-products`, `#metrics-stock-alerts`, `#metrics-discounts` y `#metrics-empty` en `index.html`
+- [X] T067 [US8] Crear el componente del panel con tarjetas KPI, tabla de estados, rankings, alertas, estado vacío y escape de todos los valores en `src/components/metrics-dashboard.js`
+- [X] T068 [US8] Cablear `renderMetrics`, los filtros, la guarda por `canViewMetrics` y el refresco tras checkout/cambios de oferta en `src/app.js`
+- [X] T069 [P] [US8] Dar estilo a las tarjetas KPI, tablas, rankings y alertas reutilizando los estilos `.kpi-grid`, `.kpi-card` y `.metric-highlights` en `src/styles.css`
+- [X] T070 [US8] Cubrir casos límite (pedidos cancelados fuera de ingresos, división por cero, ofertas vencidas, rango de fechas vacío, cupón usado en el checkout) en `src/metrics.js` y `src/app.js`
+- [X] T071 [US8] Incluir `tests/unit/metrics.test.js`, `tests/unit/metrics-filters.test.js` y `tests/integration/metrics-dashboard.test.js` en el script `test:002` de `package.json` y verificar `npm run test:002` y `npm run build`
 
 **Checkpoint**: US8 es funcional y comprobable de forma independiente sobre los pedidos de US5 y los productos de US1.
 
@@ -253,18 +253,18 @@ description: "Task list for feature implementation"
 
 ### Tests for US9
 
-- [ ] T072 [P] [US9] Añadir pruebas unitarias de los permisos por rol, la visibilidad de navegación y el retorno al catálogo en `tests/unit/role-permissions.test.js`
-- [ ] T073 [P] [US9] Añadir pruebas de integración de las vistas por rol (Cliente, Vendedor, Dueño), acceso directo bloqueado, aviso y cierre de sesión en `tests/integration/role-views.test.js`
+- [X] T072 [P] [US9] Añadir pruebas unitarias de los permisos por rol, la visibilidad de navegación y el retorno al catálogo en `tests/unit/role-permissions.test.js`
+- [X] T073 [P] [US9] Añadir pruebas de integración de las vistas por rol (Cliente, Vendedor, Dueño), acceso directo bloqueado, aviso y cierre de sesión en `tests/integration/role-views.test.js`
 
 ### Implementation for US9
 
-- [ ] T074 [US9] Añadir el rol `customer`, los permisos `canViewHistory`, `canViewStock` y `canViewMetrics`, y las etiquetas `logout`/`accessRestricted` en `src/module-config.js`
-- [ ] T075 [US9] Añadir `data-requires` a los botones de navegación y los controles `#role-logout` y `#role-denied` con `role="alert"` en `index.html`
-- [ ] T076 [US9] Implementar `canAccessView`, el filtrado de navegación por rol, la guarda de `showView` con redirección al catálogo y el manejo de cambio/cierre de rol en `src/app.js`
-- [ ] T077 [P] [US9] Mostrar las unidades disponibles solo a roles con `canViewStock` en `src/components/product-card.js` y `src/components/product-catalog.js`
-- [ ] T078 [US9] Alinear las pruebas existentes de configuración e historial con el nuevo rol `customer` y los permisos por vista en `tests/unit/module-config.test.js` y `tests/integration/order-history.test.js`
-- [ ] T079 [P] [US9] Dar estilo al selector de rol, al botón de cierre de sesión y al aviso de acceso restringido en `src/styles.css`
-- [ ] T080 [US9] Cubrir la expiración/cambio de sesión privilegiada mientras se editan ofertas o se consultan métricas, revocando la vista y volviendo al catálogo en `src/app.js` y `src/module-config.js`
+- [X] T074 [US9] Añadir el rol `customer`, los permisos `canViewHistory`, `canViewStock` y `canViewMetrics`, y las etiquetas `logout`/`accessRestricted` en `src/module-config.js`
+- [X] T075 [US9] Añadir `data-requires` a los botones de navegación y los controles `#role-logout` y `#role-denied` con `role="alert"` en `index.html`
+- [X] T076 [US9] Implementar `canAccessView`, el filtrado de navegación por rol, la guarda de `showView` con redirección al catálogo y el manejo de cambio/cierre de rol en `src/app.js`
+- [X] T077 [P] [US9] Mostrar las unidades disponibles solo a roles con `canViewStock` en `src/components/product-card.js` y `src/components/product-catalog.js`
+- [X] T078 [US9] Alinear las pruebas existentes de configuración e historial con el nuevo rol `customer` y los permisos por vista en `tests/unit/module-config.test.js` y `tests/integration/order-history.test.js`
+- [X] T079 [P] [US9] Dar estilo al selector de rol, al botón de cierre de sesión y al aviso de acceso restringido en `src/styles.css`
+- [X] T080 [US9] Cubrir la expiración/cambio de sesión privilegiada mientras se editan ofertas o se consultan métricas, revocando la vista y volviendo al catálogo en `src/app.js` y `src/module-config.js`
 
 **Checkpoint**: Todas las historias de usuario son funcionales y comprobables de forma independiente.
 
@@ -274,17 +274,17 @@ description: "Task list for feature implementation"
 
 **Purpose**: Seguridad, accesibilidad, casos límite, alineación de datos semilla, documentación y verificación final.
 
-- [ ] T081 [P] Reforzar la sanitización de entradas y el escape de HTML/atributos antes de renderizar en `src/app.js`, `src/components/product-card.js`, `src/components/cart.js`, `src/components/admin-panel.js`, `src/components/order-history.js` y `src/components/metrics-dashboard.js`
-- [ ] T082 [P] Añadir refinamientos de accesibilidad (etiquetas, foco, teclado, texto alternativo de insignias) en `index.html` y `src/styles.css`
-- [ ] T083 [P] Cubrir casos límite del embudo (última unidad en stock, expiración de cupón durante checkout, timeout de pasarela) en `src/app.js`, `src/coupons.js` y `src/payments.js`
-- [ ] T084 [P] Alinear los datos semilla y las pruebas de US2 con el escenario "smartphone" y precio máximo de AC1/FR-001, recuperando el mensaje vacío y el reinicio en `src/data/products.js` y `tests/integration/product-filters.test.js`
-- [ ] T085 [P] Verificar `#role-select`, `setRole` y el enmascaramiento de `creditLimit` al cambiar a `finance` en `index.html`, `src/app.js` y `tests/integration/order-history.test.js`
-- [ ] T086 [P] Verificar la guarda `canManageCatalog` y el código de acceso `1234` sin romper el mensaje de permisos en `src/app.js`, `src/components/admin-panel.js` y `tests/integration/admin-panel.test.js`
-- [ ] T087 [P] Revisar y alinear con `spec.md`, `plan.md` y `DEFAULT_CONFIG` cualquier marca, barra de anuncio o imagen externa no solicitada en `index.html` y `src/data/products.js`
-- [ ] T088 [P] Mantener la prueba de extremo a extremo del embudo completo (catálogo → filtros → carrito → cupón → checkout → confirmación → historial) en `tests/integration/purchase-funnel.test.js`
-- [ ] T089 [P] Mantener la prueba de extremo a extremo del ciclo de oferta (admin crea oferta → catálogo muestra descuento → carrito aplica precio → oferta se desactiva → precio original) en `tests/integration/offer-lifecycle.test.js`
-- [ ] T090 [P] Actualizar `specs/002-modulo-ventas/plan.md`, `specs/002-modulo-ventas/data-model.md` y `README.md` con US8, US9, la entidad de métricas derivadas, el rol `customer`, los permisos por vista y el estado actual de cada historia
-- [ ] T091 Ejecutar `npm run test:002`, `npm test` y `npm run build`; verificar manualmente catálogo, filtros, carrito, cupones, checkout, historial, administración, métricas y cambio de roles, registrando los resultados en `specs/002-modulo-ventas/plan.md`
+- [X] T081 [P] Reforzar la sanitización de entradas y el escape de HTML/atributos antes de renderizar en `src/app.js`, `src/components/product-card.js`, `src/components/cart.js`, `src/components/admin-panel.js`, `src/components/order-history.js` y `src/components/metrics-dashboard.js`
+- [X] T082 [P] Añadir refinamientos de accesibilidad (etiquetas, foco, teclado, texto alternativo de insignias) en `index.html` y `src/styles.css`
+- [X] T083 [P] Cubrir casos límite del embudo (última unidad en stock, expiración de cupón durante checkout, timeout de pasarela) en `src/app.js`, `src/coupons.js` y `src/payments.js`
+- [X] T084 [P] Alinear los datos semilla y las pruebas de US2 con el escenario "smartphone" y precio máximo de AC1/FR-001, recuperando el mensaje vacío y el reinicio en `src/data/products.js` y `tests/integration/product-filters.test.js`
+- [X] T085 [P] Verificar `#role-select`, `setRole` y el enmascaramiento de `creditLimit` al cambiar a `finance` en `index.html`, `src/app.js` y `tests/integration/order-history.test.js`
+- [X] T086 [P] Verificar la guarda `canManageCatalog` y el código de acceso `1234` sin romper el mensaje de permisos en `src/app.js`, `src/components/admin-panel.js` y `tests/integration/admin-panel.test.js`
+- [X] T087 [P] Revisar y alinear con `spec.md`, `plan.md` y `DEFAULT_CONFIG` cualquier marca, barra de anuncio o imagen externa no solicitada en `index.html` y `src/data/products.js`
+- [X] T088 [P] Mantener la prueba de extremo a extremo del embudo completo (catálogo → filtros → carrito → cupón → checkout → confirmación → historial) en `tests/integration/purchase-funnel.test.js`
+- [X] T089 [P] Mantener la prueba de extremo a extremo del ciclo de oferta (admin crea oferta → catálogo muestra descuento → carrito aplica precio → oferta se desactiva → precio original) en `tests/integration/offer-lifecycle.test.js`
+- [X] T090 [P] Actualizar `specs/002-modulo-ventas/plan.md`, `specs/002-modulo-ventas/data-model.md` y `README.md` con US8, US9, la entidad de métricas derivadas, el rol `customer`, los permisos por vista y el estado actual de cada historia
+- [X] T091 Ejecutar `npm run test:002`, `npm test` y `npm run build`; verificar manualmente catálogo, filtros, carrito, cupones, checkout, historial, administración, métricas y cambio de roles, registrando los resultados en `specs/002-modulo-ventas/plan.md`
 
 ---
 
