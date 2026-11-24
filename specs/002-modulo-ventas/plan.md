@@ -1,6 +1,6 @@
 # Plan para el Módulo de Ventas (Basado en el Módulo Base ERP)
 
-> **Reconciliación con `spec.md` (T050)**: la implementación final de esta entrega es una **tienda en línea** (catálogo con stock, filtros, carrito, cupones, checkout e historial de pedidos), tal como se define en `spec.md`. Las secciones 1–4 conservan el diseño B2B original (Clientes y Documentos de Venta) como referencia de negocio y de stack; la sección 2.1 y la sección 10 describen el alcance realmente construido y su trazabilidad con las historias de usuario. El FR-009 del plan B2B (eliminación en cascada de documentos al borrar un cliente) se mantiene como referencia histórica: el FR-009 vigente en `spec.md` exige la tienda RootSouth con ocho productos reales y datos semilla coherentes. El FR-010 define la estética editorial Scuffers. Ambos requisitos se detallan en la sección 5.1 y se verifican en la sección 11.
+> **Reconciliación con `spec.md` (T050)**: la implementación final de esta entrega es una **tienda en línea** (catálogo con stock, filtros, carrito, cupones, checkout e historial de pedidos), tal como se define en `spec.md`. Las secciones 1–4 conservan el diseño B2B original (Clientes y Documentos de Venta) como referencia de negocio y de stack; la sección 2.1 y la sección 10 describen el alcance realmente construido y su trazabilidad con las historias de usuario. El FR-009 del plan B2B (eliminación en cascada de documentos al borrar un cliente) se mantiene como referencia histórica: el FR-009 vigente en `spec.md` exige la tienda RootSouth con ocho productos reales y datos semilla coherentes. El FR-010 define la estética editorial Scuffers con Hero Banner, destacados/catálogo en cuatro columnas. El FR-007 incorpora gráficos interactivos de ingresos por categoría, evolución de ventas, distribución por estado y ranking con barras de progreso. El FR-008 reduce la configuración a exactamente tres roles (`Cliente`, `Vendedor`, `Dueño/Administrador`) con administración protegida por código `1234`. Estos requisitos se detallan en las secciones 5.1 y 12, y se verifican en la sección 11.
 
 ## Resumen
 
@@ -25,7 +25,9 @@ Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-mo
 - Administración de precios y ofertas: el rol `admin` puede editar el precio de un producto (validado como numérico y no negativo) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta»; el carrito aplica el precio efectivo y lo recalcula si la oferta cambia. Los roles sin `canManageCatalog` reciben un mensaje de permisos.
 - Personalización por configuración y roles: nombre del módulo, etiquetas, color de acento y control de acceso a datos financieros y a la administración del catálogo desde `src/module-config.js`.
 - Catálogo RootSouth (FR-009): ocho productos reales con imágenes `/images/producto-1.jpg` a `/images/producto-8.jpg`, categorías `Knit`, `Poleras`, `Polerones` y `Accesorios`, ofertas semilla y pedidos iniciales coherentes con las prendas.
-- Estética editorial (FR-010): fondo `#FFFFFF`, marcos 3:4 con fondo `#F4F4F4`, paleta monocromática `#111111`, bordes `0px`, etiquetas en mayúsculas espaciadas y zoom sutil al pasar el cursor.
+- Estética editorial (FR-010): fondo `#FFFFFF`, Hero Banner con imagen `/images/hero-banner.jpg` y overlay oscuro, marcos 3:4 con fondo `#F4F4F4`, paleta monocromática `#111111`, bordes `0px`, destacados y catálogo en cuadrícula plana de cuatro columnas, etiquetas en mayúsculas espaciadas y zoom sutil al pasar el cursor.
+- Métricas visuales (FR-007): gráficos interactivos de barras por categoría, columnas por fecha, distribución proporcional por estado (semántica `success`/`info`/`warning`/`danger`) y ranking con barras de progreso; los controles filtran el panel y las tablas ocultas sirven como alternativa accesible.
+- Roles exactos (FR-008): `Cliente`, `Vendedor` y `Dueño/Administrador`; no existen los roles `Bodega` ni `Finanzas`. El límite de crédito y la administración son exclusivos del dueño/administrador, con código `1234`.
 
 ### Fuera del alcance
 
@@ -61,8 +63,9 @@ El diseño original contemplaba gestión de Clientes y Documentos de Venta (Coti
 | Oferta | `src/offers.js`, `src/data/offers.js`, `src/storage.js` | Validación, vigencia, resolución de la mejor oferta activa y precio efectivo por producto. |
 | Panel de administración | `src/components/admin-panel.js`, `src/app.js` | Edición de precios, CRUD de ofertas y restricción de acceso por rol (`canManageCatalog`). |
 | Catálogo RootSouth (FR-009) | `src/data/products.js`, `public/images/`, `src/catalog.js` | Ocho prendas reales con `<img>` y categorías de la tienda. |
-| Pedidos semilla (FR-009) | `src/data/seed-orders.js`, `src/storage.js` | Cuatro documentos iniciales para `client-demo` y versión de esquema `rootsouth-2026-11`. |
-| Tokens visuales (FR-010) | `src/styles.css`, `src/module-config.js` | Estética editorial Scuffers y rol por defecto `customer`. |
+| Pedidos semilla (FR-007/FR-009) | `src/data/seed-orders.js`, `src/storage.js` | Doce documentos iniciales para `client-demo` en los últimos tres meses y versión de esquema `rootsouth-2026-11-charts`. |
+| Gráficos (FR-007) | `src/metrics.js`, `src/components/metrics-charts.js`, `src/components/metrics-dashboard.js` | Agregaciones para categorías, fechas, estados y ranking; filtros por clic en gráficos. |
+| Tokens visuales (FR-010) | `src/styles.css`, `public/images/hero-banner.jpg`, `src/module-config.js` | Hero Banner, grillas planas de cuatro columnas, estética editorial Scuffers y rol por defecto `customer`. |
 
 ## 4. Propuesta de Configuración (src/module-config.js)
 
@@ -118,7 +121,7 @@ export const userConfig = {
 };
 ```
 
-> **Nota de implementación**: `src/module-config.js` expone `DEFAULT_CONFIG` con las etiquetas del escaparate (Catálogo, Productos destacados, Carrito, Pago, Historial, Agotado, etc.), los roles `sales`/`warehouse`/`finance`/`admin` y el color de acento `#1F7A3E`. El bloque anterior queda como referencia del perfil B2B original.
+> **Nota de implementación**: `src/module-config.js` expone `DEFAULT_CONFIG` con las etiquetas del escaparate y de gráficos, los roles exactos `customer` (Cliente), `sales` (Vendedor) y `admin` (Dueño/Administrador), y el color de acento `#111111`. El bloque anterior queda como referencia del perfil B2B original.
 
 ## 5. Funcionalidades Detalladas
 
@@ -151,22 +154,22 @@ export const userConfig = {
 
 - Categorías: `Knit`, `Poleras`, `Polerones` y `Accesorios`.
 - Ofertas semilla (`src/data/offers.js`): `offer-steel-zip-10` (10 % en `prod-steel-zip-knit`), `offer-coach-c-5000` ($5.000 fijos en `prod-polera-coach-c`) y `offer-vaso-vencida` (vencida, en `prod-vaso-matero`).
-- `src/data/seed-orders.js` exporta `seedOrders`: cuatro documentos iniciales para `client-demo` con ítems de estas prendas. Línea base de `src/metrics.js`: ingresos `416877`, 3 ventas completadas, ticket promedio `138959`, 4 documentos y descuento total `30000`.
-- `src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11'` y guarda la versión en `erp.seedVersion`. Si no coincide, `ensureSeedSchema()` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones, eliminando los datos heredados de tecnología.
+- `src/data/seed-orders.js` exporta `createSeedOrders(referenceDate)` y `seedOrders`: doce documentos iniciales para `client-demo` con ítems de estas prendas y fechas relativas a los últimos 82 días. Línea base de `src/metrics.js`: ingresos `896122`, 9 ventas completadas, ticket promedio `99569`, 12 documentos y descuento total `25000`; estados `Cotización` (2), `Pedido` (5), `Facturado` (4) y `Cancelado` (1).
+- `src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11-charts'` y guarda la versión en `erp.seedVersion`. Si no coincide, `ensureSeedSchema()` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones, eliminando los datos heredados de tecnología.
 
-**FR-010.** `src/styles.css` aplica la estética Scuffers: fondo blanco `#FFFFFF`, marcos de producto 3:4 con fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, bordes `0px`, tipografía sans-serif con navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen en hover. `src/module-config.js` fija `theme.accentColor = '#111111'`. El rol por defecto es `customer`, con acceso al historial; `admin` reúne permisos financieros, de catálogo y de métricas, y desbloquea el panel con el código `1234` en `#admin-code`.
+**FR-010.** `src/styles.css` aplica la estética Scuffers: fondo blanco `#FFFFFF`, Hero Banner servido desde `public/images/hero-banner.jpg` con overlay oscuro y tipografía blanca de alto contraste, marcos de producto 3:4 con fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, bordes `0px`, destacados y catálogo en cuadrícula plana de cuatro columnas, tipografía sans-serif con navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen en hover. `src/module-config.js` fija `theme.accentColor = '#111111'`. El rol por defecto es `customer`, con acceso al historial; `admin` reúne permisos financieros, de catálogo y de métricas, y desbloquea el panel con el código `1234` en `#admin-code`.
 
 ## 6. Plan de Implementación por Fases
 
 | Fase | Actividad | Estado | Observaciones |
 |---|---|---|---|
-| Fase A: Configuración | Crear/ajustar src/module-config.js con el perfil de Ventas. Validar con tests/unit/module-config.test.js. | Pendiente | Punto de partida. |
-| Fase B: Etiquetado | Comprobar que todo el UI muestra "Cliente", "Clientes", "Pedido de Venta", "Cotización" según la configuración. | Pendiente | Barra lateral, panel, formularios, listas y mensajes. |
-| Fase C: Datos Comerciales | Probar campos personalizados (rfcNit, creditLimit, paymentTerms, deliveryDate, etc). Verificar persistencia, visualización y búsqueda. | Pendiente | Aprovechar customFields. |
-| Fase D: Ciclo de Vida | Validar transiciones de estado desde el formulario de documentos. Probar casos inválidos y asegurar que solo se muestran estados permitidos. | Pendiente | Crítico para el flujo Cotización → Pedido → Facturado. |
-| Fase E: Flujos de Ventas | Probar creación de cliente, creación de cotización, cambio de estado, asociación cliente-documento, eliminación en cascada. | Pendiente | Cubrir con pruebas de integración existentes. |
-| Fase E2: Panel y Navegación | Verificar panel de Ventas, acciones rápidas, estadísticas en tiempo real y navegación por barra lateral. | Pendiente | Debe funcionar igual al rediseño ERP. |
-| Fase F: Pruebas y Validación | Ejecutar npm test, revisión manual de flujos y validación de responsive. | Pendiente | Asegurar que no hay regresiones con el módulo base. |
+| Fase A: Configuración | Crear/ajustar src/module-config.js con el perfil de Ventas. Validar con tests/unit/module-config.test.js. | Completado | Punto de partida. |
+| Fase B: Etiquetado | Comprobar que todo el UI muestra "Cliente", "Clientes", "Pedido de Venta", "Cotización" según la configuración. | Completado | Barra lateral, panel, formularios, listas y mensajes. |
+| Fase C: Datos Comerciales | Probar campos personalizados (rfcNit, creditLimit, paymentTerms, deliveryDate, etc). Verificar persistencia, visualización y búsqueda. | Completado | Aprovechar customFields. |
+| Fase D: Ciclo de Vida | Validar transiciones de estado desde el formulario de documentos. Probar casos inválidos y asegurar que solo se muestran estados permitidos. | Completado | Crítico para el flujo Cotización → Pedido → Facturado. |
+| Fase E: Flujos de Ventas | Probar creación de cliente, creación de cotización, cambio de estado, asociación cliente-documento, eliminación en cascada. | Completado | Cubrir con pruebas de integración existentes. |
+| Fase E2: Panel y Navegación | Verificar panel de Ventas, acciones rápidas, estadísticas en tiempo real y navegación por barra lateral. | Completado | Debe funcionar igual al rediseño ERP. |
+| Fase F: Pruebas y Validación | Ejecutar npm test, revisión manual de flujos y validación de responsive. | Completado | Asegurar que no hay regresiones con el módulo base. |
 
 ## 7. Criterios de Aceptación
 
@@ -203,20 +206,20 @@ export const userConfig = {
 
 | Historia | Prioridad | Estado | Evidencia |
 |---|---|---|---|
-| US1 Catálogo de productos destacados | P1 | Implementado | `src/components/product-card.js`, `src/components/product-catalog.js`, `tests/integration/product-catalog.test.js` |
+| US1 Catálogo de productos destacados | P1 | Implementado | `src/components/product-card.js`, `src/components/product-catalog.js`, `public/images/hero-banner.jpg`, `tests/integration/product-catalog.test.js` |
 | US2 Filtrado por categoría y precio | P2 | Implementado | `src/catalog.js`, `src/components/product-filters.js`, `tests/integration/product-filters.test.js` |
 | US3 Gestión de carrito | P3 | Implementado | `src/storage.js`, `src/components/cart.js`, `tests/integration/cart.test.js` |
 | US4 Cupones de descuento | P4 | Implementado | `src/coupons.js`, `src/components/coupon-form.js`, `tests/integration/coupons.test.js` |
 | US5 Checkout y confirmación | P5 | Implementado | `src/checkout.js`, `src/payments.js`, `src/components/checkout-form.js`, `src/components/order-confirmation.js`, `tests/integration/checkout.test.js` |
 | US6 Historial de documentos de venta | P6 | Implementado | `src/components/order-history.js`, `src/module-config.js`, `tests/integration/order-history.test.js` |
 | US7 Administración de precios y ofertas | P7 | Implementado | `src/offers.js`, `src/components/admin-panel.js`, `src/storage.js`, `tests/integration/admin-panel.test.js`, `tests/integration/offer-lifecycle.test.js` |
-| US8 Panel de métricas e indicadores | P8 | Implementado | `src/metrics.js`, `src/components/metrics-dashboard.js`, `src/app.js`, `tests/unit/metrics.test.js`, `tests/unit/metrics-filters.test.js`, `tests/integration/metrics-dashboard.test.js` |
+| US8 Panel de métricas e indicadores | P8 | Implementado | `src/metrics.js`, `src/components/metrics-charts.js`, `src/components/metrics-dashboard.js`, `src/app.js`, `tests/unit/metrics.test.js`, `tests/unit/metrics-filters.test.js`, `tests/unit/metrics-charts.test.js`, `tests/integration/metrics-dashboard.test.js` |
 | US9 Vistas y navegación por rol | P9 | Implementado | `src/module-config.js`, `src/app.js`, `index.html`, `src/components/product-card.js`, `tests/unit/role-permissions.test.js`, `tests/integration/role-views.test.js` |
 
-- Roles implementados en `DEFAULT_CONFIG.roles`: `customer` (Cliente, rol por defecto con catálogo, carrito, pago e historial), `sales` (Ventas, stock e historial), `warehouse` (Bodega, stock e historial), `finance` (Finanzas, con `canViewFinancials`) y `admin` (Dueño/Administrador, con `canViewFinancials`, `canManageCatalog` y `canViewMetrics`). El panel de administración exige el código `1234` en `#admin-code`.
+- Roles implementados en `DEFAULT_CONFIG.roles` y exportados como `ROLES`: `customer` (Cliente, rol por defecto con catálogo, carrito, pago e historial), `sales` (Vendedor, stock e historial) y `admin` (Dueño/Administrador, con `canViewFinancials`, `canManageCatalog` y `canViewMetrics`). No existen `warehouse` ni `finance`; el panel de administración exige el código `1234` en `#admin-code` y `showView('admin')` vuelve al catálogo si la sesión privilegiada no fue desbloqueada.
 - La decisión anterior de retirar el panel de métricas por considerarlo no solicitado quedó supersedida por US8 en `spec.md`; el panel se calcula desde `erp.orders`, `erp.products`, `erp.coupons`, `erp.couponUsage` y `erp.offers`, sin almacenar una entidad adicional.
-- Datos semilla FR-009: `src/data/products.js` (8 prendas RootSouth con `image`), `src/data/offers.js` (3 ofertas) y `src/data/seed-orders.js` (4 documentos para `client-demo`). `SEED_VERSION = 'rootsouth-2026-11'` en `src/storage.js` hace que un cambio de versión limpie y recree productos, pedidos, carrito, ofertas y uso de cupones, descartando los datos de tecnología anteriores.
-- Verificación final T097: `npm run test:002` terminó con 22 archivos y 128 pruebas aprobadas; `npm run build` compiló correctamente; `npm test -- --run` terminó con 23 archivos aprobados, 11 fallidos, 140 pruebas aprobadas y 88 fallidas. Los fallos de `npm test` provienen de suites heredadas del módulo base 001 (API `addEntity`/`addDocument`, `BASE_FIELDS`, terminología y tema base) y quedan fuera del alcance 002; la sección 11 detalla las comprobaciones de FR-009 y FR-010.
+- Datos semilla FR-007/FR-009: `src/data/products.js` (8 prendas RootSouth con `image`, 4 destacadas), `src/data/offers.js` (3 ofertas) y `src/data/seed-orders.js` (12 documentos para `client-demo`). `SEED_VERSION = 'rootsouth-2026-11-charts'` en `src/storage.js` hace que un cambio de versión limpie y recree productos, pedidos, carrito, ofertas y uso de cupones, descartando los datos de tecnología anteriores.
+- Verificación final T097: `npm run test:002` terminó con 24 archivos y 150 pruebas aprobadas; `npm run build` compiló correctamente; `npm test -- --run` terminó con 24 archivos aprobados, 11 fallidos, 152 pruebas aprobadas y 88 fallidas. Los fallos de `npm test` provienen de suites heredadas del módulo base 001 (API `addEntity`/`addDocument`, `BASE_FIELDS`, terminología y tema base) y quedan fuera del alcance 002; la sección 11 detalla las comprobaciones de FR-007, FR-009 y FR-010.
 - Los antiguos criterios CV-001 a CV-010 y las fases A–F de la sección 6 corresponden al perfil B2B de referencia; no son criterios de aceptación de esta entrega.
 - Las pruebas heredadas del módulo base 001 permanecen en `tests/` pero dependen de una implementación que no forma parte de este alcance.
 
@@ -224,15 +227,24 @@ export const userConfig = {
 
 | ID | Comprobación | Evidencia esperada |
 |---|---|---|
-| V-009-1 | Los ocho productos semilla cargan con sus ID, precios, stock y categorías RootSouth. | `src/data/products.js`, `erp.products`, sección 5.1 |
+| V-009-1 | Los ocho productos semilla cargan con sus ID, precios, stock, categorías RootSouth y exactamente cuatro destacados. | `src/data/products.js`, `erp.products`, sección 5.1 |
 | V-009-2 | Las ocho tarjetas renderizan `<img>` con `/images/producto-1.jpg` a `/images/producto-8.jpg`, servidos desde `public/images/`. | `src/catalog.js`, `src/components/product-card.js`, `public/images/` |
 | V-009-3 | El filtro ofrece `Knit`, `Poleras`, `Polerones` y `Accesorios`; `prod-bandanas` queda agotado con stock 0. | `src/catalog.js`, `src/components/product-filters.js` |
 | V-009-4 | Las ofertas semilla son `offer-steel-zip-10`, `offer-coach-c-5000` y `offer-vaso-vencida` (vencida). | `src/data/offers.js`, `erp.offers`, `src/offers.js` |
-| V-009-5 | Los cuatro documentos de `src/data/seed-orders.js` pertenecen a `client-demo` y usan solo productos RootSouth. | `src/data/seed-orders.js`, `erp.orders`, `erp.clients` |
-| V-009-6 | El panel arranca con ingresos 416877, 3 ventas completadas, ticket promedio 138959, 4 documentos y descuento 30000. | `src/metrics.js`, `src/components/metrics-dashboard.js` |
-| V-009-7 | Un `erp.seedVersion` distinto de `rootsouth-2026-11` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones. | `SEED_VERSION` y `ensureSeedSchema()` en `src/storage.js` |
-| V-010-1 | Fondo `#FFFFFF`, marcos 3:4 con fondo `#F4F4F4`, paleta `#111111`, bordes `0px` y acento `#111111`. | `src/styles.css`, `src/module-config.js` |
+| V-009-5 | Los doce documentos de `src/data/seed-orders.js` pertenecen a `client-demo`, usan solo productos RootSouth y caen en los últimos tres meses. | `src/data/seed-orders.js`, `erp.orders`, `erp.clients` |
+| V-009-6 | El panel arranca con ingresos 896122, 9 ventas completadas, ticket promedio 99569, 12 documentos y descuento 25000. | `src/metrics.js`, `src/components/metrics-dashboard.js` |
+| V-009-7 | Un `erp.seedVersion` distinto de `rootsouth-2026-11-charts` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones. | `SEED_VERSION` y `ensureSeedSchema()` en `src/storage.js` |
+| V-010-1 | Fondo `#FFFFFF`, Hero Banner `/images/hero-banner.jpg` con overlay oscuro, marcos 3:4 con fondo `#F4F4F4`, paleta `#111111`, bordes `0px`, grillas de cuatro columnas y acento `#111111`. | `src/styles.css`, `public/images/hero-banner.jpg`, `src/module-config.js` |
 | V-010-2 | Navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen al pasar el cursor. | `src/styles.css`, `src/components/product-card.js` |
-| V-ROL-1 | El rol por defecto es `customer` con historial; `admin` tiene permisos financieros, de catálogo y de métricas, y usa `1234` en `#admin-code`. | `src/module-config.js`, `src/app.js`, `index.html` |
+| V-ROL-1 | El rol por defecto es `customer` con historial; `admin` tiene permisos financieros, de catálogo y de métricas, y usa `1234` en `#admin-code`. No existen `warehouse` ni `finance`. | `src/module-config.js`, `src/app.js`, `index.html` |
+| V-007-1 | El panel renderiza gráficos de categoría, fecha y estado con alternativas accesibles, y el ranking muestra barras de progreso. | `src/components/metrics-charts.js`, `src/components/metrics-dashboard.js` |
+| V-007-2 | Hacer clic en una barra de categoría o columna de fecha recalcula KPI, tablas y gráficos. | `src/app.js`, `tests/integration/metrics-dashboard.test.js` |
 
-Resultado de la verificación automatizada T097: `npm run test:002` → 22 archivos / 128 pruebas aprobadas; `npm run build` → compilación correcta; `npm test -- --run` → 23 archivos aprobados, 11 archivos fallidos, 140 pruebas aprobadas y 88 pruebas fallidas de suites heredadas del módulo base 001, fuera del alcance 002.
+Resultado de la verificación automatizada T097: `npm run test:002` → 24 archivos / 150 pruebas aprobadas; `npm run build` → compilación correcta; `npm test -- --run` → 24 archivos aprobados, 11 fallidos, 152 pruebas aprobadas y 88 fallidas de suites heredadas del módulo base 001, fuera del alcance 002.
+
+## 12. Cierre de FR-007 y FR-008
+
+- `src/metrics.js` devuelve `revenueByCategory`, `salesByDate`, `statusDistribution` y `topProducts` con `revenueShare`/`progressPercent`; todos se recalculan con los filtros de fecha y categoría.
+- `src/components/metrics-charts.js` genera gráficos accesibles con `role="img"`, `aria-label`, tooltips `title`, tablas ocultas para lectores de pantalla y clases semánticas por estado.
+- `src/app.js` enlaza `data-chart-category` y `data-chart-date` con `state.metrics`, sincroniza los formularios y bloquea `showView('admin')` mientras no exista sesión privilegiada desbloqueada.
+- `src/module-config.js` exporta `ROLES` con exactamente `customer`, `sales` y `admin`; el selector de la cabecera se construye desde esa configuración y el límite de crédito solo se revela a `admin`.

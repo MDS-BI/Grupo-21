@@ -13,7 +13,7 @@ export function productMedia(product) {
 }
 
 export function featuredProducts(products) {
-  return (products || []).filter((product) => Boolean(product.featured));
+  return (products || []).filter((product) => Boolean(product.featured)).slice(0, 4);
 }
 
 export function productCategories(products) {

@@ -26,23 +26,24 @@ describe('order history view', () => {
     const select = document.getElementById('history-client');
     const demoOption = [...select.options].find((option) => option.textContent.includes('Cliente Demo'));
     changeValue(select, demoOption.value);
-    expect(document.querySelectorAll('#history-list tr')).toHaveLength(4);
+    expect(document.querySelectorAll('#history-list tr')).toHaveLength(12);
     const history = document.getElementById('history-list').textContent;
-    expect(history).toContain('PED-20261001-0001');
-    expect(history).toContain(formatCurrency(129970));
-    expect(history).toContain(formatCurrency(94967));
-    expect(history).toContain(formatCurrency(191940));
     expect(history).toContain('Cotización');
+    expect(history).toContain('Pedido');
+    expect(history).toContain('Facturado');
+    expect(history).toContain('Cancelado');
+    expect(history).toContain(formatCurrency(68970));
+    expect(history).toContain(formatCurrency(155980));
   });
 
-  it('masks the credit limit for sales and reveals it for finance', async () => {
+  it('masks the credit limit for sales and reveals it only for the owner', async () => {
     await completePurchase();
     clickNav('history');
     expect(document.getElementById('history-credit-limit').textContent).toBe('•••••');
 
-    changeValue(document.getElementById('role-select'), 'finance');
+    changeValue(document.getElementById('role-select'), 'admin');
     expect(document.getElementById('history-credit-limit').textContent).toBe(formatCurrency(0));
-    expect(localStorage.getItem('erp.role')).toBe('finance');
+    expect(localStorage.getItem('erp.role')).toBe('admin');
   });
 
   it('shows an empty state for a client without documents', async () => {

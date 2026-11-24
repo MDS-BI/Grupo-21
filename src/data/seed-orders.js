@@ -1,139 +1,186 @@
-export const seedOrders = [
-  {
-    id: 'seed-order-001',
-    orderNumber: 'PED-20261001-0001',
-    clientId: 'client-demo',
-    documentType: 'Pedido',
-    status: 'Pedido',
-    date: '2026-10-01',
-    items: [
-      {
-        productId: 'prod-steel-zip-knit',
-        name: 'Steel Zip Knit',
-        price: 77990,
-        quantity: 1,
-        lineTotal: 77990
-      },
-      {
-        productId: 'prod-polera-coach-c',
-        name: 'Polera Coach C - Gris Claro',
-        price: 25990,
-        quantity: 2,
-        lineTotal: 51980
-      }
-    ],
-    subtotal: 129970,
-    discount: 0,
-    total: 129970,
-    couponCode: null,
-    paymentMethod: 'Tarjeta'
-  },
-  {
-    id: 'seed-order-002',
-    orderNumber: 'PED-20261005-0001',
-    clientId: 'client-demo',
-    documentType: 'Facturado',
-    status: 'Facturado',
-    date: '2026-10-05',
-    items: [
-      {
-        productId: 'prod-black-zipper-layers',
-        name: 'Black Zipper Layers',
-        price: 67990,
-        quantity: 1,
-        lineTotal: 67990
-      },
-      {
-        productId: 'prod-jockey',
-        name: 'Jockey',
-        price: 16990,
-        quantity: 2,
-        lineTotal: 33980
-      },
-      {
-        productId: 'prod-bandanas',
-        name: 'Bandanas',
-        price: 2997,
-        quantity: 1,
-        lineTotal: 2997
-      }
-    ],
-    subtotal: 104967,
-    discount: 10000,
-    total: 94967,
-    couponCode: 'ROOT10',
-    paymentMethod: 'Transferencia'
-  },
-  {
-    id: 'seed-order-003',
-    orderNumber: 'PED-20261012-0001',
-    clientId: 'client-demo',
-    documentType: 'Cotización',
-    status: 'Cotización',
-    date: '2026-10-12',
-    items: [
-      {
-        productId: 'prod-llavero-rootsouth',
-        name: 'Llavero Rootsouth Original',
-        price: 5000,
-        quantity: 3,
-        lineTotal: 15000
-      },
-      {
-        productId: 'prod-tarjetero-rootsouth',
-        name: 'Tarjetero Rootsouth',
-        price: 9790,
-        quantity: 1,
-        lineTotal: 9790
-      },
-      {
-        productId: 'prod-vaso-matero',
-        name: 'Vaso Matero',
-        price: 9990,
-        quantity: 2,
-        lineTotal: 19980
-      }
-    ],
-    subtotal: 44770,
-    discount: 0,
-    total: 44770,
-    couponCode: null,
-    paymentMethod: 'Tarjeta'
-  },
-  {
-    id: 'seed-order-004',
-    orderNumber: 'PED-20261102-0001',
-    clientId: 'client-demo',
-    documentType: 'Pedido',
-    status: 'Pedido',
-    date: '2026-11-02',
-    items: [
-      {
-        productId: 'prod-steel-zip-knit',
-        name: 'Steel Zip Knit',
-        price: 77990,
-        quantity: 2,
-        lineTotal: 155980
-      },
-      {
-        productId: 'prod-polera-coach-c',
-        name: 'Polera Coach C - Gris Claro',
-        price: 25990,
-        quantity: 1,
-        lineTotal: 25990
-      },
-      {
-        productId: 'prod-vaso-matero',
-        name: 'Vaso Matero',
-        price: 9990,
-        quantity: 3,
-        lineTotal: 29970
-      }
-    ],
-    subtotal: 211940,
-    discount: 20000,
-    total: 191940,
-    couponCode: 'ROOT20',
-    paymentMethod: 'Tarjeta'
-  }
-];
+function dateFromOffset(days, referenceDate) {
+  const date = new Date(referenceDate);
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+
+function orderNumber(date, sequence) {
+  return `PED-${date.replace(/-/g, '')}-${String(sequence).padStart(4, '0')}`;
+}
+
+export function createSeedOrders(referenceDate = new Date()) {
+  const templates = [
+    {
+      offset: 82,
+      status: 'Pedido',
+      documentType: 'Pedido',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-polera-coach-c', 'Polera Coach C - Gris Claro', 25990, 2],
+        ['prod-jockey', 'Jockey', 16990, 1]
+      ]
+    },
+    {
+      offset: 76,
+      status: 'Facturado',
+      documentType: 'Facturado',
+      discount: 10000,
+      couponCode: 'ROOT10',
+      paymentMethod: 'Transferencia',
+      items: [
+        ['prod-steel-zip-knit', 'Steel Zip Knit', 77990, 1],
+        ['prod-black-zipper-layers', 'Black Zipper Layers', 67990, 1]
+      ]
+    },
+    {
+      offset: 70,
+      status: 'Cotización',
+      documentType: 'Cotización',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-bandanas', 'Bandanas', 2997, 2],
+        ['prod-llavero-rootsouth', 'Llavero Rootsouth Original', 5000, 3],
+        ['prod-tarjetero-rootsouth', 'Tarjetero Rootsouth', 9790, 1]
+      ]
+    },
+    {
+      offset: 64,
+      status: 'Pedido',
+      documentType: 'Pedido',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-vaso-matero', 'Vaso Matero', 9990, 4],
+        ['prod-polera-coach-c', 'Polera Coach C - Gris Claro', 25990, 1]
+      ]
+    },
+    {
+      offset: 58,
+      status: 'Facturado',
+      documentType: 'Facturado',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Transferencia',
+      items: [
+        ['prod-black-zipper-layers', 'Black Zipper Layers', 67990, 2]
+      ]
+    },
+    {
+      offset: 52,
+      status: 'Pedido',
+      documentType: 'Pedido',
+      discount: 5000,
+      couponCode: 'OFERTA5',
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-jockey', 'Jockey', 16990, 3],
+        ['prod-bandanas', 'Bandanas', 2997, 4]
+      ]
+    },
+    {
+      offset: 46,
+      status: 'Facturado',
+      documentType: 'Facturado',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-steel-zip-knit', 'Steel Zip Knit', 77990, 1],
+        ['prod-tarjetero-rootsouth', 'Tarjetero Rootsouth', 9790, 2]
+      ]
+    },
+    {
+      offset: 40,
+      status: 'Cotización',
+      documentType: 'Cotización',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-llavero-rootsouth', 'Llavero Rootsouth Original', 5000, 5],
+        ['prod-vaso-matero', 'Vaso Matero', 9990, 2]
+      ]
+    },
+    {
+      offset: 34,
+      status: 'Pedido',
+      documentType: 'Pedido',
+      discount: 10000,
+      couponCode: 'ROOT10',
+      paymentMethod: 'Transferencia',
+      items: [
+        ['prod-polera-coach-c', 'Polera Coach C - Gris Claro', 25990, 3],
+        ['prod-black-zipper-layers', 'Black Zipper Layers', 67990, 1]
+      ]
+    },
+    {
+      offset: 28,
+      status: 'Facturado',
+      documentType: 'Facturado',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-steel-zip-knit', 'Steel Zip Knit', 77990, 2]
+      ]
+    },
+    {
+      offset: 16,
+      status: 'Cancelado',
+      documentType: 'Pedido',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-jockey', 'Jockey', 16990, 2],
+        ['prod-vaso-matero', 'Vaso Matero', 9990, 1]
+      ]
+    },
+    {
+      offset: 6,
+      status: 'Pedido',
+      documentType: 'Pedido',
+      discount: 0,
+      couponCode: null,
+      paymentMethod: 'Tarjeta',
+      items: [
+        ['prod-polera-coach-c', 'Polera Coach C - Gris Claro', 25990, 1],
+        ['prod-bandanas', 'Bandanas', 2997, 2],
+        ['prod-tarjetero-rootsouth', 'Tarjetero Rootsouth', 9790, 1]
+      ]
+    }
+  ];
+
+  return templates.map((template, index) => {
+    const date = dateFromOffset(template.offset, referenceDate);
+    const items = template.items.map(([productId, name, price, quantity]) => ({
+      productId,
+      name,
+      price,
+      quantity,
+      lineTotal: price * quantity
+    }));
+    const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
+    return {
+      id: `seed-order-${String(index + 1).padStart(3, '0')}`,
+      orderNumber: orderNumber(date, 1),
+      clientId: 'client-demo',
+      documentType: template.documentType,
+      status: template.status,
+      date,
+      items,
+      subtotal,
+      discount: template.discount,
+      total: subtotal - template.discount,
+      couponCode: template.couponCode,
+      paymentMethod: template.paymentMethod
+    };
+  });
+}
+
+export const seedOrders = createSeedOrders();

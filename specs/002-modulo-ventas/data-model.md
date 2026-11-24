@@ -2,7 +2,7 @@
 
 El módulo de Ventas reutiliza las entidades base `Entity` y `Document` del ERP, adaptándolas como `Cliente` y `Documento de Venta`. La Cotización y el Pedido de Venta son el mismo documento en distintos estados del ciclo de vida, no entidades separadas.
 
-> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B. En la tienda, el FR-009 vigente corresponde al catálogo RootSouth y sus datos semilla (sección «Catálogo semilla RootSouth»), y el FR-010 a la presentación editorial (sección «Presentación editorial»).
+> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B. En la tienda, el FR-009 vigente corresponde al catálogo RootSouth y sus datos semilla (sección «Catálogo semilla RootSouth»), y el FR-010 a la presentación editorial (sección «Presentación editorial»). El FR-007 incorpora indicadores derivados para gráficos de categoría, fecha, estado y ranking (sección «Indicadores derivados»), y el FR-008 reduce los roles activos a `customer`, `sales` y `admin` (sección «Permisos por rol»).
 
 ## Entidad: Cliente
 
@@ -207,7 +207,7 @@ Los ocho registros de `src/data/products.js` son productos reales de RootSouth. 
 | `prod-tarjetero-rootsouth` | Tarjetero Rootsouth | `/images/producto-7.jpg` | 9790 | Accesorios | 25 |
 | `prod-vaso-matero` | Vaso Matero | `/images/producto-8.jpg` | 9990 | Accesorios | 18 |
 
-Las categorías del catálogo son `Knit`, `Poleras`, `Polerones` y `Accesorios`; los ocho productos están marcados como destacados. `prod-bandanas` tiene `stock = 0`, por lo que se muestra como «Agotado» y no se puede comprar.
+Las categorías del catálogo son `Knit`, `Poleras`, `Polerones` y `Accesorios`; exactamente cuatro productos están marcados como destacados (`prod-steel-zip-knit`, `prod-polera-coach-c`, `prod-black-zipper-layers`, `prod-jockey`) y la sección de destacados se limita a cuatro tarjetas. `prod-bandanas` tiene `stock = 0`, por lo que se muestra como «Agotado» y no se puede comprar.
 
 ### Cupón
 
@@ -256,7 +256,7 @@ Reglas de precios:
 | orderNumber | string | Número de pedido `PED-YYYYMMDD-NNNN` | Único, generado al confirmar |
 | clientId | string | Referencia al cliente comprador | Debe existir; el cliente se crea o reutiliza por correo |
 | documentType | string | Tipo de documento | `Pedido` |
-| status | string | Estado del documento | `Pedido` |
+| status | string | Estado del documento | `Cotización`, `Pedido`, `Facturado` o `Cancelado` |
 | items | array | Líneas `{ productId, name, price, quantity, lineTotal }` | Al menos una al confirmar |
 | subtotal | number | Suma de líneas antes del descuento | No negativo |
 | discount | number | Descuento del cupón aplicado | No negativo y ≤ subtotal |
@@ -268,20 +268,28 @@ Reglas de precios:
 
 ### Pedidos semilla RootSouth (FR-009)
 
-`src/data/seed-orders.js` exporta `seedOrders`, cuatro documentos iniciales que `src/storage.js` escribe en `erp.orders` para el cliente `client-demo` (`erp.clients`). Todos sus ítems referencian productos del catálogo RootSouth y ninguno corresponde a los antiguos artículos de tecnología.
+`src/data/seed-orders.js` exporta `createSeedOrders(referenceDate)` y `seedOrders`, doce documentos iniciales que `src/storage.js` escribe en `erp.orders` para el cliente `client-demo` (`erp.clients`). Todos sus ítems referencian productos del catálogo RootSouth y ninguno corresponde a los antiguos artículos de tecnología. Las fechas se derivan del día de ejecución mediante desplazamientos de 82, 76, 70, 64, 58, 52, 46, 40, 34, 28, 16 y 6 días, de modo que la muestra siempre quede dentro de los últimos tres meses.
 
-| ID | orderNumber | date | status | subtotal | discount | total |
-|---|---|---|---|---:|---:|---:|
-| `seed-order-001` | `PED-20261001-0001` | 2026-10-01 | `Pedido` | 129970 | 0 | 129970 |
-| `seed-order-002` | `PED-20261005-0001` | 2026-10-05 | `Facturado` | 104967 | 10000 | 94967 |
-| `seed-order-003` | `PED-20261012-0001` | 2026-10-12 | `Cotización` | 44770 | 0 | 44770 |
-| `seed-order-004` | `PED-20261102-0001` | 2026-11-02 | `Pedido` | 211940 | 20000 | 191940 |
+| ID | offset (días) | status | documentType | descuento | cupón |
+|---|---:|---|---|---:|---|
+| `seed-order-001` | 82 | `Pedido` | `Pedido` | 0 | — |
+| `seed-order-002` | 76 | `Facturado` | `Facturado` | 10000 | `ROOT10` |
+| `seed-order-003` | 70 | `Cotización` | `Cotización` | 0 | — |
+| `seed-order-004` | 64 | `Pedido` | `Pedido` | 0 | — |
+| `seed-order-005` | 58 | `Facturado` | `Facturado` | 0 | — |
+| `seed-order-006` | 52 | `Pedido` | `Pedido` | 5000 | `OFERTA5` |
+| `seed-order-007` | 46 | `Facturado` | `Facturado` | 0 | — |
+| `seed-order-008` | 40 | `Cotización` | `Cotización` | 0 | — |
+| `seed-order-009` | 34 | `Pedido` | `Pedido` | 10000 | `ROOT10` |
+| `seed-order-010` | 28 | `Facturado` | `Facturado` | 0 | — |
+| `seed-order-011` | 16 | `Cancelado` | `Pedido` | 0 | — |
+| `seed-order-012` | 6 | `Pedido` | `Pedido` | 0 | — |
 
-La línea base que `computeMetrics()` calcula sobre estos documentos es: ingresos `416877` (129970 + 94967 + 191940), 3 ventas completadas (estados `Pedido` y `Facturado`), ticket promedio `138959`, 4 documentos en total y descuentos por `30000`. `seed-order-003` cuenta como documento pero no aporta ingresos por estar en `Cotización`. Los cupones `ROOT10` y `ROOT20` quedan registrados como `couponCode` histórico de dos de los pedidos.
+La línea base que `computeMetrics()` calcula sobre estos documentos es: ingresos `896122`, 9 ventas completadas (estados `Pedido` y `Facturado`), ticket promedio `99569`, 12 documentos en total y descuentos por `25000`. Los documentos en `Cotización` y `Cancelado` cuentan como documentos pero no aportan ingresos; la distribución de estados es `Cotización` 2, `Pedido` 5, `Facturado` 4 y `Cancelado` 1.
 
 ### Control de versión del esquema de semillas (FR-009)
 
-`src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11'` y persiste la versión activa en la clave `erp.seedVersion`. `ensureSeedSchema()` compara la versión almacenada con la constante: si no coinciden o no existe, reescribe `erp.products`, `erp.offers`, `erp.orders`, `erp.cart` y `erp.couponUsage` con los datos semilla de la tienda RootSouth y actualiza `erp.seedVersion`. `erp.clients`, `erp.coupons` y `erp.role` no se recrean en este proceso.
+`src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11-charts'` y persiste la versión activa en la clave `erp.seedVersion`. `ensureSeedSchema()` compara la versión almacenada con la constante: si no coinciden o no existe, reescribe `erp.products`, `erp.offers`, `erp.orders`, `erp.cart` y `erp.couponUsage` con los datos semilla de la tienda RootSouth y actualiza `erp.seedVersion`. `erp.clients`, `erp.coupons` y `erp.role` no se recrean en este proceso.
 
 Este versionado elimina los productos de tecnología de esquemas anteriores junto con sus pedidos, ofertas, carrito y uso acumulado de cupones, de modo que el historial y las métricas arranquen solo con prendas RootSouth. La limpieza ocurre de forma automática en la primera carga tras el cambio de versión.
 
@@ -294,7 +302,7 @@ Este versionado elimina los productos de tecnología de esquemas anteriores junt
 - El carrito es single-user (un solo espacio de trabajo) y se vacía tras una compra exitosa.
 - Cada oferta referencia un producto existente (`Oferta.productId → Producto.id`); al crear o editar una oferta se valida el producto, el tipo, el valor y la vigencia. Las ofertas no eliminan productos.
 - El pedido guarda el precio efectivo de cada línea, por lo que un cambio posterior de precio u oferta no altera pedidos ya confirmados.
-- `creditLimit` es informativo: se muestra en el historial y se enmascara (`•••••`) para roles sin permiso financiero (`customer`, `sales`, `warehouse`); lo ven `finance` y `admin` mediante `canViewFinancials`.
+- `creditLimit` es informativo: se muestra en el historial y se enmascara (`•••••`) para roles sin permiso financiero (`customer`, `sales`); solo lo ve `admin` mediante `canViewFinancials`.
 
 ### Equivalencias con el modelo B2B de referencia
 
@@ -306,11 +314,12 @@ Este versionado elimina los productos de tecnología de esquemas anteriores junt
 | `Documento.totalAmount` | `Pedido.total` |
 | Partidas del documento (extensión) | `Pedido.items[]` |
 | Estado `Pedido` del ciclo B2B | `Pedido.status = "Pedido"` |
-| Cotización, Aprobado, Facturado, Cancelado, Vencido | No implementados |
+| Cotización, Facturado, Cancelado | Valores de `Pedido.status` en semillas e historial; `Cancelado` no aporta ingresos |
+| Aprobado, En revisión, En proceso, Vencido | No implementados |
 
 ### Presentación editorial (FR-010)
 
-Los tokens visuales se aplican en `src/styles.css` siguiendo la referencia de Scuffers: fondo blanco `#FFFFFF`, marcos de producto verticales con `aspect-ratio: 3 / 4` y fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, `border-radius: 0`, tipografía sans-serif, etiquetas de navegación y categorías en mayúsculas con espaciado de letras y un zoom sutil de la imagen (`scale`) al pasar el cursor. `src/module-config.js` fija `theme.accentColor = '#111111'`; el verde `#1F7A3E` del perfil B2B queda solo como referencia histórica del plan.
+Los tokens visuales se aplican en `src/styles.css` siguiendo la referencia de Scuffers: fondo blanco `#FFFFFF`, Hero Banner servido desde `public/images/hero-banner.jpg` con overlay oscuro y tipografía blanca, marcos de producto verticales con `aspect-ratio: 3 / 4` y fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, `border-radius: 0`, destacados y catálogo en grilla plana de cuatro columnas, tipografía sans-serif, etiquetas de navegación y categorías en mayúsculas con espaciado de letras y un zoom sutil de la imagen (`scale`) al pasar el cursor. `src/module-config.js` fija `theme.accentColor = '#111111'`; el verde `#1F7A3E` del perfil B2B queda solo como referencia histórica del plan.
 
 Estos tokens son de presentación y no alteran el modelo persistido: `Producto.image` conserva la ruta original y el precio, el stock y la categoría no se derivan de la imagen.
 
@@ -326,6 +335,10 @@ El panel de métricas no introduce una entidad persistida: calcula sus indicador
 | Productos más vendidos | Agrupación de `Pedido.items[]` por `productId`, ordenada por ingresos y luego por unidades. |
 | Alertas de stock | Productos con `stock <= 5`, incluidos los agotados (`stock = 0`). |
 | Descuentos y cupones | Suma de `Pedido.discount`, usos acumulados por código y usos de oferta registrados en las líneas. |
+| Ingresos por categoría | Agrupación de ingresos y unidades de `Pedido.items[]` por `Producto.category`; alimenta un gráfico de barras y filtra al hacer clic. |
+| Evolución de ventas por fecha | Agrupación de ingresos y cantidad de ventas completadas por `Pedido.date` (`YYYY-MM-DD`); alimenta un gráfico de columnas y filtra al hacer clic. |
+| Distribución por estado | Conteo y porcentaje de `Pedido.status` sobre todos los documentos filtrados, con tono semántico `Cotización=warning`, `Pedido=info`, `Facturado=success`, `Cancelado=danger`. |
+| Progreso del ranking | Para cada producto: `revenueShare = round(revenue / totalRankedRevenue * 100)` y `progressPercent = round(revenue / maxRevenue * 100)`. |
 
 Los filtros por rango de fechas (`Pedido.date`) y categoría (vía `Pedido.items[].productId → Producto.category`) son inclusivos y recalculan todos los indicadores. Sin coincidencias se devuelven ceros y un estado vacío sin errores de cálculo.
 
@@ -334,10 +347,10 @@ Los filtros por rango de fechas (`Pedido.date`) y categoría (vía `Pedido.items
 | Rol | Permisos |
 |---|---|
 | `customer` | Rol por defecto: catálogo, carrito, pago e historial. No ve administración ni métricas; no ve cantidades de stock. |
-| `sales` | Catálogo con disponibilidad de stock, carrito, pago e historial de clientes. No administra catálogo ni ve métricas globales. |
-| `warehouse` | Catálogo con stock e historial. Sin administración de precios ni métricas. |
-| `finance` | Historial con límite de crédito sin enmascarar (`canViewFinancials`). Sin administración de catálogo ni métricas globales. |
-| `admin` | Dueño/administrador: `canViewFinancials`, `canManageCatalog` y `canViewMetrics`; historial íntegro, stock y administración de precios/ofertas. El panel exige el código `1234` en `#admin-code`. |
+| `sales` | Vendedor: catálogo con disponibilidad de stock, carrito, pago e historial de clientes. No administra catálogo, ve métricas globales ni el límite de crédito. |
+| `admin` | Dueño/administrador: `canViewFinancials`, `canManageCatalog` y `canViewMetrics`; historial íntegro con límite de crédito visible, stock, métricas y administración de precios/ofertas. El panel exige el código `1234` en `#admin-code`. |
+
+No existen los roles `warehouse` ni `finance`: `ROLES` en `src/module-config.js` contiene exactamente `customer`, `sales` y `admin`.
 
 `src/app.js` filtra los botones de navegación con `data-requires` y aplica una guarda en `showView`; el contenido restringido se sustituye por un aviso con una acción para volver al catálogo. El cierre de sesión interna guarda el rol `customer` y devuelve a la vista pública.
 

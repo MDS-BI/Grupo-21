@@ -17,7 +17,7 @@ export const KEYS = {
   seedVersion: 'erp.seedVersion'
 };
 
-export const SEED_VERSION = 'rootsouth-2026-11';
+export const SEED_VERSION = 'rootsouth-2026-11-charts';
 
 const seedClient = {
   id: 'client-demo',

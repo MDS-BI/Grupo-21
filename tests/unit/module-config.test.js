@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
-  DEFAULT_CONFIG, normalizeConfig, loadModuleConfig, setActiveConfig, getConfig,
+  DEFAULT_CONFIG, ROLES, normalizeConfig, loadModuleConfig, setActiveConfig, getConfig,
   labelFor, getRole, setRole, canViewFinancials, canManageCatalog, canViewHistory,
   canViewStock, canViewMetrics, canAccessView, maskCreditLimit
 } from '../../src/module-config.js';
@@ -68,26 +68,27 @@ describe('module configuration', () => {
     expect(labelFor('unknownLabel', 'Respaldo')).toBe('Respaldo');
   });
 
-  it('supports all roles defined by the sales profile', () => {
-    expect(Object.keys(DEFAULT_CONFIG.roles)).toEqual(
-      expect.arrayContaining(['customer', 'sales', 'warehouse', 'finance', 'admin'])
-    );
+  it('exposes exactly the three roles defined by the sales profile', () => {
+    expect(ROLES).toEqual(['customer', 'sales', 'admin']);
+    expect(Object.keys(DEFAULT_CONFIG.roles)).toEqual(['customer', 'sales', 'admin']);
+    expect(DEFAULT_CONFIG.roles.sales.label).toBe('Vendedor');
+    expect(DEFAULT_CONFIG.roles.admin.label).toBe('Dueño/Administrador');
     expect(getRole()).toBe('customer');
-    expect(setRole('customer')).toBe('customer');
-    expect(getRole()).toBe('customer');
+    expect(setRole('sales')).toBe('sales');
+    expect(getRole()).toBe('sales');
   });
 
   it('derives every permission from the active role', () => {
-    expect(canViewFinancials('finance')).toBe(true);
     expect(canViewFinancials('admin')).toBe(true);
     expect(canViewFinancials('sales')).toBe(false);
+    expect(canViewFinancials('customer')).toBe(false);
     expect(canManageCatalog('admin')).toBe(true);
     expect(canViewHistory('customer')).toBe(true);
     expect(canViewHistory('sales')).toBe(true);
     expect(canViewStock('sales')).toBe(true);
     expect(canViewStock('customer')).toBe(false);
     expect(canViewMetrics('admin')).toBe(true);
-    expect(canViewMetrics('finance')).toBe(false);
+    expect(canViewMetrics('sales')).toBe(false);
     expect(canAccessView('customer', 'catalog')).toBe(true);
     expect(canAccessView('customer', 'metrics')).toBe(false);
     expect(canAccessView('admin', 'metrics')).toBe(true);
@@ -95,6 +96,7 @@ describe('module configuration', () => {
 
   it('masks credit limits for roles without financial permission', () => {
     expect(maskCreditLimit('$100', 'sales')).toBe('•••••');
-    expect(maskCreditLimit('$100', 'finance')).toBe('$100');
+    expect(maskCreditLimit('$100', 'customer')).toBe('•••••');
+    expect(maskCreditLimit('$100', 'admin')).toBe('$100');
   });
 });

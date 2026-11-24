@@ -1,5 +1,11 @@
 import { escapeHtml, formatCurrency } from '../utils.js';
 import { labelFor } from '../module-config.js';
+import {
+  revenueByCategoryChart,
+  salesByDateChart,
+  statusDistributionChart,
+  rankingProgress
+} from './metrics-charts.js';
 
 function statusRows(statusCounts = {}) {
   return Object.entries(statusCounts)
@@ -15,12 +21,18 @@ function statusRows(statusCounts = {}) {
 function productRows(products = []) {
   if (!products.length) return '<li class="empty-state">No hay productos vendidos en el periodo seleccionado.</li>';
   return products
-    .map((product) => `
-      <li class="metric-highlight">
-        <span>${escapeHtml(product.name || product.productId)}</span>
-        <span>${Number(product.units) || 0} uds. · ${formatCurrency(Number(product.revenue) || 0)}</span>
-      </li>
-    `)
+    .map((product) => {
+      const progress = Number(product.progressPercent) || 0;
+      return `
+        <li class="metric-highlight metric-highlight--ranking" data-product-id="${escapeHtml(product.productId)}">
+          <span class="metric-highlight__info">
+            <span>${escapeHtml(product.name || product.productId)}</span>
+            <small>${Number(product.units) || 0} uds. · ${formatCurrency(Number(product.revenue) || 0)} · ${progress} %</small>
+          </span>
+          ${rankingProgress(product)}
+        </li>
+      `;
+    })
     .join('');
 }
 
@@ -73,6 +85,20 @@ export function metricsDashboard({ allowed = true, metrics = {} } = {}) {
           <p class="kpi-card__label">Documentos registrados</p>
           <p id="metrics-documents" class="kpi-card__value">${Number(metrics.orderCount) || 0}</p>
         </article>
+      </div>
+      <div class="charts-grid">
+        <section class="chart-card" aria-labelledby="metrics-category-title">
+          <h2 id="metrics-category-title" class="chart-card__title">${escapeHtml(labelFor('revenueByCategory', 'Ingresos por categoría'))}</h2>
+          <div id="metrics-category-chart">${revenueByCategoryChart(metrics.revenueByCategory)}</div>
+        </section>
+        <section class="chart-card" aria-labelledby="metrics-date-title">
+          <h2 id="metrics-date-title" class="chart-card__title">${escapeHtml(labelFor('salesByDate', 'Evolución de ventas'))}</h2>
+          <div id="metrics-date-chart">${salesByDateChart(metrics.salesByDate)}</div>
+        </section>
+        <section class="chart-card" aria-labelledby="metrics-status-chart-title">
+          <h2 id="metrics-status-chart-title" class="chart-card__title">${escapeHtml(labelFor('statusDistribution', 'Distribución por estado'))}</h2>
+          <div id="metrics-status-chart">${statusDistributionChart(metrics.statusDistribution)}</div>
+        </section>
       </div>
       <div class="metric-highlights">
         <section class="highlight-card" aria-labelledby="metrics-status-title">

@@ -50,11 +50,41 @@ describe('computeMetrics', () => {
     });
   });
 
-  it('ranks products by revenue and units', () => {
+  it('ranks products by revenue and units with progress values', () => {
     const metrics = computeMetrics({ orders, products });
-    expect(metrics.topProducts[0]).toMatchObject({ productId: 'p1', units: 1, revenue: 100000 });
-    expect(metrics.topProducts[1]).toMatchObject({ productId: 'p2', units: 3, revenue: 70000 });
+    expect(metrics.topProducts[0]).toMatchObject({
+      productId: 'p1',
+      units: 1,
+      revenue: 100000,
+      category: 'smartphone',
+      progressPercent: 100
+    });
+    expect(metrics.topProducts[1]).toMatchObject({
+      productId: 'p2',
+      units: 3,
+      revenue: 70000,
+      progressPercent: 70
+    });
+    expect(metrics.topProducts[0].revenueShare).toBe(59);
+    expect(metrics.topProducts[1].revenueShare).toBe(41);
     expect(metrics.topProducts.some((entry) => entry.productId === 'p3')).toBe(false);
+  });
+
+  it('builds chart-ready category, date and status aggregations', () => {
+    const metrics = computeMetrics({ orders, products });
+    expect(metrics.revenueByCategory).toEqual([
+      { category: 'smartphone', revenue: 170000, units: 4 }
+    ]);
+    expect(metrics.salesByDate).toEqual([
+      { date: '2026-05-01', revenue: 100000, salesCount: 1 },
+      { date: '2026-05-10', revenue: 50000, salesCount: 1 }
+    ]);
+    expect(metrics.statusDistribution).toEqual([
+      expect.objectContaining({ status: 'Cotización', count: 1, percentage: 25, tone: 'warning' }),
+      expect.objectContaining({ status: 'Pedido', count: 1, percentage: 25, tone: 'info' }),
+      expect.objectContaining({ status: 'Facturado', count: 1, percentage: 25, tone: 'success' }),
+      expect.objectContaining({ status: 'Cancelado', count: 1, percentage: 25, tone: 'danger' })
+    ]);
   });
 
   it('reports products with critical or zero stock', () => {
@@ -77,5 +107,9 @@ describe('computeMetrics', () => {
     expect(metrics.salesCount).toBe(0);
     expect(metrics.averageTicket).toBe(0);
     expect(metrics.hasData).toBe(false);
+    expect(metrics.revenueByCategory).toEqual([]);
+    expect(metrics.salesByDate).toEqual([]);
+    expect(metrics.statusDistribution.every((entry) => entry.count === 0 && entry.percentage === 0)).toBe(true);
+    expect(metrics.topProducts).toEqual([]);
   });
 });

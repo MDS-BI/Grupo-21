@@ -69,7 +69,8 @@ function setNotice(element, message) {
 }
 
 export function showView(view) {
-  const allowed = canAccessView(getRole(), view);
+  const unlockedAdmin = view !== 'admin' || state.adminUnlocked;
+  const allowed = canAccessView(getRole(), view) && unlockedAdmin;
   const activeView = allowed ? view : 'catalog';
 
   setNotice(qs('role-denied'), allowed ? null : {
@@ -579,15 +580,36 @@ function handleMetricsChange(event) {
   }
 }
 
-function handleMetricsClick(event) {
-  if (event.target.id !== 'metrics-reset') return;
-  state.metrics = { from: '', to: '', category: '' };
+function syncMetricsControls() {
   const from = qs('metrics-from');
   const to = qs('metrics-to');
   const category = qs('metrics-category');
-  if (from) from.value = '';
-  if (to) to.value = '';
-  if (category) category.value = '';
+  if (from) from.value = state.metrics.from;
+  if (to) to.value = state.metrics.to;
+  if (category) category.value = state.metrics.category;
+}
+
+function handleMetricsClick(event) {
+  const categoryButton = event.target.closest?.('[data-chart-category]');
+  if (categoryButton) {
+    state.metrics.category = categoryButton.dataset.chartCategory;
+    syncMetricsControls();
+    renderMetrics();
+    return;
+  }
+
+  const dateButton = event.target.closest?.('[data-chart-date]');
+  if (dateButton) {
+    state.metrics.from = dateButton.dataset.chartDate;
+    state.metrics.to = dateButton.dataset.chartDate;
+    syncMetricsControls();
+    renderMetrics();
+    return;
+  }
+
+  if (event.target.id !== 'metrics-reset') return;
+  state.metrics = { from: '', to: '', category: '' };
+  syncMetricsControls();
   renderMetrics();
 }
 

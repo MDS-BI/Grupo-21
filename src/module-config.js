@@ -39,15 +39,20 @@ export const DEFAULT_CONFIG = {
     stockAvailable: 'Unidades disponibles',
     allCategories: 'Todas las categorías',
     returnedToCustomer: 'Volviste a la vista pública de cliente.',
-    adminCode: 'Código de administración'
+    adminCode: 'Código de administración',
+    revenueByCategory: 'Ingresos por categoría',
+    salesByDate: 'Evolución de ventas',
+    statusDistribution: 'Distribución por estado',
+    rankingProgress: 'Ranking de productos'
   },
   customFields: [],
   statusLifecycle: {
-    statuses: ['Cotización', 'Pedido', 'Facturado'],
+    statuses: ['Cotización', 'Pedido', 'Facturado', 'Cancelado'],
     transitions: {
       'Cotización': ['Pedido'],
-      'Pedido': ['Facturado'],
-      'Facturado': []
+      'Pedido': ['Facturado', 'Cancelado'],
+      'Facturado': [],
+      'Cancelado': []
     }
   },
   theme: {
@@ -63,27 +68,11 @@ export const DEFAULT_CONFIG = {
       canViewMetrics: false
     },
     sales: {
-      label: 'Ventas',
+      label: 'Vendedor',
       canViewFinancials: false,
       canManageCatalog: false,
       canViewHistory: true,
       canViewStock: true,
-      canViewMetrics: false
-    },
-    warehouse: {
-      label: 'Bodega',
-      canViewFinancials: false,
-      canManageCatalog: false,
-      canViewHistory: true,
-      canViewStock: true,
-      canViewMetrics: false
-    },
-    finance: {
-      label: 'Finanzas',
-      canViewFinancials: true,
-      canManageCatalog: false,
-      canViewHistory: true,
-      canViewStock: false,
       canViewMetrics: false
     },
     admin: {
@@ -102,7 +91,7 @@ export const userConfig = {
   theme: { accentColor: '#111111' }
 };
 
-const ROLES = Object.keys(DEFAULT_CONFIG.roles);
+export const ROLES = Object.keys(DEFAULT_CONFIG.roles);
 const ROLE_KEY = 'erp.role';
 
 let activeConfig = null;

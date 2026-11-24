@@ -28,10 +28,10 @@ La entrega de `specs/002-modulo-ventas` es una tienda en línea construida con V
 - **Carrito**: añadir, cambiar cantidades, quitar líneas y vaciar; subtotal, descuento y total se recalculan al instante y el carrito persiste al recargar.
 - **Cupones**: `BIENVENIDO10` (10 %), `AHORRA5000` (fijo), `EXPIRADO` y `AGOTADO` como casos de prueba. Se valida existencia, vigencia, estado y límite de uso.
 - **Checkout**: validación de nombre, correo, dirección, ciudad, código postal y método de pago. Pasarela simulada con éxito, rechazo y timeout. Al confirmar se descuenta stock, se guarda el pedido y se genera un número `PED-YYYYMMDD-NNNN`.
-- **Historial**: documentos de venta por cliente con tipo, fecha, número, monto y estado. El rol **Cliente** también puede consultar su historial. El límite de crédito se enmascara (`•••••`) para roles sin permisos financieros; lo ven **Finanzas** y **Administración**.
-- **Administración de precios y ofertas**: el rol **Administración** puede editar precios (validados como numéricos y no negativos) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta», y el carrito aplica el precio efectivo. Los demás roles ven un mensaje de permisos al entrar al panel.
-- **Métricas**: panel para el dueño/administrador con ingresos totales, ventas completadas, ticket promedio, documentos por estado, ranking de productos por unidades e ingresos, alertas de stock y uso de cupones/ofertas. Filtros por rango de fechas y categoría; sin datos muestra ceros y un estado vacío.
-- **Roles**: Cliente, Ventas, Bodega, Finanzas y Administración, seleccionables desde la cabecera; se guardan en `localStorage` (`erp.role`). El rol por defecto es **Cliente**, que compra y consulta su historial. Ventas y Bodega ven stock e historial; Finanzas ve el límite de crédito; **Administración** tiene permisos financieros, administra precios/ofertas y consulta métricas. El panel de administración exige el código `1234` en `#admin-code`. El botón «Cerrar sesión» devuelve a la vista pública de Cliente.
+- **Historial**: documentos de venta por cliente con tipo, fecha, número, monto y estado (`Cotización`, `Pedido`, `Facturado`, `Cancelado`). El rol **Cliente** también puede consultar su historial. El límite de crédito se enmascara (`•••••`) para Cliente y Vendedor; solo lo ve **Dueño/Administrador**.
+- **Administración de precios y ofertas**: el rol **Dueño/Administrador** puede editar precios (validados como numéricos y no negativos) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta», y el carrito aplica el precio efectivo. Los demás roles ven un mensaje de permisos al entrar al panel.
+- **Métricas**: panel para el dueño/administrador con ingresos totales, ventas completadas, ticket promedio, gráficos interactivos de ingresos por categoría y evolución de ventas, distribución proporcional por estado con colores semánticos, ranking con barras de progreso, alertas de stock y uso de cupones/ofertas. Filtros por rango de fechas y categoría, también accionables desde los gráficos; sin datos muestra ceros y un estado vacío.
+- **Roles**: exactamente **Cliente**, **Vendedor** y **Dueño/Administrador**, seleccionables desde la cabecera; se guardan en `localStorage` (`erp.role`). El rol por defecto es **Cliente**, que compra y consulta su historial. **Vendedor** ve stock e historial; **Dueño/Administrador** tiene permisos financieros, administra precios/ofertas y consulta métricas. El panel de administración exige el código `1234` en `#admin-code` y una sesión privilegiada activa. El botón «Cerrar sesión» devuelve a la vista pública de Cliente.
 
 ### Tienda RootSouth / Scuffers (FR-009 y FR-010)
 
@@ -48,13 +48,13 @@ La entrega de `specs/002-modulo-ventas` es una tienda en línea construida con V
 | `prod-tarjetero-rootsouth` | Tarjetero Rootsouth | 9790 | Accesorios | 25 |
 | `prod-vaso-matero` | Vaso Matero | 9990 | Accesorios | 18 |
 
-Las categorías del catálogo son `Knit`, `Poleras`, `Polerones` y `Accesorios`. Las ofertas semilla son `offer-steel-zip-10` (10 % en `prod-steel-zip-knit`), `offer-coach-c-5000` ($5.000 fijos en `prod-polera-coach-c`) y `offer-vaso-vencida` (caso vencido en `prod-vaso-matero`).
+Las categorías del catálogo son `Knit`, `Poleras`, `Polerones` y `Accesorios`. Exactamente cuatro productos están destacados y se muestran en una sola fila: `prod-steel-zip-knit`, `prod-polera-coach-c`, `prod-black-zipper-layers` y `prod-jockey`. Las ofertas semilla son `offer-steel-zip-10` (10 % en `prod-steel-zip-knit`), `offer-coach-c-5000` ($5.000 fijos en `prod-polera-coach-c`) y `offer-vaso-vencida` (caso vencido en `prod-vaso-matero`).
 
-`src/data/seed-orders.js` aporta cuatro documentos iniciales (`seed-order-001` a `seed-order-004`) para `client-demo`, todos con prendas RootSouth. Con esos datos el panel de métricas parte de ingresos `416877`, 3 ventas completadas, ticket promedio `138959`, 4 documentos y descuentos por `30000`; el documento en `Cotización` no aporta ingresos.
+`src/data/seed-orders.js` aporta doce documentos iniciales (`seed-order-001` a `seed-order-012`) para `client-demo`, todos con prendas RootSouth y fechas relativas a los últimos tres meses. Con esos datos el panel de métricas parte de ingresos `896122`, 9 ventas completadas, ticket promedio `99569`, 12 documentos y descuentos por `25000`. La distribución es 2 `Cotización`, 5 `Pedido`, 4 `Facturado` y 1 `Cancelado`; los documentos en `Cotización` y `Cancelado` no aportan ingresos.
 
-`src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11'` y usa la clave `erp.seedVersion`. Si la versión guardada no coincide, `ensureSeedSchema()` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones, con lo que desaparecen los antiguos productos de tecnología y sus datos asociados.
+`src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11-charts'` y usa la clave `erp.seedVersion`. Si la versión guardada no coincide, `ensureSeedSchema()` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones, con lo que desaparecen los antiguos productos de tecnología y sus datos asociados.
 
-**FR-010 — estética editorial.** La interfaz sigue la referencia de Scuffers: fondo blanco `#FFFFFF`, marcos de producto verticales 3:4 con fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, bordes de `0px`, tipografía sans-serif con etiquetas de navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen al pasar el cursor.
+**FR-010 — estética editorial.** La interfaz sigue la referencia de Scuffers: Hero Banner desde `/images/hero-banner.jpg` con overlay oscuro y tipografía blanca de alto contraste, fondo blanco `#FFFFFF`, marcos de producto verticales 3:4 con fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, bordes de `0px`, destacados y catálogo en grillas planas de cuatro columnas, tipografía sans-serif con etiquetas de navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen al pasar el cursor.
 
 ### Ejecutar
 
@@ -68,7 +68,7 @@ npm run preview  # vista previa de la compilación
 ### Pruebas
 
 ```bash
-npm run test:002   # 22 archivos / 128 pruebas; npm run build OK; npm test: 140 passed / 88 failed heredadas 001
+npm run test:002   # 24 archivos / 150 pruebas; npm run build OK; npm test: 152 passed / 88 failed heredadas 001
 ```
 
 > `tests/` también contiene pruebas heredadas del módulo base 001 que dependen de una implementación aún no incluida en este repositorio; por eso se usa `test:002` para validar esta entrega. La suite 002 cubre catálogo, filtros, carrito, cupones, checkout, historial, administración de precios/ofertas, métricas, vistas por rol y flujos de extremo a extremo (embudo de compra y ciclo de oferta).
@@ -85,14 +85,15 @@ src/coupons.js             Cupones, vigencia, límite de uso y descuentos
 src/checkout.js            Validación del checkout y numeración de pedidos
 src/payments.js            Pasarela de pago simulada
 src/module-config.js       Configuración, etiquetas, tema, roles y permisos por vista
-src/metrics.js             Cálculo puro de indicadores y filtros del panel
+src/metrics.js             Cálculo puro de indicadores, agregaciones de gráficos y filtros del panel
+src/components/metrics-charts.js Gráficos accesibles, tooltips, fallback y barras de progreso
 src/offers.js              Modelo, validación, vigencia y resolución de ofertas
 src/data/products.js       Catálogo semilla RootSouth con rutas de imagen
 src/data/offers.js         Ofertas semilla
 src/data/seed-orders.js    Pedidos semilla de RootSouth para client-demo
 src/components/            Componentes de catálogo, carrito, cupones, checkout, historial, administración y métricas
 src/styles.css             Estilos responsive y tokens editoriales (FR-010)
-public/images/             Imágenes reales producto-1.jpg a producto-8.jpg
+public/images/             Hero Banner hero-banner.jpg e imágenes reales producto-1.jpg a producto-8.jpg
 tests/unit/                Pruebas unitarias 002
 tests/integration/         Pruebas de integración 002
 tests/setup/jsdom.js       Aislamiento de localStorage entre pruebas
@@ -100,7 +101,7 @@ tests/setup/jsdom.js       Aislamiento de localStorage entre pruebas
 
 ### Datos y persistencia
 
-Claves usadas en `localStorage`: `erp.products`, `erp.clients`, `erp.orders`, `erp.cart`, `erp.coupons`, `erp.couponUsage`, `erp.offers`, `erp.role` y `erp.seedVersion`. `SEED_VERSION = 'rootsouth-2026-11'` controla la limpieza de los datos heredados de tecnología al detectar un esquema distinto. No se envían datos a ningún servidor.
+Claves usadas en `localStorage`: `erp.products`, `erp.clients`, `erp.orders`, `erp.cart`, `erp.coupons`, `erp.couponUsage`, `erp.offers`, `erp.role` y `erp.seedVersion`. `SEED_VERSION = 'rootsouth-2026-11-charts'` controla la limpieza de los datos heredados de tecnología al detectar un esquema distinto. No se envían datos a ningún servidor.
 
 ### Ofertas y precios
 

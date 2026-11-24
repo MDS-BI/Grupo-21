@@ -31,6 +31,12 @@ describe('metrics filters', () => {
     expect(metrics.revenue).toBe(300000);
     expect(metrics.salesCount).toBe(1);
     expect(metrics.orderCount).toBe(1);
+    expect(metrics.revenueByCategory).toEqual([
+      { category: 'tablet', revenue: 300000, units: 2 }
+    ]);
+    expect(metrics.salesByDate).toEqual([
+      { date: '2026-05-20', revenue: 300000, salesCount: 1 }
+    ]);
   });
 
   it('filters orders by product category', () => {
@@ -38,6 +44,13 @@ describe('metrics filters', () => {
     expect(metrics.revenue).toBe(200000);
     expect(metrics.topProducts).toHaveLength(1);
     expect(metrics.topProducts[0].productId).toBe('phone');
+    expect(metrics.topProducts[0].progressPercent).toBe(100);
+    expect(metrics.revenueByCategory).toEqual([
+      { category: 'smartphone', revenue: 200000, units: 1 }
+    ]);
+    expect(metrics.salesByDate).toEqual([
+      { date: '2026-04-05', revenue: 200000, salesCount: 1 }
+    ]);
   });
 
   it('combines category and date filters', () => {
@@ -56,6 +69,9 @@ describe('metrics filters', () => {
     expect(metrics.orderCount).toBe(0);
     expect(metrics.hasData).toBe(false);
     expect(metrics.topProducts).toEqual([]);
+    expect(metrics.revenueByCategory).toEqual([]);
+    expect(metrics.salesByDate).toEqual([]);
+    expect(metrics.statusDistribution.every((entry) => entry.percentage === 0)).toBe(true);
   });
 
   it('keeps stock alerts visible even when no sales match the filter', () => {

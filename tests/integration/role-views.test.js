@@ -14,6 +14,17 @@ beforeEach(() => {
 });
 
 describe('role-based views', () => {
+  it('offers exactly the three visible roles with the updated labels', async () => {
+    await bootAs('customer');
+    expect([...document.getElementById('role-select').options].map((option) => [
+      option.value, option.textContent
+    ])).toEqual([
+      ['customer', 'Cliente'],
+      ['sales', 'Vendedor'],
+      ['admin', 'Dueño/Administrador']
+    ]);
+  });
+
   it('shows purchase and history views to a customer', async () => {
     await bootAs('customer');
     expect(document.querySelector('[data-view="history"]').hidden).toBe(false);
@@ -23,7 +34,7 @@ describe('role-based views', () => {
     expect(document.getElementById('role-logout').hidden).toBe(true);
 
     clickNav('history');
-    expect(document.querySelectorAll('#history-list tr')).toHaveLength(4);
+    expect(document.querySelectorAll('#history-list tr')).toHaveLength(12);
   });
 
   it('shows history and stock availability to sales staff but hides admin and metrics', async () => {
@@ -40,6 +51,16 @@ describe('role-based views', () => {
     expect(document.querySelector('[data-view="history"]').hidden).toBe(false);
     expect(document.querySelector('[data-view="admin"]').hidden).toBe(false);
     expect(document.querySelector('[data-view="metrics"]').hidden).toBe(false);
+  });
+
+  it('keeps the owner/admin panel locked until the access code is verified', async () => {
+    await bootAs('admin');
+    expect(document.getElementById('admin-access').hidden).toBe(false);
+    expect(document.getElementById('view-admin').hidden).toBe(true);
+
+    document.getElementById('admin-code').value = '1234';
+    document.getElementById('admin-access').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    expect(document.getElementById('view-admin').hidden).toBe(false);
   });
 
   it('blocks direct access to a restricted view with a clear notice and a way back', async () => {

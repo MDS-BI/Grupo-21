@@ -13,10 +13,19 @@ beforeEach(() => {
 describe('product storage', () => {
   it('seeds the catalog when storage is empty', () => {
     const products = loadProducts();
-    expect(products).toHaveLength(seedProducts.length);
+    expect(products).toHaveLength(8);
+    expect(seedProducts).toHaveLength(8);
     expect(products.map((product) => product.id)).toContain('prod-steel-zip-knit');
-    expect(products.map((product) => product.image)).toContain('/images/producto-1.jpg');
+    expect(products.map((product) => product.image)).toEqual(
+      Array.from({ length: 8 }, (_, index) => `/images/producto-${index + 1}.jpg`)
+    );
+    expect(products.every((product) => product.image.startsWith('/images/producto-'))).toBe(true);
     expect(localStorage.getItem('erp.products')).not.toBeNull();
+  });
+
+  it('marks exactly four available RootSouth products as featured', () => {
+    expect(seedProducts.filter((product) => product.featured)).toHaveLength(4);
+    expect(loadProducts().filter((product) => product.featured).every((product) => product.stock > 0)).toBe(true);
   });
 
   it('does not duplicate the seed on repeated loads', () => {

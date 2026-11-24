@@ -11,8 +11,14 @@ describe('catalog filters', () => {
 
   it('returns only featured products', () => {
     const featured = featuredProducts(seedProducts);
-    expect(featured).toHaveLength(8);
+    expect(featured).toHaveLength(4);
     expect(featured.every((product) => product.featured)).toBe(true);
+    expect(featured.map((product) => product.id)).toEqual([
+      'prod-steel-zip-knit',
+      'prod-polera-coach-c',
+      'prod-black-zipper-layers',
+      'prod-jockey'
+    ]);
   });
 
   it('filters by category', () => {

@@ -46,14 +46,15 @@ describe('metrics dashboard', () => {
   it('shows the RootSouth baseline revenue, sales, ticket and status distribution', async () => {
     await openMetrics();
     expect(document.getElementById('view-metrics').hidden).toBe(false);
-    expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(416877));
-    expect(document.getElementById('metrics-sales').textContent).toBe('3');
-    expect(document.getElementById('metrics-average').textContent).toBe(formatCurrency(138959));
-    expect(document.getElementById('metrics-documents').textContent).toBe('4');
+    expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(896122));
+    expect(document.getElementById('metrics-sales').textContent).toBe('9');
+    expect(document.getElementById('metrics-average').textContent).toBe(formatCurrency(99569));
+    expect(document.getElementById('metrics-documents').textContent).toBe('12');
     expect(document.getElementById('metrics-status').textContent).toContain('Pedido');
     expect(document.getElementById('metrics-status').textContent).toContain('Facturado');
     expect(document.getElementById('metrics-status').textContent).toContain('Cotización');
-    expect(document.getElementById('metrics-discounts').textContent).toContain(formatCurrency(30000));
+    expect(document.getElementById('metrics-status').textContent).toContain('Cancelado');
+    expect(document.getElementById('metrics-discounts').textContent).toContain(formatCurrency(25000));
   });
 
   it('ranks RootSouth products and warns about low stock', async () => {
@@ -61,6 +62,30 @@ describe('metrics dashboard', () => {
     expect(document.getElementById('metrics-top-products').textContent).toContain('Steel Zip Knit');
     expect(document.getElementById('metrics-top-products').textContent).toContain('Polera Coach C - Gris Claro');
     expect(document.getElementById('metrics-stock-alerts').textContent).toContain('Bandanas');
+  });
+
+  it('renders accessible charts, semantic status colors and product progress bars', async () => {
+    await openMetrics();
+    expect(document.querySelector('#metrics-category-chart [data-chart="revenue-category"]')).not.toBeNull();
+    expect(document.querySelector('#metrics-date-chart [data-chart="sales-date"]')).not.toBeNull();
+    const statusChart = document.querySelector('#metrics-status-chart [data-chart="status-distribution"]');
+    expect(statusChart).not.toBeNull();
+    expect(statusChart.querySelector('.status-chart__segment--success')).not.toBeNull();
+    expect(statusChart.querySelector('.status-chart__segment--danger')).not.toBeNull();
+    expect(document.querySelector('#metrics-top-products .progress-track__fill')).not.toBeNull();
+  });
+
+  it('filters metrics from the category and date chart controls', async () => {
+    await openMetrics(customOrders());
+    document.querySelector('[data-chart-category="Poleras"]').click();
+    expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(50000));
+    expect(document.getElementById('metrics-category').value).toBe('Poleras');
+
+    document.getElementById('metrics-reset').click();
+    document.querySelector('[data-chart-date="2026-05-10"]').click();
+    expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(50000));
+    expect(document.getElementById('metrics-from').value).toBe('2026-05-10');
+    expect(document.getElementById('metrics-to').value).toBe('2026-05-10');
   });
 
   it('recalculates every indicator when date and category filters are applied', async () => {
@@ -83,11 +108,13 @@ describe('metrics dashboard', () => {
     expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(0));
     expect(document.getElementById('metrics-sales').textContent).toBe('0');
     expect(document.getElementById('metrics-empty').hidden).toBe(false);
+    expect(document.querySelector('#metrics-category-chart .empty-state')).not.toBeNull();
+    expect(document.querySelector('#metrics-date-chart .empty-state')).not.toBeNull();
   });
 
   it('reflects a new purchase immediately', async () => {
     await openMetrics();
-    expect(document.getElementById('metrics-sales').textContent).toBe('3');
+    expect(document.getElementById('metrics-sales').textContent).toBe('9');
 
     buyFromCatalog('prod-steel-zip-knit');
     clickNav('cart');
@@ -97,8 +124,8 @@ describe('metrics dashboard', () => {
     await flush();
 
     clickNav('metrics');
-    expect(document.getElementById('metrics-sales').textContent).toBe('4');
-    expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(487068));
+    expect(document.getElementById('metrics-sales').textContent).toBe('10');
+    expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(966313));
   });
 
   it('blocks the panel for roles without metrics permission', async () => {

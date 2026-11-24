@@ -47,7 +47,7 @@ export const seedProducts = [
     price: 2997,
     stock: 0,
     category: 'Accesorios',
-    featured: true
+    featured: false
   },
   {
     id: 'prod-llavero-rootsouth',
@@ -57,7 +57,7 @@ export const seedProducts = [
     price: 5000,
     stock: 50,
     category: 'Accesorios',
-    featured: true
+    featured: false
   },
   {
     id: 'prod-tarjetero-rootsouth',
@@ -67,7 +67,7 @@ export const seedProducts = [
     price: 9790,
     stock: 25,
     category: 'Accesorios',
-    featured: true
+    featured: false
   },
   {
     id: 'prod-vaso-matero',
@@ -77,6 +77,6 @@ export const seedProducts = [
     price: 9990,
     stock: 18,
     category: 'Accesorios',
-    featured: true
+    featured: false
   }
 ];

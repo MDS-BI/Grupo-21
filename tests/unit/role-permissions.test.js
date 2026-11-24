@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
-  DEFAULT_CONFIG, getRole, setRole, setActiveConfig, canViewFinancials,
+  DEFAULT_CONFIG, ROLES, getRole, setRole, setActiveConfig, canViewFinancials,
   canManageCatalog, canViewHistory, canViewStock, canViewMetrics, canAccessView
 } from '../../src/module-config.js';
 
@@ -22,7 +22,8 @@ describe('role permissions', () => {
     expect(canAccessView('customer', 'history')).toBe(true);
   });
 
-  it('gives sales staff history and stock visibility but no metrics or catalog editing', () => {
+  it('gives the seller history and stock visibility but no metrics or catalog editing', () => {
+    expect(DEFAULT_CONFIG.roles.sales.label).toBe('Vendedor');
     expect(canViewHistory('sales')).toBe(true);
     expect(canViewStock('sales')).toBe(true);
     expect(canViewMetrics('sales')).toBe(false);
@@ -37,11 +38,12 @@ describe('role permissions', () => {
     expect(canAccessView('admin', 'metrics')).toBe(true);
   });
 
-  it('restricts financial data to the finance and admin roles', () => {
-    expect(canViewFinancials('finance')).toBe(true);
+  it('restricts financial data exclusively to the owner/admin role', () => {
+    expect(ROLES).toEqual(['customer', 'sales', 'admin']);
     expect(canViewFinancials('admin')).toBe(true);
     expect(canViewFinancials('sales')).toBe(false);
-    expect(canViewMetrics('finance')).toBe(false);
+    expect(canViewFinancials('customer')).toBe(false);
+    expect(canViewMetrics('admin')).toBe(true);
   });
 
   it('blocks direct access to restricted views', () => {

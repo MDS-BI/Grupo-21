@@ -5,6 +5,7 @@ import {
   addClient, loadClients, updateClient, deleteClient, validateClient
 } from '../../src/storage.js';
 import { maskCreditLimit, setActiveConfig } from '../../src/module-config.js';
+import { seedOrders } from '../../src/data/seed-orders.js';
 
 beforeEach(() => {
   localStorage.clear();
@@ -27,15 +28,17 @@ describe('clients and order history', () => {
     expect(loadClients()[0].code).toBe('CLI-001');
 
     const orders = loadOrders();
-    expect(orders).toHaveLength(4);
-    expect(orders.map((order) => order.orderNumber)).toEqual([
-      'PED-20261001-0001',
-      'PED-20261005-0001',
-      'PED-20261012-0001',
-      'PED-20261102-0001'
-    ]);
-    expect(orders.map((order) => order.total)).toEqual([129970, 94967, 44770, 191940]);
-    expect(ordersForClient('client-demo')).toHaveLength(4);
+    expect(orders).toHaveLength(12);
+    expect(seedOrders).toHaveLength(12);
+    expect(orders.map((order) => order.id).sort()).toEqual(seedOrders.map((order) => order.id).sort());
+    expect(orders.every((order) => order.clientId === 'client-demo')).toBe(true);
+    expect(orders.every((order) => /^PED-\d{8}-0001$/.test(order.orderNumber))).toBe(true);
+    expect(new Set(orders.map((order) => order.orderNumber)).size).toBe(12);
+    expect(orders.filter((order) => order.status === 'Facturado')).toHaveLength(4);
+    expect(orders.filter((order) => order.status === 'Pedido')).toHaveLength(5);
+    expect(orders.filter((order) => order.status === 'Cotización')).toHaveLength(2);
+    expect(orders.filter((order) => order.status === 'Cancelado')).toHaveLength(1);
+    expect(ordersForClient('client-demo')).toHaveLength(12);
   });
 
   it('validates client name, code and email', () => {
@@ -62,7 +65,7 @@ describe('clients and order history', () => {
 
     expect(a.orderNumber).toMatch(/^PED-\d{8}-0001$/);
     expect(b.orderNumber).toMatch(/^PED-\d{8}-0002$/);
-    expect(loadOrders()).toHaveLength(7);
+    expect(loadOrders()).toHaveLength(15);
 
     const buyerOrders = ordersForClient(buyer.id);
     expect(buyerOrders).toHaveLength(2);
@@ -86,11 +89,9 @@ describe('clients and order history', () => {
     expect(ordersForClient(inventoryClient.id)).toHaveLength(0);
   });
 
-  it('masks credit limits for non-finance roles', () => {
+  it('masks credit limits for roles without owner/admin permission', () => {
     expect(maskCreditLimit('$2.500.000', 'customer')).toBe('•••••');
     expect(maskCreditLimit('$2.500.000', 'sales')).toBe('•••••');
-    expect(maskCreditLimit('$2.500.000', 'warehouse')).toBe('•••••');
-    expect(maskCreditLimit('$2.500.000', 'finance')).toBe('$2.500.000');
     expect(maskCreditLimit('$2.500.000', 'admin')).toBe('$2.500.000');
   });
 });

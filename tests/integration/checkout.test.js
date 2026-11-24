@@ -32,7 +32,7 @@ describe('checkout flow', () => {
     expect(document.getElementById('error-city')).not.toBeNull();
     expect(document.getElementById('error-postalCode')).not.toBeNull();
     expect(document.getElementById('error-paymentMethod')).not.toBeNull();
-    expect(storedOrders()).toHaveLength(4);
+    expect(storedOrders()).toHaveLength(12);
   });
 
   it('keeps the entered values after a validation error', async () => {
@@ -50,7 +50,7 @@ describe('checkout flow', () => {
     expect(document.getElementById('order-number').textContent).toMatch(/^PED-\d{8}-\d{4}$/);
     expect(document.getElementById('cart-count').textContent).toBe('0');
 
-    expect(storedOrders()).toHaveLength(5);
+    expect(storedOrders()).toHaveLength(13);
     const order = storedOrders().find((entry) => entry.shipping?.email === 'ana@example.com');
     expect(order.total).toBe(70191);
     expect(order.subtotal).toBe(70191);
@@ -94,7 +94,7 @@ describe('checkout flow', () => {
     const message = document.getElementById('checkout-message');
     expect(message.className).toContain('notice--error');
     expect(message.textContent).toMatch(/rechazado/i);
-    expect(storedOrders()).toHaveLength(4);
+    expect(storedOrders()).toHaveLength(12);
     expect(JSON.parse(localStorage.getItem('erp.cart')).items).toHaveLength(1);
   });
 });

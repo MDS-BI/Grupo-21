@@ -12,9 +12,11 @@ beforeEach(() => {
 });
 
 describe('product catalog view', () => {
-  it('renders the eight RootSouth products with images, names and prices', async () => {
+  it('renders four featured and eight catalog products with images, names and prices', async () => {
     await startApp();
-    expect(document.querySelectorAll('#featured-grid .product-card')).toHaveLength(8);
+    expect(document.querySelectorAll('#featured-grid .product-card')).toHaveLength(4);
+    expect(document.querySelector('#featured-grid').className).toContain('product-grid--featured');
+    expect(document.querySelector('#catalog-grid').className).toContain('product-grid--catalog');
 
     const cards = [...document.querySelectorAll('#catalog-grid .product-card')];
     expect(cards).toHaveLength(8);
@@ -77,6 +79,20 @@ describe('product catalog view', () => {
     expect(document.getElementById('view-history').hidden).toBe(false);
     clickNav('catalog');
     expect(document.getElementById('view-catalog').hidden).toBe(false);
+  });
+
+  it('shows the Hero Banner and keeps a flat four-column layout', async () => {
+    await startApp();
+    const header = document.querySelector('#view-catalog .view-header');
+    expect(header).not.toBeNull();
+    expect(document.querySelector('#catalog-title').textContent).toBe('Catálogo de productos');
+    expect(document.querySelector('.hero__eyebrow')).not.toBeNull();
+
+    const css = readFileSync(resolve(process.cwd(), 'src/styles.css'), 'utf8');
+    expect(css).toContain('/images/hero-banner.jpg');
+    expect(css).toContain('rgba(0, 0, 0, 0.72)');
+    expect(css).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))');
+    expect(css.lastIndexOf('#view-catalog .view-header')).toBeGreaterThan(css.indexOf('background-image: none !important'));
   });
 
   it('applies module branding and the Scuffers visual tokens', async () => {

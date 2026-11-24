@@ -15,6 +15,8 @@ function cardIds() {
 describe('catalog filters', () => {
   it('filters by category and keeps the selection visible', async () => {
     await startApp();
+    expect(document.querySelector('#catalog-grid .product-group')).toBeNull();
+    expect(document.querySelectorAll('#featured-grid .product-card')).toHaveLength(4);
     changeValue(document.getElementById('filter-category'), 'Knit');
     expect(cardIds()).toEqual(['prod-steel-zip-knit']);
     expect(document.getElementById('filter-category').value).toBe('Knit');
