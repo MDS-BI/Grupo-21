@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  mountMarkup, startApp, clickNav, buyFromCatalog, submitForm
+  mountMarkup, startApp, clickNav, buyFromCatalog, submitForm, changeValue
 } from '../helpers/app-fixture.js';
 import { formatCurrency } from '../../src/utils.js';
 
@@ -12,16 +12,20 @@ function storedOffers() {
 beforeEach(() => {
   vi.resetModules();
   localStorage.clear();
-  localStorage.setItem('erp.role', 'admin');
   mountMarkup();
 });
 
 describe('offer lifecycle end to end', () => {
   it('goes from admin offer creation to catalog discount, cart price and rollback', async () => {
     await startApp();
+    changeValue(document.getElementById('role-select'), 'admin');
+    expect(document.getElementById('admin-access').hidden).toBe(false);
 
     document.getElementById('admin-code').value = '1234';
     submitForm(document.getElementById('admin-access'));
+    expect(document.getElementById('admin-access').hidden).toBe(true);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(false);
+
     document.getElementById('offer-product').value = 'prod-jockey';
     document.getElementById('offer-type').value = 'percent';
     document.getElementById('offer-value').value = '20';

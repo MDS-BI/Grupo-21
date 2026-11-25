@@ -33,6 +33,8 @@ async function openMetrics(orders) {
     localStorage.setItem('erp.seedVersion', SEED_VERSION);
     localStorage.setItem('erp.orders', JSON.stringify(orders));
   }
+  document.getElementById('admin-code').value = '1234';
+  submitForm(document.getElementById('admin-access'));
   clickNav('metrics');
 }
 

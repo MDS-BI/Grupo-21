@@ -8,7 +8,12 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <div class="announcement-bar">ENVÍO GRATIS SOBRE $99.000 CLP</div>
+    <div class="announcement-bar">
+      <div class="announcement-track">
+        <span class="announcement-message">ENVÍO GRATIS SOBRE $99.000 CLP · COLECCIÓN ROOTSOUTH 2026 · CUPÓN BIENVENIDO10 — 10% OFF · DESPACHO A TODO CHILE · CAMBIOS Y DEVOLUCIONES FÁCILES</span>
+        <span class="announcement-message" aria-hidden="true">ENVÍO GRATIS SOBRE $99.000 CLP · COLECCIÓN ROOTSOUTH 2026 · CUPÓN BIENVENIDO10 — 10% OFF · DESPACHO A TODO CHILE · CAMBIOS Y DEVOLUCIONES FÁCILES</span>
+      </div>
+    </div>
     <header class="site-header">
       <nav class="nav-header" aria-label="Navegación principal">
         <div class="nav-header__left">
@@ -43,19 +48,21 @@
         </div>
 
         <div class="nav-header__right">
-          <button type="button" id="profile-toggle" class="nav-link nav-link--profile" aria-expanded="false" aria-controls="profile-panel">Perfil</button>
-          <div id="profile-panel" class="header-menu header-menu--profile" hidden>
-            <label class="field" for="role-select">
-              <span>Rol activo</span>
-              <select id="role-select" aria-label="Rol activo"></select>
-            </label>
-            <button type="button" id="role-logout" class="btn btn--ghost btn--small" hidden>Cerrar sesión</button>
-            <form id="admin-access" class="admin-access" hidden>
-              <label class="sr-only" for="admin-code">Código de administración</label>
-              <input id="admin-code" type="password" inputmode="numeric" autocomplete="off" placeholder="Código admin" aria-label="Código de administración" />
-              <button type="submit" id="admin-access-submit" class="btn btn--ghost btn--small">Acceder</button>
-              <p id="admin-access-error" class="notice notice--error" role="alert" hidden></p>
-            </form>
+          <div class="profile-container">
+            <button type="button" id="profile-toggle" class="nav-link nav-link--profile" aria-expanded="false" aria-controls="profile-panel">Perfil</button>
+            <div id="profile-panel" class="header-menu header-menu--profile" hidden>
+              <label class="field" for="role-select">
+                <span>Rol activo</span>
+                <select id="role-select" aria-label="Rol activo"></select>
+              </label>
+              <button type="button" id="role-logout" class="btn btn--ghost btn--small" hidden>Cerrar sesión</button>
+              <form id="admin-access" class="admin-access" hidden>
+                <label class="sr-only" for="admin-code">Código de administración</label>
+                <input id="admin-code" type="password" inputmode="numeric" autocomplete="off" placeholder="Código admin" aria-label="Código de administración" />
+                <button type="submit" id="admin-access-submit" class="btn btn--ghost btn--small">Acceder</button>
+                <p id="admin-access-error" class="notice notice--error" role="alert" hidden></p>
+              </form>
+            </div>
           </div>
           <button type="button" id="cart-toggle" class="nav-link nav-link--cart" data-view="cart" aria-label="Carrito, 0 productos">
             <span class="cart-icon" aria-hidden="true"></span>

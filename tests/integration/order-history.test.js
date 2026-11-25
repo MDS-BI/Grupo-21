@@ -36,13 +36,20 @@ describe('order history', () => {
     expect(document.getElementById('history-credit-limit').textContent).toBe('•••••');
   });
 
-  it('reveals the financial limit when the Gerente General changes role', async () => {
+  it('reveals the financial limit only after the Gerente General access code', async () => {
     localStorage.setItem('erp.role', 'sales');
     await completePurchase();
     document.querySelector('[data-action="go-history"]').click();
     expect(document.getElementById('history-credit-limit').textContent).toBe('•••••');
 
     changeValue(document.getElementById('role-select'), 'admin');
+    expect(document.getElementById('admin-access').hidden).toBe(false);
+    expect(document.getElementById('view-history').hidden).toBe(true);
+    expect(document.getElementById('history-credit-limit').textContent).toBe('•••••');
+
+    document.getElementById('admin-code').value = '1234';
+    submitForm(document.getElementById('admin-access'));
+    clickNav('history');
     expect(document.getElementById('view-history').hidden).toBe(false);
     expect(document.getElementById('history-credit-limit').textContent).not.toBe('•••••');
   });

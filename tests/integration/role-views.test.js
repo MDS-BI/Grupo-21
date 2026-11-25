@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mountMarkup, startApp, changeValue } from '../helpers/app-fixture.js';
+import { mountMarkup, startApp, changeValue, submitForm } from '../helpers/app-fixture.js';
 
 async function bootAs(role) {
   if (role) localStorage.setItem('erp.role', role);
   return startApp();
+}
+
+function unlockAdmin(code = '1234') {
+  document.getElementById('admin-code').value = code;
+  submitForm(document.getElementById('admin-access'));
 }
 
 beforeEach(() => {
@@ -50,23 +55,38 @@ describe('role-based views', () => {
     expect(document.getElementById('role-logout').hidden).toBe(false);
   });
 
-  it('shows the full management menu to the Gerente General', async () => {
+  it('shows the full management menu to the verified Gerente General', async () => {
     await bootAs('admin');
+    expect(document.getElementById('admin-access').hidden).toBe(false);
+    unlockAdmin();
+
     expect(document.getElementById('manage-menu-toggle').hidden).toBe(false);
     expect(document.querySelector('#manage-menu [data-view="history"]').hidden).toBe(false);
     expect(document.querySelector('#manage-menu [data-view="admin"]').hidden).toBe(false);
     expect(document.querySelector('#manage-menu [data-view="metrics"]').hidden).toBe(false);
+    expect(document.getElementById('role-logout').hidden).toBe(false);
   });
 
   it('keeps the Gerente General panel locked until the access code is verified', async () => {
     await bootAs('admin');
     expect(document.getElementById('admin-access').hidden).toBe(false);
+    expect(document.getElementById('admin-access-error').hidden).toBe(true);
+    expect(document.getElementById('role-logout').hidden).toBe(true);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
+    expect(document.querySelector('#manage-menu [data-view="history"]').hidden).toBe(true);
+    expect(document.querySelector('#manage-menu [data-view="admin"]').hidden).toBe(true);
+    expect(document.querySelector('#manage-menu [data-view="metrics"]').hidden).toBe(true);
     expect(document.getElementById('view-admin').hidden).toBe(true);
 
-    document.getElementById('admin-code').value = '1234';
-    document.getElementById('admin-access').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    unlockAdmin('9999');
+    expect(document.getElementById('admin-access-error').textContent).toMatch(/acceso denegado/i);
+    expect(document.getElementById('view-admin').hidden).toBe(true);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
+
+    unlockAdmin();
     expect(document.getElementById('view-admin').hidden).toBe(false);
     expect(document.getElementById('admin-access').hidden).toBe(true);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(false);
   });
 
   it('blocks direct access to restricted views with a clear notice and a way back', async () => {
@@ -84,17 +104,23 @@ describe('role-based views', () => {
 
   it('returns to the public customer view when internal session is closed', async () => {
     await bootAs('admin');
+    unlockAdmin();
+    expect(document.getElementById('role-logout').hidden).toBe(false);
     document.getElementById('role-logout').click();
 
     expect(localStorage.getItem('erp.role')).toBe('customer');
     expect(document.getElementById('view-catalog').hidden).toBe(false);
     expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
     expect(document.getElementById('role-logout').hidden).toBe(true);
+    expect(document.getElementById('admin-access').hidden).toBe(true);
   });
 
   it('rebuilds navigation immediately when the active role changes', async () => {
     await bootAs('customer');
     changeValue(document.getElementById('role-select'), 'admin');
+    expect(document.getElementById('admin-access').hidden).toBe(false);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
+    unlockAdmin();
     expect(document.getElementById('manage-menu-toggle').hidden).toBe(false);
     expect(document.querySelector('#manage-menu [data-view="metrics"]').hidden).toBe(false);
     document.querySelector('#manage-menu [data-view="metrics"]').click();

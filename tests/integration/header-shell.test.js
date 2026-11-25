@@ -2,11 +2,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { mountMarkup, startApp, clickNav, changeValue, buyFromCatalog } from '../helpers/app-fixture.js';
+import { mountMarkup, startApp, clickNav, changeValue, submitForm, buyFromCatalog } from '../helpers/app-fixture.js';
+
+const ANNOUNCEMENT = 'ENVÍO GRATIS SOBRE $99.000 CLP · COLECCIÓN ROOTSOUTH 2026 · CUPÓN BIENVENIDO10 — 10% OFF · DESPACHO A TODO CHILE · CAMBIOS Y DEVOLUCIONES FÁCILES';
 
 async function bootAs(role) {
   if (role) localStorage.setItem('erp.role', role);
   return startApp();
+}
+
+function unlockAdmin(code = '1234') {
+  document.getElementById('admin-code').value = code;
+  submitForm(document.getElementById('admin-access'));
 }
 
 function pressEscape() {
@@ -23,7 +30,12 @@ describe('editorial header shell', () => {
   it('renders the announcement bar and the three-zone navigation', async () => {
     await bootAs('customer');
 
-    expect(document.querySelector('.announcement-bar').textContent).toBe('ENVÍO GRATIS SOBRE $99.000 CLP');
+    const messages = document.querySelectorAll('.announcement-track .announcement-message');
+    expect(messages).toHaveLength(2);
+    expect(messages[0].textContent).toBe(ANNOUNCEMENT);
+    expect(messages[1].textContent).toBe(ANNOUNCEMENT);
+    expect(messages[1].getAttribute('aria-hidden')).toBe('true');
+    expect(document.querySelector('.announcement-bar').contains(document.querySelector('.announcement-track'))).toBe(true);
     const left = document.querySelector('.nav-header__left');
     const center = document.querySelector('.nav-header__center');
     const right = document.querySelector('.nav-header__right');
@@ -89,6 +101,7 @@ describe('editorial header shell', () => {
 
   it('closes open panels on navigation, role change and logout', async () => {
     await bootAs('admin');
+    unlockAdmin();
     const manageToggle = document.getElementById('manage-menu-toggle');
     const profileToggle = document.getElementById('profile-toggle');
 
@@ -131,6 +144,18 @@ describe('editorial header shell', () => {
     expect(document.getElementById('role-logout').hidden).toBe(false);
 
     changeValue(document.getElementById('role-select'), 'admin');
+    expect(document.getElementById('admin-access').hidden).toBe(false);
+    expect(document.getElementById('admin-access-error').hidden).toBe(true);
+    expect(document.getElementById('role-logout').hidden).toBe(true);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
+    expect(document.querySelector('#manage-menu [data-view="history"]').hidden).toBe(true);
+    expect(document.querySelector('#manage-menu [data-view="admin"]').hidden).toBe(true);
+    expect(document.querySelector('#manage-menu [data-view="metrics"]').hidden).toBe(true);
+
+    unlockAdmin();
+    expect(document.getElementById('admin-access').hidden).toBe(true);
+    expect(document.getElementById('role-logout').hidden).toBe(false);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(false);
     expect(document.querySelector('#manage-menu [data-view="history"]').hidden).toBe(false);
     expect(document.querySelector('#manage-menu [data-view="admin"]').hidden).toBe(false);
     expect(document.querySelector('#manage-menu [data-view="metrics"]').hidden).toBe(false);
@@ -143,7 +168,17 @@ describe('editorial header shell', () => {
     expect(css).toContain('.nav-header');
     expect(css).toContain('.nav-header__center');
     expect(css).toContain('left: 0');
-    expect(css).not.toContain('translateX(-50%)');
+    expect(css).not.toMatch(/#shop-menu\s*\{[^}]*translatex\(-50%\)/);
+    expect(css).toContain('.profile-container');
+    expect(css).toContain('position: relative');
+    expect(css).toContain('#profile-panel.header-menu--profile');
+    expect(css).toContain('right: 0');
+    expect(css).toContain('left: auto');
+    expect(css).toContain('overflow: hidden');
+    expect(css).toContain('@keyframes announcement-marquee');
+    expect(css).toContain('translatex(-50%)');
+    expect(css).toContain('linear infinite');
+    expect(css).toContain('animation-play-state: paused');
     expect(css).toContain('.menu-thumb');
     expect(css).toContain('.hero__content');
     expect(css).toContain('#111111');

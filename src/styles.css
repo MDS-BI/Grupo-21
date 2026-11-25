@@ -56,9 +56,9 @@ body {
 .announcement-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
   min-height: 32px;
-  padding: 0.4rem 1rem;
+  padding: 0.4rem 0;
+  overflow: hidden;
   background: #111111;
   color: #ffffff;
   font-size: 11px;
@@ -66,6 +66,33 @@ body {
   letter-spacing: 0.18em;
   text-align: center;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.announcement-track {
+  display: flex;
+  min-width: max-content;
+  animation: announcement-marquee 18s linear infinite;
+}
+
+.announcement-message {
+  display: block;
+  min-width: max-content;
+  padding: 0 2rem;
+}
+
+.announcement-bar:hover .announcement-track {
+  animation-play-state: paused;
+}
+
+@keyframes announcement-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 .site-header {
@@ -97,6 +124,12 @@ body {
 
 .nav-header__right {
   justify-content: flex-end;
+}
+
+.profile-container {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .nav-header__center {
@@ -261,8 +294,9 @@ body {
   transform: none;
 }
 
-#profile-panel {
-  right: clamp(1rem, 4vw, 3rem);
+#profile-panel.header-menu--profile {
+  right: 0;
+  left: auto;
   width: min(320px, calc(100vw - 2rem));
 }
 
@@ -1229,8 +1263,8 @@ body {
     display: none;
   }
 
-  #profile-panel {
-    right: 1rem;
+  #profile-panel.header-menu--profile {
+    right: 0;
   }
 
   #view-catalog .view-header {

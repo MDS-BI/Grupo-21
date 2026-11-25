@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  mountMarkup, startApp, clickNav, submitForm, buyFromCatalog
+  mountMarkup, startApp, clickNav, submitForm, changeValue, buyFromCatalog
 } from '../helpers/app-fixture.js';
 import { formatCurrency } from '../../src/utils.js';
 
 async function openAdmin(code = '1234') {
-  localStorage.setItem('erp.role', 'admin');
   await startApp();
+  changeValue(document.getElementById('role-select'), 'admin');
   document.getElementById('admin-code').value = code;
   submitForm(document.getElementById('admin-access'));
 }
@@ -32,9 +32,13 @@ beforeEach(() => {
 
 describe('admin panel access control', () => {
   it('asks for the access code in the profile panel and denies entry when it is wrong', async () => {
-    localStorage.setItem('erp.role', 'admin');
     await startApp();
+    changeValue(document.getElementById('role-select'), 'admin');
     expect(document.getElementById('profile-panel').contains(document.getElementById('admin-access'))).toBe(true);
+    expect(document.getElementById('admin-access').hidden).toBe(false);
+    expect(document.getElementById('admin-access-error').hidden).toBe(true);
+    expect(document.getElementById('role-logout').hidden).toBe(true);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
 
     document.getElementById('admin-code').value = '9999';
     submitForm(document.getElementById('admin-access'));
@@ -42,11 +46,16 @@ describe('admin panel access control', () => {
     expect(document.getElementById('admin-access-error').textContent).toMatch(/acceso denegado/i);
     expect(document.getElementById('view-admin').hidden).toBe(true);
     expect(document.getElementById('offer-form')).toBeNull();
+    expect(document.getElementById('role-logout').hidden).toBe(true);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
   });
 
   it('shows the administration controls after entering the correct code', async () => {
     await openAdmin('1234');
     expect(document.querySelector('#role-select [value="admin"]').textContent).toBe('Gerente General');
+    expect(document.getElementById('admin-access').hidden).toBe(true);
+    expect(document.getElementById('role-logout').hidden).toBe(false);
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(false);
     expect(document.getElementById('view-admin').hidden).toBe(false);
     expect(document.getElementById('admin-denied')).toBeNull();
     expect(document.getElementById('offer-form')).not.toBeNull();

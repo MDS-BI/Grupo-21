@@ -113,3 +113,55 @@ Las cuatro correcciones son de presentación e interacción sobre datos ya exist
 - Incrementar `SEED_VERSION`: rechazado porque borraría datos semilla sin relación con el cambio.
 - Persistir el estado de los menús o del scroll: rechazado porque es estado efímero de UI.
 - Modificar permisos para compensar el nuevo menú: rechazado porque los accesos ya están resueltos por `canAccessView()`.
+
+## Actualización de esta ronda: Perfil, acceso gerencial y marquesina
+
+No aparecen `NEEDS CLARIFICATION` nuevos: el usuario y `spec.md` fijan los tres deltas. No se requieren agentes de investigación adicionales porque no hay dependencias, integraciones ni tecnologías nuevas; la decisión es reutilizar DOM, CSS y el estado efímero ya existente.
+
+### Decisión 6: anclaje del popover de Perfil
+
+#### Decision
+
+Envolver `#profile-toggle` y `#profile-panel` en `.profile-container` dentro de `.nav-header__right`. El contenedor usa `position: relative`; el popover usa `right: 0; left: auto` con una regla específica posterior a `.header-menu`.
+
+#### Rationale
+
+Así el popover se alinea al botón Perfil sin alterar `left: 0` de `TIENDA`/`GESTIÓN`. El contenedor neighbor es la forma mínima de obtener un contexto de posicionamiento sin cambiar la fila de 3 zonas ni el fixture de pruebas.
+
+#### Alternatives considered
+
+- Alinear `#profile-panel` con `left: 0`: rechazado porque lo llevaría al costado izquierdo.
+- Centrar con `left: 50%`/`translateX(-50%)`: rechazado porque contradice la alineación derecha.
+- Reposicionar con JavaScript: rechazado porque el layout es estático y CSS basta.
+
+### Decisión 7: sesión gerencial pendiente hasta validar `1234`
+
+#### Decision
+
+`erp.role = "admin"` indica rol seleccionado, no sesión activa. Al cargar o cambiar a `admin`, el estado es pendiente (`admin && !state.adminUnlocked`): se muestra `#admin-access` con `#admin-code`/`#admin-access-submit`, `#admin-access-error` queda oculto, y se ocultan `#role-logout`, `#manage-menu-toggle`, sus hijos y las vistas gerenciales. Solo el envío de `1234` activa `state.adminUnlocked`, oculta el formulario, reaplica permisos, habilita GESTIÓN y muestra logout; un código distinto muestra `Acceso denegado` sin cambiar el estado.
+
+#### Rationale
+
+Separa la selección de rol de la autenticación efectiva y mantiene `canAccessView()` como fuente de permisos. El error condicional evita mostrar «Acceso denegado» antes de que el usuario intente entrar. Reiniciar el estado al cambiar rol o cerrar sesión evita que un desbloqueo previo filtre a otro rol.
+
+#### Alternatives considered
+
+- Activar permisos al elegir `admin` y pedir código solo para Administración: rechazado porque expondría Métricas, Historial y logout antes de validar.
+- Persistir `state.adminUnlocked` en `localStorage`: rechazado porque la credencial es de demostración y la sesión debe ser efímera.
+- Mover la validación a `module-config.js`: rechazado porque no cambia la matriz de permisos, solo el momento de activación.
+
+### Decisión 8: marquesina CSS sin saltos
+
+#### Decision
+
+`.announcement-bar` pasa a ser un viewport con `overflow: hidden` y `white-space: nowrap`. Dentro, `.announcement-track` contiene dos copias idénticas del mensaje; la segunda lleva `aria-hidden="true"`. La animación `@keyframes announcement-marquee` va de `translateX(0)` a `translateX(-50%)` con `linear infinite`, y `.announcement-bar:hover .announcement-track` usa `animation-play-state: paused`.
+
+#### Rationale
+
+Duplicar la pista y desplazar exactamente la mitad de su ancho hace que el reinicio del ciclo sea continuo. CSS puro evita timers, layout calculations y dependencias nuevas; el hover permite leer el aviso sin perderlo.
+
+#### Alternatives considered
+
+- `marquee` HTML obsoleto: rechazado por no ser estándar y no controlar pausa.
+- JavaScript con `setInterval`: rechazado por costo innecesario y mayor riesgo de saltos.
+- Una sola copia con `translateX(-100%)`: rechazado porque deja un espacio vacío al reiniciar.

@@ -26,6 +26,12 @@ import { orderHistory } from './components/order-history.js';
 import { adminPanel } from './components/admin-panel.js';
 import { metricsDashboard } from './components/metrics-dashboard.js';
 
+const privilegedAdminViews = new Set(['history', 'admin', 'metrics']);
+
+function hasPendingAdminSession() {
+  return getRole() === 'admin' && !state.adminUnlocked;
+}
+
 const state = {
   view: 'catalog',
   filters: { category: 'all', maxPrice: '', featuredOnly: false },
@@ -156,8 +162,9 @@ function setNotice(element, message) {
 
 export function showView(view) {
   closeHeaderPanels();
-  const unlockedAdmin = view !== 'admin' || state.adminUnlocked;
-  const allowed = canAccessView(getRole(), view) && unlockedAdmin;
+  const role = getRole();
+  const blockedByPendingAdmin = hasPendingAdminSession() && privilegedAdminViews.has(view);
+  const allowed = canAccessView(role, view) && !blockedByPendingAdmin;
   const activeView = allowed ? view : 'catalog';
 
   setNotice(qs('role-denied'), allowed ? null : {
@@ -744,15 +751,16 @@ function renderRoleSelector() {
 
 function applyRolePermissions() {
   const role = getRole();
+  const pendingAdmin = hasPendingAdminSession();
   const permissions = { canViewHistory, canManageCatalog, canViewMetrics };
   globalThis.document?.querySelectorAll('[data-requires]').forEach((button) => {
     const check = permissions[button.dataset.requires];
-    button.hidden = typeof check === 'function' ? !check(role) : true;
+    button.hidden = pendingAdmin || (typeof check === 'function' ? !check(role) : true);
   });
 
   const logout = qs('role-logout');
   if (logout) {
-    logout.hidden = role === 'customer';
+    logout.hidden = role === 'customer' || pendingAdmin;
     logout.textContent = labelFor('logout', 'Cerrar sesión');
   }
 
@@ -808,6 +816,7 @@ function requestAdminAccess() {
     const adminAccess = qs('admin-access');
     if (adminAccess) adminAccess.hidden = true;
     setNotice(qs('admin-access-error'), null);
+    applyRolePermissions();
     return true;
   }
   setNotice(qs('admin-access-error'), { type: 'error', text: 'Acceso denegado' });
