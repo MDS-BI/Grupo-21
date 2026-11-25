@@ -1,11 +1,21 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mountMarkup, startApp, changeValue } from '../helpers/app-fixture.js';
+
+let scrollCalls = [];
 
 beforeEach(() => {
   vi.resetModules();
   localStorage.clear();
   mountMarkup();
+  scrollCalls = [];
+  Element.prototype.scrollIntoView = vi.fn(function scrollIntoViewStub(options) {
+    scrollCalls.push({ id: this.id, options });
+  });
+});
+
+afterEach(() => {
+  delete Element.prototype.scrollIntoView;
 });
 
 function cardIds() {
@@ -60,5 +70,73 @@ describe('catalog filters', () => {
     expect(cardIds()).toHaveLength(8);
     expect(document.getElementById('filter-category').value).toBe('all');
     expect(document.getElementById('catalog-message').hidden).toBe(true);
+  });
+
+  it('filters, closes and scrolls from every TIENDA dropdown option', async () => {
+    const app = await startApp();
+    const cases = [
+      {
+        view: 'featured',
+        target: 'productos-destacados',
+        filters: { category: 'all', maxPrice: '', featuredOnly: true },
+        ids: ['prod-steel-zip-knit', 'prod-polera-coach-c', 'prod-black-zipper-layers', 'prod-jockey']
+      },
+      {
+        view: 'all',
+        target: 'productos',
+        filters: { category: 'all', maxPrice: '', featuredOnly: false },
+        ids: [
+          'prod-steel-zip-knit',
+          'prod-polera-coach-c',
+          'prod-black-zipper-layers',
+          'prod-jockey',
+          'prod-bandanas',
+          'prod-llavero-rootsouth',
+          'prod-tarjetero-rootsouth',
+          'prod-vaso-matero'
+        ]
+      },
+      {
+        view: 'Knit',
+        target: 'productos',
+        filters: { category: 'Knit', maxPrice: '', featuredOnly: false },
+        ids: ['prod-steel-zip-knit']
+      },
+      {
+        view: 'Poleras',
+        target: 'productos',
+        filters: { category: 'Poleras', maxPrice: '', featuredOnly: false },
+        ids: ['prod-polera-coach-c']
+      },
+      {
+        view: 'Polerones',
+        target: 'productos',
+        filters: { category: 'Polerones', maxPrice: '', featuredOnly: false },
+        ids: ['prod-black-zipper-layers']
+      },
+      {
+        view: 'Accesorios',
+        target: 'productos',
+        filters: { category: 'Accesorios', maxPrice: '', featuredOnly: false },
+        ids: ['prod-jockey', 'prod-bandanas', 'prod-llavero-rootsouth', 'prod-tarjetero-rootsouth', 'prod-vaso-matero']
+      }
+    ];
+
+    for (const entry of cases) {
+      scrollCalls.length = 0;
+      document.getElementById('shop-menu-toggle').click();
+      expect(document.getElementById('shop-menu').hidden).toBe(false);
+
+      document.querySelector(`[data-shop-view="${entry.view}"]`).click();
+
+      expect(app.getAppState().filters).toEqual(entry.filters);
+      expect(cardIds()).toEqual(entry.ids);
+      expect(document.getElementById('view-catalog').hidden).toBe(false);
+      expect(document.getElementById('shop-menu').hidden).toBe(true);
+      expect(document.getElementById('shop-menu-toggle').getAttribute('aria-expanded')).toBe('false');
+      expect(scrollCalls).toHaveLength(1);
+      expect(scrollCalls[0].id).toBe(entry.target);
+      expect(scrollCalls[0].options).toEqual({ behavior: 'smooth', block: 'start' });
+    }
   });
 });

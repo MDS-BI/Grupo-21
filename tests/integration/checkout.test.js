@@ -49,6 +49,7 @@ describe('checkout flow', () => {
     expect(document.getElementById('view-confirmation').hidden).toBe(false);
     expect(document.getElementById('order-number').textContent).toMatch(/^PED-\d{8}-\d{4}$/);
     expect(document.getElementById('cart-count').textContent).toBe('0');
+    expect(document.getElementById('cart-toggle').getAttribute('aria-label')).toMatch(/0/);
 
     expect(storedOrders()).toHaveLength(13);
     const order = storedOrders().find((entry) => entry.shipping?.email === 'ana@example.com');

@@ -5,6 +5,7 @@ import {
   statusDistributionChart,
   rankingProgress
 } from '../../src/components/metrics-charts.js';
+import { formatCurrency } from '../../src/utils.js';
 
 describe('metrics charts', () => {
   it('renders an accessible category bar chart with clickable filters and a fallback table', () => {
@@ -22,15 +23,20 @@ describe('metrics charts', () => {
     expect(markup).toContain('Ingresos por categoría');
   });
 
-  it('renders an accessible sales evolution chart with clickable dates', () => {
+  it('renders a monthly sales evolution chart with compact labels and exact tooltips', () => {
     const markup = salesByDateChart([
       { date: '2026-10-01', revenue: 100000, salesCount: 1 },
       { date: '2026-10-05', revenue: 50000, salesCount: 1 }
     ]);
     expect(markup).toContain('data-chart="sales-date"');
-    expect(markup).toContain('data-chart-date="2026-10-01"');
+    expect(markup).toContain('data-chart-from="2026-10-01"');
+    expect(markup).toContain('data-chart-to="2026-10-31"');
+    expect(markup).not.toContain('data-chart-date="2026-10-01"');
+    expect(markup).toContain('>$150k</span>');
+    expect(markup).toContain(`title="${formatCurrency(150000)}"`);
+    expect(markup).toContain(`aria-label="Filtrar por 2026-10 · ${formatCurrency(150000)}"`);
+    expect(markup).toContain(`<th scope="row">2026-10</th><td>${formatCurrency(150000)}</td>`);
     expect(markup).toContain('style="height: 100%"');
-    expect(markup).toContain('aria-label="Filtrar por 2026-10-05"');
     expect(markup).toContain('Evolución de ventas por fecha');
   });
 

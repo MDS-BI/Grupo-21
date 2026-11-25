@@ -30,6 +30,7 @@ describe('cart view', () => {
     expect(document.getElementById('cart-subtotal').textContent).toBe(formatCurrency(135980));
     expect(document.getElementById('cart-total').textContent).toBe(formatCurrency(135980));
     expect(document.getElementById('cart-count').textContent).toBe('2');
+    expect(document.getElementById('cart-toggle').getAttribute('aria-label')).toMatch(/2/);
   });
 
   it('reports when quantity exceeds available stock', async () => {

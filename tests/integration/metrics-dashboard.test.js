@@ -75,17 +75,31 @@ describe('metrics dashboard', () => {
     expect(document.querySelector('#metrics-top-products .progress-track__fill')).not.toBeNull();
   });
 
-  it('filters metrics from the category and date chart controls', async () => {
+  it('filters metrics from the category chart control', async () => {
     await openMetrics(customOrders());
     document.querySelector('[data-chart-category="Poleras"]').click();
     expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(50000));
     expect(document.getElementById('metrics-category').value).toBe('Poleras');
+  });
 
-    document.getElementById('metrics-reset').click();
-    document.querySelector('[data-chart-date="2026-05-10"]').click();
+  it('keeps legacy exact-date chart filtering compatible', async () => {
+    await openMetrics(customOrders());
+    const legacyButton = document.createElement('button');
+    legacyButton.type = 'button';
+    legacyButton.dataset.chartDate = '2026-05-10';
+    document.getElementById('view-metrics').append(legacyButton);
+    legacyButton.click();
     expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(50000));
     expect(document.getElementById('metrics-from').value).toBe('2026-05-10');
     expect(document.getElementById('metrics-to').value).toBe('2026-05-10');
+  });
+
+  it('filters metrics by month from the sales evolution chart', async () => {
+    await openMetrics(customOrders());
+    document.querySelector('[data-chart-from="2026-05-01"]').click();
+    expect(document.getElementById('metrics-revenue').textContent).toBe(formatCurrency(80000));
+    expect(document.getElementById('metrics-from').value).toBe('2026-05-01');
+    expect(document.getElementById('metrics-to').value).toBe('2026-05-31');
   });
 
   it('recalculates every indicator when date and category filters are applied', async () => {
@@ -130,9 +144,17 @@ describe('metrics dashboard', () => {
 
   it('blocks the panel for roles without metrics permission', async () => {
     await startApp();
+    expect(document.getElementById('manage-menu-toggle').hidden).toBe(true);
+    expect(document.querySelector('[data-view="metrics"]').hidden).toBe(true);
     clickNav('metrics');
     expect(document.getElementById('view-metrics').hidden).toBe(true);
     expect(document.getElementById('role-denied').textContent).toMatch(/permisos|restringido/i);
     expect(document.getElementById('metrics-revenue')).toBeNull();
+
+    localStorage.setItem('erp.role', 'sales');
+    const app = await startApp();
+    app.showView('metrics');
+    expect(document.getElementById('view-metrics').hidden).toBe(true);
+    expect(document.getElementById('role-denied').textContent).toMatch(/permisos|restringido/i);
   });
 });

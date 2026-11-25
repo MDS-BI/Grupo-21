@@ -63,7 +63,7 @@ export const DEFAULT_CONFIG = {
       label: 'Cliente',
       canViewFinancials: false,
       canManageCatalog: false,
-      canViewHistory: true,
+      canViewHistory: false,
       canViewStock: false,
       canViewMetrics: false
     },
@@ -76,7 +76,7 @@ export const DEFAULT_CONFIG = {
       canViewMetrics: false
     },
     admin: {
-      label: 'Dueño/Administrador',
+      label: 'Gerente General',
       canViewFinancials: true,
       canManageCatalog: true,
       canViewHistory: true,

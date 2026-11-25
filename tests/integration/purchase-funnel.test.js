@@ -12,7 +12,7 @@ beforeEach(() => {
 });
 
 describe('purchase funnel end to end', () => {
-  it('goes from catalog filter to confirmation and history', async () => {
+  it('goes from catalog filter to confirmation and then to authorized history', async () => {
     await startApp();
 
     changeValue(document.getElementById('filter-category'), 'Accesorios');
@@ -36,12 +36,31 @@ describe('purchase funnel end to end', () => {
     const orderNumber = document.getElementById('order-number').textContent;
     expect(orderNumber).toMatch(/^PED-\d{8}-\d{4}$/);
     expect(document.getElementById('confirmation').textContent).toContain(formatCurrency(11990));
+    expect(document.querySelector('[data-action="go-history"]')).toBeNull();
 
+    changeValue(document.getElementById('role-select'), 'sales');
     clickNav('history');
     expect(document.querySelector('#history-list').textContent).toContain(orderNumber);
     expect(document.querySelector('#history-list').textContent).toContain(formatCurrency(11990));
 
     const products = JSON.parse(localStorage.getItem('erp.products'));
     expect(products.find((product) => product.id === 'prod-jockey').stock).toBe(29);
+  });
+
+  it('offers the history button in the confirmation when the role is Vendedor', async () => {
+    localStorage.setItem('erp.role', 'sales');
+    await startApp();
+
+    buyFromCatalog('prod-jockey');
+    clickNav('cart');
+    document.getElementById('go-checkout').click();
+    fillCheckout({ fullName: 'Bruno Díaz', email: 'bruno@example.com' });
+    submitForm(document.getElementById('checkout-form'));
+    await flush();
+
+    const historyButton = document.querySelector('[data-action="go-history"]');
+    expect(historyButton).not.toBeNull();
+    historyButton.click();
+    expect(document.getElementById('view-history').hidden).toBe(false);
   });
 });

@@ -1,19 +1,15 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   mountMarkup, startApp, clickNav, submitForm, buyFromCatalog
 } from '../helpers/app-fixture.js';
 import { formatCurrency } from '../../src/utils.js';
 
-function stubPrompt(value) {
-  vi.stubGlobal('prompt', vi.fn(() => value));
-}
-
 async function openAdmin(code = '1234') {
   localStorage.setItem('erp.role', 'admin');
   await startApp();
   document.getElementById('admin-code').value = code;
-  clickNav('admin');
+  submitForm(document.getElementById('admin-access'));
 }
 
 function fillOfferForm({ productId, type = 'percent', value, startDate = '2026-01-01', endDate = '2099-12-31' }) {
@@ -34,17 +30,14 @@ beforeEach(() => {
   mountMarkup();
 });
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
-
 describe('admin panel access control', () => {
-  it('prompts for the access code and denies entry when it is wrong', async () => {
-    stubPrompt('9999');
+  it('asks for the access code in the profile panel and denies entry when it is wrong', async () => {
     localStorage.setItem('erp.role', 'admin');
     await startApp();
+    expect(document.getElementById('profile-panel').contains(document.getElementById('admin-access'))).toBe(true);
 
-    clickNav('admin');
+    document.getElementById('admin-code').value = '9999';
+    submitForm(document.getElementById('admin-access'));
 
     expect(document.getElementById('admin-access-error').textContent).toMatch(/acceso denegado/i);
     expect(document.getElementById('view-admin').hidden).toBe(true);
@@ -53,6 +46,7 @@ describe('admin panel access control', () => {
 
   it('shows the administration controls after entering the correct code', async () => {
     await openAdmin('1234');
+    expect(document.querySelector('#role-select [value="admin"]').textContent).toBe('Gerente General');
     expect(document.getElementById('view-admin').hidden).toBe(false);
     expect(document.getElementById('admin-denied')).toBeNull();
     expect(document.getElementById('offer-form')).not.toBeNull();

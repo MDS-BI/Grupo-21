@@ -8,31 +8,61 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
+    <div class="announcement-bar">ENVÍO GRATIS SOBRE $99.000 CLP</div>
     <header class="site-header">
-      <div class="brand">
-        <span class="brand__mark" aria-hidden="true">ERP</span>
-        <span id="brand-name" class="brand__name">Módulo de Ventas</span>
-      </div>
-      <nav class="site-nav" aria-label="Navegación principal">
-        <button type="button" class="nav-button" data-view="catalog" aria-current="page">Catálogo</button>
-        <button type="button" class="nav-button" data-view="cart">
-          Carrito <span id="cart-count" class="cart-count">0</span>
-        </button>
-        <button type="button" class="nav-button" data-view="history" data-requires="canViewHistory">Historial</button>
-        <button type="button" class="nav-button" data-view="admin" data-requires="canManageCatalog">Administración</button>
-        <button type="button" class="nav-button" data-view="metrics" data-requires="canViewMetrics">Métricas</button>
+      <nav class="nav-header" aria-label="Navegación principal">
+        <div class="nav-header__left">
+          <button type="button" id="shop-menu-toggle" class="nav-link" aria-expanded="false" aria-controls="shop-menu">TIENDA</button>
+          <div id="shop-menu" class="header-menu header-menu--shop" hidden>
+            <div class="header-menu__links">
+              <button type="button" data-shop-view="all">Ver todo</button>
+              <button type="button" data-shop-view="featured">Destacados</button>
+              <button type="button" data-shop-view="Knit">Knit</button>
+              <button type="button" data-shop-view="Poleras">Poleras</button>
+              <button type="button" data-shop-view="Polerones">Polerones</button>
+              <button type="button" data-shop-view="Accesorios">Accesorios</button>
+            </div>
+            <figure class="header-menu__feature">
+              <img class="menu-thumb" src="/images/producto-1.jpg" alt="Producto destacado RootSouth" />
+              <figcaption>Colección 2026</figcaption>
+            </figure>
+          </div>
+
+          <button type="button" id="manage-menu-toggle" class="nav-link" aria-expanded="false" aria-controls="manage-menu" data-requires="canViewHistory">GESTIÓN</button>
+          <div id="manage-menu" class="header-menu" hidden>
+            <button type="button" data-view="history" data-requires="canViewHistory">Historial</button>
+            <button type="button" data-view="admin" data-requires="canManageCatalog">Administración</button>
+            <button type="button" data-view="metrics" data-requires="canViewMetrics">Métricas</button>
+          </div>
+        </div>
+
+        <div class="nav-header__center">
+          <a class="brand" href="#view-catalog" data-view="catalog" aria-label="RootSouth, ir al catálogo">
+            <span id="brand-name" class="brand__name">ROOTSOUTH®</span>
+          </a>
+        </div>
+
+        <div class="nav-header__right">
+          <button type="button" id="profile-toggle" class="nav-link nav-link--profile" aria-expanded="false" aria-controls="profile-panel">Perfil</button>
+          <div id="profile-panel" class="header-menu header-menu--profile" hidden>
+            <label class="field" for="role-select">
+              <span>Rol activo</span>
+              <select id="role-select" aria-label="Rol activo"></select>
+            </label>
+            <button type="button" id="role-logout" class="btn btn--ghost btn--small" hidden>Cerrar sesión</button>
+            <form id="admin-access" class="admin-access" hidden>
+              <label class="sr-only" for="admin-code">Código de administración</label>
+              <input id="admin-code" type="password" inputmode="numeric" autocomplete="off" placeholder="Código admin" aria-label="Código de administración" />
+              <button type="submit" id="admin-access-submit" class="btn btn--ghost btn--small">Acceder</button>
+              <p id="admin-access-error" class="notice notice--error" role="alert" hidden></p>
+            </form>
+          </div>
+          <button type="button" id="cart-toggle" class="nav-link nav-link--cart" data-view="cart" aria-label="Carrito, 0 productos">
+            <span class="cart-icon" aria-hidden="true"></span>
+            Carrito <span id="cart-count" class="cart-count">0</span>
+          </button>
+        </div>
       </nav>
-      <label class="role-select">
-        <span class="sr-only">Rol activo</span>
-        <select id="role-select" aria-label="Rol activo"></select>
-      </label>
-      <button type="button" id="role-logout" class="btn btn--ghost btn--small" hidden>Cerrar sesión</button>
-      <form id="admin-access" class="admin-access" hidden>
-        <label class="sr-only" for="admin-code">Código de administración</label>
-        <input id="admin-code" type="password" inputmode="numeric" autocomplete="off" placeholder="Código admin" aria-label="Código de administración" />
-        <button type="submit" id="admin-access-submit" class="btn btn--ghost btn--small">Acceder</button>
-        <p id="admin-access-error" class="notice notice--error" role="alert" hidden></p>
-      </form>
     </header>
 
     <main class="site-main">
@@ -44,8 +74,8 @@
       <section id="view-catalog" class="view" aria-labelledby="catalog-title">
         <header class="view-header">
           <div class="hero__content">
-            <p class="hero__eyebrow">RootSouth · colección 2026</p>
-            <h1 id="catalog-title">Catálogo de productos</h1>
+            <p class="hero__eyebrow">ROOTSOUTH · COLECCIÓN 2026</p>
+            <h1 id="catalog-title">CATÁLOGO DE PRODUCTOS</h1>
             <p id="catalog-subtitle" class="view-subtitle">Explora, filtra y agrega productos al carrito.</p>
           </div>
         </header>

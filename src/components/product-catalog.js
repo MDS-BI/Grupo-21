@@ -10,11 +10,11 @@ export function productGrid(products, { role } = {}) {
 
 export function productCatalog({ featured = [], products = [], role } = {}) {
   return `
-    <section class="featured-section" aria-labelledby="featured-title">
+    <section id="productos-destacados" class="featured-section" aria-labelledby="featured-title">
       <h2 id="featured-title" class="section-title">${labelFor('featured', 'Productos destacados')}</h2>
       <div id="featured-grid" class="product-grid product-grid--featured">${productGrid(featured, { role })}</div>
     </section>
-    <section class="catalog-section" aria-labelledby="catalog-grid-title">
+    <section id="productos" class="catalog-section" aria-labelledby="catalog-grid-title">
       <h2 id="catalog-grid-title" class="section-title">${labelFor('products', 'Productos')}</h2>
       <div id="catalog-grid" class="product-grid product-grid--catalog">${productGrid(products, { role })}</div>
     </section>

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   mountMarkup, startApp, clickNav, buyFromCatalog, submitForm
 } from '../helpers/app-fixture.js';
@@ -14,18 +14,14 @@ beforeEach(() => {
   localStorage.clear();
   localStorage.setItem('erp.role', 'admin');
   mountMarkup();
-  vi.stubGlobal('prompt', vi.fn(() => '1234'));
-});
-
-afterEach(() => {
-  vi.unstubAllGlobals();
 });
 
 describe('offer lifecycle end to end', () => {
   it('goes from admin offer creation to catalog discount, cart price and rollback', async () => {
     await startApp();
 
-    clickNav('admin');
+    document.getElementById('admin-code').value = '1234';
+    submitForm(document.getElementById('admin-access'));
     document.getElementById('offer-product').value = 'prod-jockey';
     document.getElementById('offer-type').value = 'percent';
     document.getElementById('offer-value').value = '20';

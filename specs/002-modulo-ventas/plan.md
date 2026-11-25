@@ -1,250 +1,279 @@
-# Plan para el Módulo de Ventas (Basado en el Módulo Base ERP)
+# Plan de Implementación: correcciones de Hero, cabecera, menú TIENDA y gráfico Evolución de ventas
 
-> **Reconciliación con `spec.md` (T050)**: la implementación final de esta entrega es una **tienda en línea** (catálogo con stock, filtros, carrito, cupones, checkout e historial de pedidos), tal como se define en `spec.md`. Las secciones 1–4 conservan el diseño B2B original (Clientes y Documentos de Venta) como referencia de negocio y de stack; la sección 2.1 y la sección 10 describen el alcance realmente construido y su trazabilidad con las historias de usuario. El FR-009 del plan B2B (eliminación en cascada de documentos al borrar un cliente) se mantiene como referencia histórica: el FR-009 vigente en `spec.md` exige la tienda RootSouth con ocho productos reales y datos semilla coherentes. El FR-010 define la estética editorial Scuffers con Hero Banner, destacados/catálogo en cuatro columnas. El FR-007 incorpora gráficos interactivos de ingresos por categoría, evolución de ventas, distribución por estado y ranking con barras de progreso. El FR-008 reduce la configuración a exactamente tres roles (`Cliente`, `Vendedor`, `Dueño/Administrador`) con administración protegida por código `1234`. Estos requisitos se detallan en las secciones 5.1 y 12, y se verifican en la sección 11.
+**Rama**: `002-modulo-ventas` | **Fecha**: 2026-11-25 | **Spec**: [`specs/002-modulo-ventas/spec.md`](spec.md)
+
+**Input**: `specs/002-modulo-ventas/spec.md`, FR-007 y FR-010. Cuatro correcciones sobre el código ya implementado.
 
 ## Resumen
 
-El Módulo de Ventas está orientado a los usuarios del área comercial de la empresa. Sus usuarios potenciales principales son los ejecutivos de ventas, quienes gestionan clientes, elaboran cotizaciones y dan seguimiento a los pedidos; los supervisores o jefes de ventas, que revisan y aprueban documentos, controlan el avance del ciclo de vida y consultan los indicadores del panel; y, de forma secundaria, el personal administrativo que apoya el registro y la actualización de datos comerciales.
+Este plan actualiza solo la documentación técnica de `002-modulo-ventas` para corregir cuatro puntos del código existente, sin modificar la persistencia, las nueve Historias de Usuario, la vista de Historial, Administración ni la grilla de 4 columnas:
 
-El diseño debe incorporar el manejo responsable de riesgos y datos sensibles. Los datos fiscales de los clientes, como el RUT/RFC/NIT (taxId), deben tratarse como información confidencial: se recomienda validar su formato al ingresarlos, restringir su visualización según el rol, evitar exponerlos innecesariamente en listados o mensajes y no registrarlos en logs. Respecto de los límites de crédito, deben considerarse como datos comerciales sensibles sujetos a control de acceso y auditoría; el módulo solo los almacena y muestra, y cualquier bloqueo o aprobación automática por crédito queda para una iteración futura con reglas explícitas. Finalmente, para prevenir sesgos en el diseño, las búsquedas, filtros, ordenamientos y reglas de aprobación deben basarse en criterios objetivos y verificables (estado, fechas, montos, condiciones de pago), evitando decisiones automatizadas sobre clientes o vendedores a partir de atributos personales y asegurando que la información mostrada sea transparente y trazable.
+1. Hero Banner sin caja blanca: `CATÁLOGO DE PRODUCTOS` y subtítulo en `#FFFFFF` directamente sobre la foto oscurecida con `linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.2) 100%)`; solo el pill `ROOTSOUTH · COLECCIÓN 2026` conserva alto contraste negro/blanco.
+2. Invertir la cabecera: `TIENDA`/`GESTIÓN` a la izquierda con paneles cayendo a la izquierda, logo tipográfico `ROOTSOUTH®` centrado sin cuadro `RS`, y `Perfil` + `CARRITO` a la derecha.
+3. Conectar `Destacados`, `Ver todo` y las categorías del menú `TIENDA` con el filtro real, cierre del menú y `scrollIntoView` suave a `#productos-destacados` o `#productos`.
+4. Evitar superposición de montos en «Evolución de ventas» con etiquetas compactas sin colisiones, agrupación por mes o abreviaturas como `$69k`, y monto exacto en tooltip/tabla accesible.
 
-## 1. Objetivo
+La estrategia es reutilizar los contratos DOM existentes, conservar `canAccessView()` y `state.filters` como única fuente de comportamiento, y verificar con Vitest + jsdom y `vite build`.
 
-Desarrollar el módulo de Ventas partiendo del Módulo Base ERP (001-erp-base-module), adaptándolo para cubrir la gestión comercial de una empresa. El objetivo es permitir administrar la cartera de clientes, generar cotizaciones/pedidos de venta y dar seguimiento a su ciclo de vida, sin modificar el núcleo del sistema, únicamente mediante el archivo de configuración src/module-config.js.
+## Technical Context
 
-## 2. Alcance
+**Language/Version**: JavaScript ES modules (`package.json` usa `"type": "module"`); sin TypeScript.
 
-### Dentro del alcance (alcance implementado, según `spec.md`)
+**Primary Dependencies**: Vite `^8.2.1`, Vitest `^4.1.10`, jsdom `^30.0.1`.
 
-- Catálogo de productos: productos semilla con nombre, descripción, precio, categoría, stock y marca de destacado; los productos sin stock se muestran como agotados y no se pueden comprar.
-- Filtros de catálogo: filtrado combinado por categoría y precio máximo, con mensaje de resultados vacíos y acción de reinicio.
-- Carrito de compras: añadir productos, ajustar cantidades, quitar líneas, vaciar y recalcular subtotal/total; el carrito persiste en `localStorage` y respeta el stock disponible.
-- Cupones: validación de código, vigencia y límite de uso; descuento porcentual o fijo; notificaciones de éxito/error y restauración del total al quitar el cupón.
-- Checkout: formulario de envío y método de pago, validación de campos obligatorios, pasarela simulada (éxito, rechazo y timeout), descuento de stock y número de pedido `PED-YYYYMMDD-NNNN`.
-- Confirmación e historial: página de confirmación con resumen y número de pedido; historial de documentos de venta por cliente con tipo, fecha, número, monto y estado; límite de crédito enmascarado para roles sin permisos financieros.
-- Administración de precios y ofertas: el rol `admin` puede editar el precio de un producto (validado como numérico y no negativo) y crear, editar, activar, desactivar o eliminar ofertas por porcentaje o monto fijo con vigencia. El catálogo muestra el precio con descuento, el precio original tachado y la insignia «Oferta»; el carrito aplica el precio efectivo y lo recalcula si la oferta cambia. Los roles sin `canManageCatalog` reciben un mensaje de permisos.
-- Personalización por configuración y roles: nombre del módulo, etiquetas, color de acento y control de acceso a datos financieros y a la administración del catálogo desde `src/module-config.js`.
-- Catálogo RootSouth (FR-009): ocho productos reales con imágenes `/images/producto-1.jpg` a `/images/producto-8.jpg`, categorías `Knit`, `Poleras`, `Polerones` y `Accesorios`, ofertas semilla y pedidos iniciales coherentes con las prendas.
-- Estética editorial (FR-010): fondo `#FFFFFF`, Hero Banner con imagen `/images/hero-banner.jpg` y overlay oscuro, marcos 3:4 con fondo `#F4F4F4`, paleta monocromática `#111111`, bordes `0px`, destacados y catálogo en cuadrícula plana de cuatro columnas, etiquetas en mayúsculas espaciadas y zoom sutil al pasar el cursor.
-- Métricas visuales (FR-007): gráficos interactivos de barras por categoría, columnas por fecha, distribución proporcional por estado (semántica `success`/`info`/`warning`/`danger`) y ranking con barras de progreso; los controles filtran el panel y las tablas ocultas sirven como alternativa accesible.
-- Roles exactos (FR-008): `Cliente`, `Vendedor` y `Dueño/Administrador`; no existen los roles `Bodega` ni `Finanzas`. El límite de crédito y la administración son exclusivos del dueño/administrador, con código `1234`.
+**Storage**: `localStorage` con `erp.*`; el rol activo se guarda en `erp.role`. No se requiere migración ni cambiar `SEED_VERSION = 'rootsouth-2026-11-charts'`.
+
+**Testing**: `npm run test:002` (suite vigente del módulo 002), `npm test -- --run` (toda la suite, con fallos heredados conocidos del módulo 001), `npm run build`. No existen scripts de lint ni typecheck.
+
+**Target Platform**: Navegador moderno; SPA estática servida por Vite en `http://localhost:5173` y compilada a `dist/`.
+
+**Project Type**: Aplicación web frontend, sin backend y con pago simulado.
+
+**Performance Goals**: Sin nuevas dependencias ni solicitudes de red; los desplegables, el filtrado del catálogo y el gráfico usan operaciones DOM locales sin re-renderizados innecesarios.
+
+**Constraints**:
+- CSS global con `border-radius: 0 !important`, `box-shadow: none !important`, `[hidden] { display: none !important; }` y anulaciones de `background-image`; la regla árbitro del Hero debe permanecer después de esas anulaciones.
+- Las pruebas usan `mountMarkup()` sobre `index.html` y selectores `#role-select`, `#admin-access`, `#role-logout`, `#cart-count`, `#brand-name`, `[data-view]` y `[data-shop-view]`.
+- `jsdom` no implementa `scrollIntoView`: las pruebas deben poder espiar/stubgear el método sin depender de layout real.
+- El gráfico «Evolución de ventas» se genera con HTML/CSS desde `src/components/metrics-charts.js`; no hay librería de charts ni canvas.
+- `1234` es una credencial de demostración en cliente; `state.adminUnlocked` sigue siendo memoria de sesión, no persistencia.
+- El módulo 001 heredado queda fuera de alcance; sus fallos no deben usarse como criterio de este cambio.
+
+**Scale/Scope**: Una cabecera, un Hero Banner, el menú `TIENDA`, el gráfico «Evolución de ventas», tres roles y siete vistas (`catalog`, `cart`, `checkout`, `confirmation`, `history`, `admin`, `metrics`).
+
+## Constitution Check
+
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+
+| Principio / estándar | Evaluación previa | Evidencia en el plan |
+|---|---|---|
+| I. Code Quality & Maintainability | PASS | Cambios concentrados en `index.html`, `app.js`, `styles.css`, `product-catalog.js` y `metrics-charts.js`; reutilización de `state.filters`, `showView()` y helpers de disclosures existentes. |
+| II. Test-First & Verification | PASS | Ajustes definidos en `product-catalog.test.js`, `header-shell.test.js`, `product-filters.test.js` y `metrics-charts.test.js`; verificación con `test:002` y `build`. |
+| III. User Experience Consistency | PASS | Hero legible sin caja blanca, cabecera de 3 zonas alineada, menú `TIENDA` con cierre/filtro/scroll coherentes y etiquetas de gráfico sin colisiones. |
+| IV. Performance & Reliability | PASS | Sin dependencias nuevas, red ni migración; el agrupado por mes reduce nodos del gráfico y `canAccessView()` sigue protegiendo vistas. |
+| Quality Standards | PASS | `research.md`, `data-model.md`, `contracts/` y `quickstart.md` documentan las cuatro correcciones. No hay comandos de lint/typecheck disponibles; se registra como restricción del repositorio. |
+| Development Workflow | PASS | Incrementos pequeños y verificables: Dominio de scroll, layout de cabecera, Hero, gráfico y validación final. |
+
+**Resultado del gate**: PASS. No hay violaciones que requieran `Complexity Tracking`.
+
+## Project Structure
+
+### Documentation (this feature)
+
+```text
+specs/002-modulo-ventas/
+├── plan.md                       # Este plan
+├── research.md                   # Phase 0: decisiones técnicas
+├── data-model.md                 # Phase 1: impacto en datos y estado
+├── contracts/
+│   └── ui-header-contract.md     # Phase 1: contrato DOM/ARIA/permisos
+├── quickstart.md                 # Phase 1: guía de validación
+├── tasks.md                      # Phase 2 (/speckit.tasks, no generado aquí)
+└── spec.md                       # Fuente de verdad de US1–US9 y FR-001–FR-010
+```
+
+### Source Code (repository root)
+
+```text
+index.html                         # Cinta, cabecera 3 zonas invertida, menús, panel de perfil y Hero sin caja blanca
+src/
+├── module-config.js               # ROLES y canAccessView (sin cambios en esta actualización)
+├── app.js                         # showView, disclosures, setShopFilter + scroll y filtros de métricas
+├── styles.css                     # Cabecera alineada a la izquierda, Hero sin caja y etiquetas de gráfico
+├── catalog.js                     # Categorías usadas por el menú TIENDA
+├── components/
+│   ├── product-catalog.js         # Secciones con ids #productos-destacados y #productos
+│   ├── metrics-charts.js          # Evolución de ventas agrupada/abreviada con tooltip
+│   ├── order-confirmation.js      # Botón "Ver historial" condicionado por permiso
+│   ├── order-history.js           # Vista restringida por canViewHistory
+│   ├── admin-panel.js             # Vista restringida por canManageCatalog
+│   └── metrics-dashboard.js       # Vista restringida por canViewMetrics
+├── data/products.js               # Ocho prendas RootSouth y miniatura editorial
+└── storage.js                     # erp.role y claves de persistencia (sin cambios)
+tests/
+├── unit/
+│   ├── metrics-charts.test.js     # Etiquetas compactas, tooltip y agrupación por mes
+│   ├── module-config.test.js      # Etiqueta y matriz de permisos (sin cambios)
+│   └── role-permissions.test.js   # Cliente sin Historial (sin cambios)
+├── integration/
+│   ├── role-views.test.js         # Navegación/visor por rol (sin cambios)
+│   ├── header-shell.test.js       # Orden de zonas, alineación y cierre de paneles
+│   ├── product-catalog.test.js    # Hero sin caja blanca, texto blanco y grillas
+│   ├── product-filters.test.js    # Menú TIENDA → filtro + scroll suave
+│   ├── metrics-dashboard.test.js  # Clics por mes en Evolución de ventas
+│   ├── order-history.test.js      # Historial con Vendedor/Gerente (sin cambios)
+│   └── admin-panel.test.js        # Código 1234 y panel (sin cambios)
+├── helpers/app-fixture.js         # mountMarkup()/startApp()/clickNav()
+└── setup/jsdom.js                 # Aislamiento de localStorage
+```
+
+**Structure Decision**: Mantener la SPA actual de un solo proyecto. El markup de la cabecera permanece en `index.html` porque el fixture de pruebas lo monta directamente; los destinos de scroll se crean en `productCatalog()`; el filtrado y el scroll se coordinan en `src/app.js`; las etiquetas del gráfico se calculan en `src/components/metrics-charts.js`. La autorización permanece en `src/module-config.js`. No se introduce backend ni nuevo paquete.
+
+## Complexity Tracking
+
+No hay violaciones de la constitución. No se requiere tabla de compensaciones.
+
+## Alcance de esta actualización
+
+### Dentro del alcance
+
+- Hero: eliminar fondo/borde de `.hero__content`; mantener único pill blanco/negro en `.hero__eyebrow`; título y subtítulo `#FFFFFF` sobre el degradado lateral exacto.
+- Cabecera: mover `TIENDA`/`GESTIÓN` a `.nav-header__left`, `ROOTSOUTH®` a `.nav-header__center` sin `.brand__mark`, y `Perfil`/`CARRITO` a `.nav-header__right`; paneles `.header-menu` con `left: 0`, sin `translateX(-50%)`.
+- Menú `TIENDA`: usar `data-shop-view` para aplicar `state.filters`, cerrar el panel y desplazarse con `scrollIntoView({ behavior: 'smooth', block: 'start' })`; crear `#productos-destacados` y `#productos` en `productCatalog()`.
+- Métricas: en `salesByDateChart()`, agrupar por `YYYY-MM`, mostrar valor compacto `$69k`, conservar el monto exacto en `title`/`aria-label` y tabla `sr-only`, y permitir filtrar por rango mensual desde el gráfico.
+- Ajustes de pruebas y documentación técnica para que los cuatro puntos sean verificables sin cambiar el comportamiento ya cubierto.
 
 ### Fuera del alcance
 
-- Administración de inventario y CRUD completo de productos desde la interfaz (el catálogo semilla se consume y el stock se descuenta al comprar; la administración se limita a editar precios y gestionar ofertas).
-- Módulo de Facturación Electrónica: se deja para una futura iteración.
-- Cuentas por Cobrar/Pagar: no forma parte de este módulo.
-- Multi-sucursal o Multi-empresa: el sistema trabaja sobre un único espacio de trabajo.
-- Backend, autenticación real y pasarela de pago real: la persistencia es local y el pago es simulado.
+- Cambios en las 9 Historias de Usuario, la vista de Historial, Administración ni la grilla de 4 columnas.
+- Cambios en permisos, roles, etiqueta `Gerente General`, código `1234`, productos, ofertas, cupones, checkout ni semillas.
+- Migración de `localStorage`, incremento de `SEED_VERSION`, backend o autenticación real.
+- Reparación de suites heredadas del módulo base 001.
 
-### 2.1 Alcance B2B de referencia (no implementado en esta entrega)
+## Diseño técnico por capas
 
-El diseño original contemplaba gestión de Clientes y Documentos de Venta (Cotización → Pedido → Facturado) con límite de crédito y condiciones de pago. Ese modelo se conserva en `data-model.md` como referencia de dominio y de evolución, pero **no** es el flujo construido en esta entrega. La tienda en línea solo usa un subconjunto de Cliente (nombre, correo, dirección) y Pedido (ítems, subtotal, descuento, total, estado `Pedido`).
+### 1. Configuración y autorización (`src/module-config.js`)
 
-## 3. Mapeo con el Módulo Base
+Sin cambios. `canAccessView()` continúa siendo el único mapeo vista → permiso, `ROLES` sigue siendo `['customer', 'sales', 'admin']` y `showView()` mantiene la guarda con `state.adminUnlocked`. Ninguna de las cuatro correcciones abre vistas restringidas ni altera `erp.role`.
 
-| Concepto Base | Adaptación para Ventas | Descripción |
+### 2. Estructura DOM (`index.html` y `src/components/product-catalog.js`)
+
+| Elemento | Acción | Contrato resultante |
 |---|---|---|
-| Entidad | Cliente | Representa a personas naturales o jurídicas con los que se realiza negocio. |
-| Documento | Pedido de Venta / Cotización | Representa una transacción comercial vinculada a un cliente. Puede iniciar como cotización y evolucionar a pedido/factura. |
-| Panel | Panel de Ventas | Punto de entrada con acciones rápidas orientadas al área comercial. |
-| Búsqueda | Búsqueda de Clientes/Pedidos | Permite localizar clientes o documentos de venta rápidamente. |
+| `.nav-header__left` | Mover aquí `#shop-menu-toggle`/`#shop-menu` y `#manage-menu-toggle`/`#manage-menu` | Menús a la izquierda; paneles con `left: 0` y sin centrado. |
+| `.nav-header__center` | Mover aquí `#brand-name`; eliminar `.brand__mark` | Wordmark `ROOTSOUTH®` centrado, sin cuadro `RS`. |
+| `.nav-header__right` | Mantener `#profile-toggle`/`#profile-panel` y `#cart-toggle`/`#cart-count` | Perfil y `CARRITO` a la derecha; contador intacto. |
+| `[data-shop-view]` | Conservar `all`, `featured`, `Knit`, `Poleras`, `Polerones`, `Accesorios` | Misma lista; ahora cada opción dispara filtro + cierre + scroll. |
+| `productCatalog()` | Añadir `id="productos-destacados"` a `.featured-section` e `id="productos"` a `.catalog-section` | Destinos estables para `scrollIntoView`. |
+| `#view-catalog .hero__content` | Mantener solo el contenido textual, sin tarjeta | Título/subtítulo directos sobre la foto; pill permitido solo en `.hero__eyebrow`. |
 
-**Mapeo del alcance implementado (tienda en línea)**
+Se conservan `#role-select`, `#admin-access`, `#admin-code`, `#admin-access-submit`, `#admin-access-error`, `#role-logout`, `[data-view="history"|"metrics"|"admin"]`, `#role-access`, `#role-denied`, `#role-denied-return` y todos los hosts de vistas existentes.
 
-| Concepto implementado | Archivo | Descripción |
+### 3. Comportamiento (`src/app.js`)
+
+| Función | Cambio |
+|---|---|
+| `setShopFilter(value)` | Aceptar el destino derivado del valor: `featured` → `#productos-destacados`; `all` o categoría → `#productos`. Aplicar `state.filters`, llamar a `showView('catalog')` y solicitar `scrollIntoView` suave tras el render. |
+| `handleHeaderClick()` | Obtener `data-shop-view` y pasar el destino a `setShopFilter`; no duplicar listeners. |
+| `showView()` | Sin cambios funcionales; ya cierra paneles con `closeHeaderPanels()`, por lo que el menú queda cerrado antes del scroll. |
+| `closeHeaderPanels()` / `bindHeaderControls()` | Sin cambios; conservar Escape, clic fuera y sincronización `hidden`/`aria-expanded`. |
+| `handleMetricsClick()` | Si el botón trae `data-chart-from`/`data-chart-to`, usar ese rango mensual; mantener compatibilidad con `data-chart-date`. |
+| `updateCartCount()` | Sin cambios; `#cart-count` y `aria-label` siguen intactos. |
+
+El scroll debe implementarse con un helper tolerante a jsdom: si `Element.prototype.scrollIntoView` no existe, no fallar; en navegador usar `{ behavior: 'smooth', block: 'start' }`. No se debe alterar `renderCatalog()` ni la lógica de cupones, ofertas o carrito.
+
+### 4. Presentación (`src/styles.css`)
+
+- `.hero__content`: `background: transparent !important`, `border: 0 !important`, sin `box-shadow`; conservar `position` y `z-index` para que el texto quede sobre el degradado.
+- `#view-catalog .view-header`: mantener `linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.2) 100%), var(--hero-image) !important` como regla final.
+- `#view-catalog .view-header h1` y `#view-catalog .view-header .view-subtitle`: `color: #FFFFFF !important`; `text-shadow` solo refuerzo, nunca fondo blanco.
+- `#view-catalog .hero__eyebrow`: único pill con `background: #FFFFFF !important`, `color: #111111 !important`, `text-transform: uppercase`.
+- `.header-menu`, `#shop-menu` y `#manage-menu`: `left: 0`; eliminar `left: 50%` y `transform: translateX(-50%)` de `#shop-menu`.
+- `.nav-header`: conservar `grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr)`; en móvil, el centro debe seguir siendo la marca y los desplegables deben caer a la izquierda.
+- `.column-chart__item`: ancho uniforme y `min-width: 0`; `.column-chart__value`: etiqueta compacta, `white-space: nowrap`, `overflow: hidden`, `text-overflow: ellipsis` y `title` con el monto exacto.
+- Conservar token `--hero-image: url("/images/hero-banner.jpg")`, grillas de cuatro columnas, `aspect-ratio:3/4`, `#FFFFFF`, `#F4F4F4`, `#111111` y `[hidden]`.
+
+## Fases de implementación
+
+| Fase | Actividad | Salida verificable |
 |---|---|---|
-| Producto | `src/data/products.js`, `src/storage.js` | Catálogo semilla y CRUD interno con precio, stock, categoría y destacado. |
-| Filtros de catálogo | `src/catalog.js`, `src/components/product-filters.js` | Filtrado por categoría y precio máximo con estado vacío. |
-| Carrito | `src/storage.js`, `src/components/cart.js` | Líneas con cantidad, subtotal, descuento y total; persistencia local. |
-| Cupón | `src/coupons.js`, `src/components/coupon-form.js` | Código, tipo (porcentaje/fijo), vigencia y límite de uso. |
-| Pedido | `src/storage.js`, `src/checkout.js`, `src/components/order-confirmation.js` | Documento de venta con número `PED-…`, ítems, totales y estado `Pedido`. |
-| Historial | `src/components/order-history.js`, `src/app.js` | Documentos de venta por cliente y enmascaramiento de `creditLimit` por rol. |
-| Oferta | `src/offers.js`, `src/data/offers.js`, `src/storage.js` | Validación, vigencia, resolución de la mejor oferta activa y precio efectivo por producto. |
-| Panel de administración | `src/components/admin-panel.js`, `src/app.js` | Edición de precios, CRUD de ofertas y restricción de acceso por rol (`canManageCatalog`). |
-| Catálogo RootSouth (FR-009) | `src/data/products.js`, `public/images/`, `src/catalog.js` | Ocho prendas reales con `<img>` y categorías de la tienda. |
-| Pedidos semilla (FR-007/FR-009) | `src/data/seed-orders.js`, `src/storage.js` | Doce documentos iniciales para `client-demo` en los últimos tres meses y versión de esquema `rootsouth-2026-11-charts`. |
-| Gráficos (FR-007) | `src/metrics.js`, `src/components/metrics-charts.js`, `src/components/metrics-dashboard.js` | Agregaciones para categorías, fechas, estados y ranking; filtros por clic en gráficos. |
-| Tokens visuales (FR-010) | `src/styles.css`, `public/images/hero-banner.jpg`, `src/module-config.js` | Hero Banner, grillas planas de cuatro columnas, estética editorial Scuffers y rol por defecto `customer`. |
+| 0. Investigación | Resolver decisiones de alineación, scroll, etiquetas de gráfico y pruebas. | `research.md` completo; sin `NEEDS CLARIFICATION`. |
+| 1. Diseño y contratos | Actualizar modelo de presentación, contrato DOM/UI y guía de validación. | `data-model.md`, `contracts/ui-header-contract.md`, `quickstart.md`. |
+| 2. Cabecera | Invertir zonas, quitar `RS`, alinear desplegables a la izquierda. | `TIENDA`/`GESTIÓN` izquierda, `ROOTSOUTH®` centro, Perfil/`CARRITO` derecha. |
+| 3. Menú `TIENDA` | Añadir ids de sección, conectar `data-shop-view`, cierre y scroll suave. | Filtro real + panel cerrado + scroll a `#productos-destacados`/`#productos`. |
+| 4. Hero | Quitar caja blanca y forzar texto blanco sobre degradado; conservar pill. | Sin tarjeta blanca; título/subtítulo `#FFFFFF` y badge alto contraste. |
+| 5. Métricas | Agrupar/abreviar etiquetas y conservar monto exacto en tooltip/tabla. | Montos sin colisión; clic por mes aplica rango. |
+| 6. Pruebas y verificación | Ajustar suites afectadas y ejecutar comandos. | `npm run test:002` y `npm run build` correctos. |
 
-## 4. Propuesta de Configuración (src/module-config.js)
+> Esta actualización no regenera `tasks.md`; las tareas de implementación derivadas deben crearse después de este plan sin reabrir cambios ya entregados que no estén en los cuatro puntos.
 
-```js
-export const userConfig = {
-  moduleName: "Módulo de Ventas",
-
-  labels: {
-    entity: "Cliente",
-    entities: "Clientes",
-    document: "Pedido de Venta",
-    documents: "Pedidos de Venta",
-    newEntity: "Nuevo Cliente",
-    newDocument: "Nueva Cotización/Pedido",
-    manageEntities: "Gestionar Clientes",
-    searchRecords: "Buscar Clientes o Pedidos",
-    dashboardTitle: "Panel de Ventas",
-  },
-
-  customFields: [
-    { target: "entity", key: "rfcNit", label: "RFC / NIT", type: "text", required: false },
-    { target: "entity", key: "contactName", label: "Nombre de contacto", type: "text", required: false },
-    // creditLimit y paymentTerms son campos BASE del modelo (ver data-model.md).
-    // El perfil de Ventas los muestra en formularios como alias de UI y NO se
-    // declaran como customFields para no duplicar almacenamiento ni chocar con
-    // las claves base. Las opciones válidas de paymentTerms en Ventas son:
-    // Contado, Crédito 15 días, Crédito 30 días, Crédito 45 días, Crédito 60 días.
-    { target: "entity", key: "salesRep", label: "Vendedor asignado", type: "text", required: false },
-
-    { target: "document", key: "deliveryDate", label: "Fecha de entrega", type: "date", required: false },
-    { target: "document", key: "paymentMethod", label: "Forma de pago", type: "select", required: false, options: ["Efectivo", "Transferencia", "Tarjeta", "Crédito"] },
-    { target: "document", key: "quoteValidity", label: "Vigencia de cotización", type: "date", required: false },
-    { target: "document", key: "sellerNotes", label: "Observaciones del vendedor", type: "text", required: false },
-  ],
-
-  statusLifecycle: {
-    statuses: ["Cotización", "En revisión", "Aprobado", "Pedido", "En proceso", "Facturado", "Cancelado", "Vencido"],
-    transitions: {
-      "Cotización": ["En revisión", "Aprobado", "Cancelado", "Vencido"],
-      "En revisión": ["Aprobado", "Cotización", "Cancelado", "Vencido"],
-      "Aprobado": ["Pedido", "Cancelado"],
-      "Pedido": ["En proceso", "Facturado", "Cancelado"],
-      "En proceso": ["Facturado", "Cancelado"],
-      "Facturado": [],
-      "Cancelado": [],
-      "Vencido": []
-    }
-  },
-
-  theme: {
-    accentColor: "#1F7A3E"
-  }
-};
-```
-
-> **Nota de implementación**: `src/module-config.js` expone `DEFAULT_CONFIG` con las etiquetas del escaparate y de gráficos, los roles exactos `customer` (Cliente), `sales` (Vendedor) y `admin` (Dueño/Administrador), y el color de acento `#111111`. El bloque anterior queda como referencia del perfil B2B original.
-
-## 5. Funcionalidades Detalladas
-
-| Funcionalidad | Descripción | Origen en el Base |
-|---|---|---|
-| Catálogo de Clientes | Listado, alta, modificación y baja de clientes con sus datos fiscales, de contacto y comerciales. | HU1, HU2, HU4 |
-| Cotizaciones | Generar una cotización para un cliente con fecha, condiciones y observaciones. Al aprobarla, puede convertirse en Pedido de Venta. | HU10 + Ciclo de Vida (HU12) |
-| Pedidos de Venta | Seguimiento desde "Pedido" hasta "Facturado", con control de estados y restricciones de transición. | HU10 + HU12 |
-| Búsqueda Comercial | Buscar clientes por nombre, código, RFC/NIT, vendedor o por datos del pedido. También filtrar por estado del documento. | HU8, HU11 |
-| Panel de Ventas | Acciones rápidas: "Nuevo Cliente", "Nueva Cotización", "Gestionar Clientes", "Buscar Clientes/Pedidos". Tarjetas con totales de Clientes, Cotizaciones, Pedidos y Facturados. | HU3 (revisada), HU13 |
-| Integridad Comercial (FR-009 B2B de referencia) | Al eliminar un cliente, sus cotizaciones/pedidos deben eliminarse automáticamente. | HU10; hoy `deleteOrdersForClient` en `src/storage.js` |
-| Campos Comerciales | Mostrar límite de crédito, condiciones de pago, fecha de entrega y forma de pago en formularios, listas y detalles. | HU7 |
-
-> **FR-009 (reconciliación)**: en el plan B2B original, FR-009 designaba la integridad comercial y la eliminación en cascada de cotizaciones/pedidos al borrar un cliente; ese comportamiento subsiste en la tienda con `deleteOrdersForClient`. El FR-009 de `spec.md` cambia de alcance: exige que el catálogo sea la tienda de ropa RootSouth con ocho productos reales e imágenes, y que los pedidos iniciales de historial y métricas correspondan a esas prendas, limpiando los datos de tecnología mediante versionado de esquema. El FR-009 vigente no debe leerse como un requisito B2B de eliminación en cascada.
-
-### 5.1 Datos y presentación RootSouth (FR-009 y FR-010)
-
-**FR-009.** `src/data/products.js` contiene ocho prendas y accesorios RootSouth con `image` servida desde `public/images/producto-1.jpg` a `public/images/producto-8.jpg` como `/images/producto-1.jpg` a `/images/producto-8.jpg`; `src/catalog.js` las renderiza con `<img>`.
-
-| ID | Producto | Precio (CLP) | Categoría | Stock |
-|---|---|---:|---|---:|
-| `prod-steel-zip-knit` | Steel Zip Knit | 77990 | Knit | 12 |
-| `prod-polera-coach-c` | Polera Coach C - Gris Claro | 25990 | Poleras | 20 |
-| `prod-black-zipper-layers` | Black Zipper Layers | 67990 | Polerones | 14 |
-| `prod-jockey` | Jockey | 16990 | Accesorios | 30 |
-| `prod-bandanas` | Bandanas | 2997 | Accesorios | 0 (Agotado) |
-| `prod-llavero-rootsouth` | Llavero Rootsouth Original | 5000 | Accesorios | 50 |
-| `prod-tarjetero-rootsouth` | Tarjetero Rootsouth | 9790 | Accesorios | 25 |
-| `prod-vaso-matero` | Vaso Matero | 9990 | Accesorios | 18 |
-
-- Categorías: `Knit`, `Poleras`, `Polerones` y `Accesorios`.
-- Ofertas semilla (`src/data/offers.js`): `offer-steel-zip-10` (10 % en `prod-steel-zip-knit`), `offer-coach-c-5000` ($5.000 fijos en `prod-polera-coach-c`) y `offer-vaso-vencida` (vencida, en `prod-vaso-matero`).
-- `src/data/seed-orders.js` exporta `createSeedOrders(referenceDate)` y `seedOrders`: doce documentos iniciales para `client-demo` con ítems de estas prendas y fechas relativas a los últimos 82 días. Línea base de `src/metrics.js`: ingresos `896122`, 9 ventas completadas, ticket promedio `99569`, 12 documentos y descuento total `25000`; estados `Cotización` (2), `Pedido` (5), `Facturado` (4) y `Cancelado` (1).
-- `src/storage.js` exporta `SEED_VERSION = 'rootsouth-2026-11-charts'` y guarda la versión en `erp.seedVersion`. Si no coincide, `ensureSeedSchema()` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones, eliminando los datos heredados de tecnología.
-
-**FR-010.** `src/styles.css` aplica la estética Scuffers: fondo blanco `#FFFFFF`, Hero Banner servido desde `public/images/hero-banner.jpg` con overlay oscuro y tipografía blanca de alto contraste, marcos de producto 3:4 con fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, bordes `0px`, destacados y catálogo en cuadrícula plana de cuatro columnas, tipografía sans-serif con navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen en hover. `src/module-config.js` fija `theme.accentColor = '#111111'`. El rol por defecto es `customer`, con acceso al historial; `admin` reúne permisos financieros, de catálogo y de métricas, y desbloquea el panel con el código `1234` en `#admin-code`.
-
-## 6. Plan de Implementación por Fases
-
-| Fase | Actividad | Estado | Observaciones |
-|---|---|---|---|
-| Fase A: Configuración | Crear/ajustar src/module-config.js con el perfil de Ventas. Validar con tests/unit/module-config.test.js. | Completado | Punto de partida. |
-| Fase B: Etiquetado | Comprobar que todo el UI muestra "Cliente", "Clientes", "Pedido de Venta", "Cotización" según la configuración. | Completado | Barra lateral, panel, formularios, listas y mensajes. |
-| Fase C: Datos Comerciales | Probar campos personalizados (rfcNit, creditLimit, paymentTerms, deliveryDate, etc). Verificar persistencia, visualización y búsqueda. | Completado | Aprovechar customFields. |
-| Fase D: Ciclo de Vida | Validar transiciones de estado desde el formulario de documentos. Probar casos inválidos y asegurar que solo se muestran estados permitidos. | Completado | Crítico para el flujo Cotización → Pedido → Facturado. |
-| Fase E: Flujos de Ventas | Probar creación de cliente, creación de cotización, cambio de estado, asociación cliente-documento, eliminación en cascada. | Completado | Cubrir con pruebas de integración existentes. |
-| Fase E2: Panel y Navegación | Verificar panel de Ventas, acciones rápidas, estadísticas en tiempo real y navegación por barra lateral. | Completado | Debe funcionar igual al rediseño ERP. |
-| Fase F: Pruebas y Validación | Ejecutar npm test, revisión manual de flujos y validación de responsive. | Completado | Asegurar que no hay regresiones con el módulo base. |
-
-## 7. Criterios de Aceptación
+## Criterios de aceptación
 
 | ID | Criterio | Tipo |
 |---|---|---|
-| CV-001 | Al cargar la app con la configuración de Ventas, el nombre "Módulo de Ventas" debe aparecer en la barra superior, panel y título. | Funcional |
-| CV-002 | Todos los textos deben usar "Cliente/Clientes" y "Pedido de Venta/Cotizaciones" en lugar de "Entidad/Documento". | Funcional |
-| CV-003 | Se puede crear un cliente con sus campos comerciales (RFC/NIT, Límite de crédito, Condiciones de pago) y estos se guardan correctamente. | Funcional |
-| CV-004 | Se puede crear una cotización asociada a un cliente, cambiar su estado siguiendo las transiciones configuradas y esta restricción se aplica al guardar. | Funcional |
-| CV-005 | Las transiciones inválidas (ej. Facturado → Cotización) deben ser rechazadas con un mensaje claro. | Funcional |
-| CV-006 | Al buscar por nombre de cliente, RFC/NIT o vendedor, los resultados deben mostrarse correctamente. | Funcional |
-| CV-007 | Al eliminar un cliente, sus cotizaciones/pedidos deben eliminarse automáticamente. | Funcional |
-| CV-008 | El panel muestra contadores correctos de Clientes, Cotizaciones/Pedidos y su total debe coincidir con lo almacenado en localStorage. | Funcional |
-| CV-009 | El módulo funciona únicamente con src/module-config.js, sin modificar app.js, storage.js, shell.js u otros archivos del núcleo. | Extensibilidad |
-| CV-010 | La aplicación es usable en escritorio y móvil, con la barra lateral contraída correctamente en pantallas pequeñas. | UX/Responsive |
+| CA-001 | El Hero no tiene caja, fondo ni tarjeta blanca detrás del título/subtítulo; solo el pill `ROOTSOUTH · COLECCIÓN 2026` tiene fondo blanco o negro. | UI |
+| CA-002 | `CATÁLOGO DE PRODUCTOS` y el subtítulo usan `#FFFFFF` directamente sobre `linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.2) 100%)`. | Contraste |
+| CA-003 | La cabecera muestra `TIENDA`/`GESTIÓN` a la izquierda, `ROOTSOUTH®` centrado sin cuadro `RS`, y `Perfil` + `CARRITO` a la derecha. | UI |
+| CA-004 | Los paneles de `TIENDA` y `GESTIÓN` caen a la izquierda (`left: 0`) y nunca se centran con `translateX(-50%)`. | UI |
+| CA-005 | `Destacados` aplica `featuredOnly`, cierra el menú y hace scroll suave a `#productos-destacados`. | Comportamiento |
+| CA-006 | `Ver todo` limpia categoría, cierra el menú y hace scroll suave a `#productos`; las categorías aplican filtro, cierran el menú y bajan a `#productos`. | Comportamiento |
+| CA-007 | «Evolución de ventas» muestra etiquetas compactas sin superposición, con monto exacto en `title`/tabla accesible. | UI/Accesibilidad |
+| CA-008 | El clic en una barra agrupada por mes aplica el rango `data-chart-from`/`data-chart-to`, sin romper el filtro por fecha exacta. | Comportamiento |
+| CA-009 | No cambian Historial, Administración, permisos, roles ni la grilla de 4 columnas. | Compatibilidad |
+| CA-010 | No cambian productos, ofertas, pedidos semilla ni `SEED_VERSION`. | Datos |
 
-## 8. Recomendaciones
+## Estrategia de pruebas
 
-- Mantener consistencia: Usar la terminología "Cotización" para el documento en estado inicial.
-- Validar crédito: Aunque el módulo base no bloquea por límite de crédito, el campo creditLimit queda listo para futuras extensiones.
-- Probar con datos reales: Crear al menos 2-3 clientes y un flujo completo (Cotización → Aprobado → Pedido → Facturado).
-- Documentar el perfil: Añadir un comentario al inicio de src/module-config.js indicando que corresponde al perfil "Ventas".
-- Verificar con la suite: Tras aplicar la configuración, ejecutar npm test para confirmar que las pruebas siguen pasando.
+### Ajustes obligatorios en pruebas existentes
 
-## 9. Entregable Esperado
+| Archivo | Ajuste |
+|---|---|
+| `tests/integration/product-catalog.test.js` | Eliminar aserción de caja blanca del Hero; exigir `color:#FFFFFF !important` para `h1`/subtítulo y degradado exacto al final de `src/styles.css`. |
+| `tests/integration/header-shell.test.js` | Verificar que `#shop-menu-toggle`/`#manage-menu-toggle` están en `.nav-header__left`, `#brand-name` en `.nav-header__center` sin `.brand__mark`, y que `#shop-menu`/`#manage-menu` usan `left: 0` sin `translateX(-50%)`. |
+| `tests/integration/product-filters.test.js` | Para `featured`, `all` y cada categoría: comprobar `state.filters`, panel cerrado y llamada a `scrollIntoView` con el destino correcto. |
+| `tests/unit/metrics-charts.test.js` | Comprobar etiquetas `$69k`, `title` con monto exacto, agrupación `YYYY-MM` y atributos `data-chart-from`/`data-chart-to`. |
+| `tests/integration/metrics-dashboard.test.js` | Verificar que el clic mensual actualiza `#metrics-from`/`#metrics-to` y recalcula el panel. |
 
-1. src/module-config.js configurado para el Módulo de Ventas.
-2. Aplicación funcional con terminología comercial correcta.
-3. Flujo completo de Cotización/Pedido operativo con control de estados.
-4. Panel de Ventas con acciones rápidas y estadísticas correctas.
-5. Validación exitosa de la suite de pruebas (npm test).
+### Pruebas nuevas o ampliadas
 
-## 10. Estado de implementación del alcance `spec.md`
+`tests/integration/header-shell.test.js` y `tests/integration/product-filters.test.js` deben cubrir:
 
-| Historia | Prioridad | Estado | Evidencia |
-|---|---|---|---|
-| US1 Catálogo de productos destacados | P1 | Implementado | `src/components/product-card.js`, `src/components/product-catalog.js`, `public/images/hero-banner.jpg`, `tests/integration/product-catalog.test.js` |
-| US2 Filtrado por categoría y precio | P2 | Implementado | `src/catalog.js`, `src/components/product-filters.js`, `tests/integration/product-filters.test.js` |
-| US3 Gestión de carrito | P3 | Implementado | `src/storage.js`, `src/components/cart.js`, `tests/integration/cart.test.js` |
-| US4 Cupones de descuento | P4 | Implementado | `src/coupons.js`, `src/components/coupon-form.js`, `tests/integration/coupons.test.js` |
-| US5 Checkout y confirmación | P5 | Implementado | `src/checkout.js`, `src/payments.js`, `src/components/checkout-form.js`, `src/components/order-confirmation.js`, `tests/integration/checkout.test.js` |
-| US6 Historial de documentos de venta | P6 | Implementado | `src/components/order-history.js`, `src/module-config.js`, `tests/integration/order-history.test.js` |
-| US7 Administración de precios y ofertas | P7 | Implementado | `src/offers.js`, `src/components/admin-panel.js`, `src/storage.js`, `tests/integration/admin-panel.test.js`, `tests/integration/offer-lifecycle.test.js` |
-| US8 Panel de métricas e indicadores | P8 | Implementado | `src/metrics.js`, `src/components/metrics-charts.js`, `src/components/metrics-dashboard.js`, `src/app.js`, `tests/unit/metrics.test.js`, `tests/unit/metrics-filters.test.js`, `tests/unit/metrics-charts.test.js`, `tests/integration/metrics-dashboard.test.js` |
-| US9 Vistas y navegación por rol | P9 | Implementado | `src/module-config.js`, `src/app.js`, `index.html`, `src/components/product-card.js`, `tests/unit/role-permissions.test.js`, `tests/integration/role-views.test.js` |
+1. Orden de zonas y alineación izquierda de ambos desplegables.
+2. Cierre del menú al elegir una opción de `TIENDA` (`hidden` y `aria-expanded="false"`).
+3. `scrollIntoView` suave a `#productos-destacados` para `Destacados` y a `#productos` para `Ver todo`/categorías, con stub seguro en jsdom.
+4. Filtro real: `featuredOnly`, `category: 'all'` o categoría concreta, sin tocar cupones, ofertas ni carrito.
+5. Hero sin fondo/borde blanco en `.hero__content`; pill conservado; título/subtítulo blancos.
+6. Gráfico sin montos largos visibles, con tooltip exacto y tabla `sr-only` intacta.
 
-- Roles implementados en `DEFAULT_CONFIG.roles` y exportados como `ROLES`: `customer` (Cliente, rol por defecto con catálogo, carrito, pago e historial), `sales` (Vendedor, stock e historial) y `admin` (Dueño/Administrador, con `canViewFinancials`, `canManageCatalog` y `canViewMetrics`). No existen `warehouse` ni `finance`; el panel de administración exige el código `1234` en `#admin-code` y `showView('admin')` vuelve al catálogo si la sesión privilegiada no fue desbloqueada.
-- La decisión anterior de retirar el panel de métricas por considerarlo no solicitado quedó supersedida por US8 en `spec.md`; el panel se calcula desde `erp.orders`, `erp.products`, `erp.coupons`, `erp.couponUsage` y `erp.offers`, sin almacenar una entidad adicional.
-- Datos semilla FR-007/FR-009: `src/data/products.js` (8 prendas RootSouth con `image`, 4 destacadas), `src/data/offers.js` (3 ofertas) y `src/data/seed-orders.js` (12 documentos para `client-demo`). `SEED_VERSION = 'rootsouth-2026-11-charts'` en `src/storage.js` hace que un cambio de versión limpie y recree productos, pedidos, carrito, ofertas y uso de cupones, descartando los datos de tecnología anteriores.
-- Verificación final T097: `npm run test:002` terminó con 24 archivos y 150 pruebas aprobadas; `npm run build` compiló correctamente; `npm test -- --run` terminó con 24 archivos aprobados, 11 fallidos, 152 pruebas aprobadas y 88 fallidas. Los fallos de `npm test` provienen de suites heredadas del módulo base 001 (API `addEntity`/`addDocument`, `BASE_FIELDS`, terminología y tema base) y quedan fuera del alcance 002; la sección 11 detalla las comprobaciones de FR-007, FR-009 y FR-010.
-- Los antiguos criterios CV-001 a CV-010 y las fases A–F de la sección 6 corresponden al perfil B2B de referencia; no son criterios de aceptación de esta entrega.
-- Las pruebas heredadas del módulo base 001 permanecen en `tests/` pero dependen de una implementación que no forma parte de este alcance.
+Las suites de permisos, historial y administración no necesitan cambios para estas cuatro correcciones.
 
-## 11. Verificación de FR-009, FR-010 y datos RootSouth
+## Verificación
 
-| ID | Comprobación | Evidencia esperada |
+Desde la raíz del repositorio:
+
+```powershell
+npm run test:002
+npm run build
+npm test -- --run
+```
+
+Criterios de aceptación de la verificación:
+
+- `npm run test:002`: todos los archivos del alcance 002 aprobados, incluidas las aserciones de Hero, cabecera, scroll/filtro y gráfico.
+- `npm run build`: compilación Vite correcta; `dist/images/` conserva las imágenes RootSouth.
+- `npm test -- --run`: comparar contra la línea base conocida de 88 fallos heredados del módulo 001; no se exige resolverlos en este cambio.
+- Revisión manual recomendada: `npm run dev` y comprobar Hero sin caja blanca, cabecera invertida, desplegables a la izquierda, los tres tipos de clic de `TIENDA` y montos de «Evolución de ventas» sin colisiones.
+
+## Re-evaluación de la constitución tras Phase 1
+
+| Principio | Estado posterior | Justificación |
 |---|---|---|
-| V-009-1 | Los ocho productos semilla cargan con sus ID, precios, stock, categorías RootSouth y exactamente cuatro destacados. | `src/data/products.js`, `erp.products`, sección 5.1 |
-| V-009-2 | Las ocho tarjetas renderizan `<img>` con `/images/producto-1.jpg` a `/images/producto-8.jpg`, servidos desde `public/images/`. | `src/catalog.js`, `src/components/product-card.js`, `public/images/` |
-| V-009-3 | El filtro ofrece `Knit`, `Poleras`, `Polerones` y `Accesorios`; `prod-bandanas` queda agotado con stock 0. | `src/catalog.js`, `src/components/product-filters.js` |
-| V-009-4 | Las ofertas semilla son `offer-steel-zip-10`, `offer-coach-c-5000` y `offer-vaso-vencida` (vencida). | `src/data/offers.js`, `erp.offers`, `src/offers.js` |
-| V-009-5 | Los doce documentos de `src/data/seed-orders.js` pertenecen a `client-demo`, usan solo productos RootSouth y caen en los últimos tres meses. | `src/data/seed-orders.js`, `erp.orders`, `erp.clients` |
-| V-009-6 | El panel arranca con ingresos 896122, 9 ventas completadas, ticket promedio 99569, 12 documentos y descuento 25000. | `src/metrics.js`, `src/components/metrics-dashboard.js` |
-| V-009-7 | Un `erp.seedVersion` distinto de `rootsouth-2026-11-charts` limpia y recrea productos, pedidos, carrito, ofertas y uso de cupones. | `SEED_VERSION` y `ensureSeedSchema()` en `src/storage.js` |
-| V-010-1 | Fondo `#FFFFFF`, Hero Banner `/images/hero-banner.jpg` con overlay oscuro, marcos 3:4 con fondo `#F4F4F4`, paleta `#111111`, bordes `0px`, grillas de cuatro columnas y acento `#111111`. | `src/styles.css`, `public/images/hero-banner.jpg`, `src/module-config.js` |
-| V-010-2 | Navegación y categorías en mayúsculas espaciadas y zoom sutil de la imagen al pasar el cursor. | `src/styles.css`, `src/components/product-card.js` |
-| V-ROL-1 | El rol por defecto es `customer` con historial; `admin` tiene permisos financieros, de catálogo y de métricas, y usa `1234` en `#admin-code`. No existen `warehouse` ni `finance`. | `src/module-config.js`, `src/app.js`, `index.html` |
-| V-007-1 | El panel renderiza gráficos de categoría, fecha y estado con alternativas accesibles, y el ranking muestra barras de progreso. | `src/components/metrics-charts.js`, `src/components/metrics-dashboard.js` |
-| V-007-2 | Hacer clic en una barra de categoría o columna de fecha recalcula KPI, tablas y gráficos. | `src/app.js`, `tests/integration/metrics-dashboard.test.js` |
+| I. Code Quality & Maintainability | PASS | Contrato actualizado en `contracts/ui-header-contract.md`; scroll y filtro reutilizan `showView()`/`state.filters`; etiquetas de gráfico aisladas en `metrics-charts.js`. |
+| II. Test-First & Verification | PASS | Suites existentes ampliadas para los cuatro puntos; comandos definidos y línea base heredada documentada. |
+| III. User Experience Consistency | PASS | Hero, cabecera, menú `TIENDA` y gráfico comparten el mismo patrón visual y estados accesibles. |
+| IV. Performance & Reliability | PASS | Sin dependencias, red ni migración; agrupar por mes reduce barras y mantiene el filtrado por rango. |
 
-Resultado de la verificación automatizada T097: `npm run test:002` → 24 archivos / 150 pruebas aprobadas; `npm run build` → compilación correcta; `npm test -- --run` → 24 archivos aprobados, 11 fallidos, 152 pruebas aprobadas y 88 fallidas de suites heredadas del módulo base 001, fuera del alcance 002.
+**Gate final**: PASS.
 
-## 12. Cierre de FR-007 y FR-008
+## Reconciliación con el plan histórico
 
-- `src/metrics.js` devuelve `revenueByCategory`, `salesByDate`, `statusDistribution` y `topProducts` con `revenueShare`/`progressPercent`; todos se recalculan con los filtros de fecha y categoría.
-- `src/components/metrics-charts.js` genera gráficos accesibles con `role="img"`, `aria-label`, tooltips `title`, tablas ocultas para lectores de pantalla y clases semánticas por estado.
-- `src/app.js` enlaza `data-chart-category` y `data-chart-date` con `state.metrics`, sincroniza los formularios y bloquea `showView('admin')` mientras no exista sesión privilegiada desbloqueada.
-- `src/module-config.js` exporta `ROLES` con exactamente `customer`, `sales` y `admin`; el selector de la cabecera se construye desde esa configuración y el límite de crédito solo se revela a `admin`.
+Las secciones anteriores del plan describían una entrega B2B de referencia con Cliente/Documento, cotizaciones, facturación y un perfil configurable. Esa referencia se conserva en `data-model.md`, pero **no** es el alcance implementado ni el objetivo de esta actualización.
+
+Estado previo relevante:
+
+- La tienda RootSouth tiene ocho productos, cuatro destacados, categorías `Knit`, `Poleras`, `Polerones` y `Accesorios`, ofertas semilla y doce pedidos para `client-demo`.
+- El panel de métricas calcula indicadores desde `erp.orders`, `erp.products`, `erp.offers`, `erp.coupons` y `erp.couponUsage`, con gráficos interactivos.
+- `SEED_VERSION = 'rootsouth-2026-11-charts'` ya limpia datos heredados de tecnología.
+- Los roles activos son exactamente `customer`, `sales` y `admin`; este plan conserva los ids y corrige solo la etiqueta visible y el permiso de Historial de `customer`.
+
+## Riesgos y mitigaciones
+
+| Riesgo | Mitigación |
+|---|---|
+| La regla global `background-color:#ffffff !important` sigue pintando el Hero. | Regla árbitro final para `#view-catalog .view-header` con degradado y color blanco; regla específica para `.hero__content` con fondo transparente. |
+| Mover los menús de zona rompe selectores o el fixture de pruebas. | Conservar todos los IDs puente y actualizar `header-shell.test.js` para validar la nueva ubicación. |
+| `#shop-menu` hereda `left:50%`/`translateX(-50%)` de reglas previas. | Anular ambas propiedades con `left:0` y `transform:none` en el mismo bloque. |
+| `scrollIntoView` no existe en jsdom o el destino se renderiza después del clic. | Helper tolerante a ausencia del método y llamada tras `showView('catalog')`; espiar la llamada en pruebas. |
+| Agrupar por mes cambia el filtrado por fecha exacta. | Enviar `data-chart-from`/`data-chart-to` y mantener compatibilidad con `data-chart-date`. |
+| Etiquetas compactas pierden información. | `title`/`aria-label` y tabla `sr-only` conservan `formatCurrency()` exacto. |
+| El cambio se interpreta como modificación de Historial/Administración/grilla. | Alcance explícitamente limitado a los cuatro puntos; suites de permisos sin cambios. |

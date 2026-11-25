@@ -28,7 +28,7 @@ import { metricsDashboard } from './components/metrics-dashboard.js';
 
 const state = {
   view: 'catalog',
-  filters: { category: 'all', maxPrice: '' },
+  filters: { category: 'all', maxPrice: '', featuredOnly: false },
   couponMessage: null,
   checkoutValues: {},
   checkoutErrors: {},
@@ -55,6 +55,92 @@ function viewElement(view) {
   return qs(`view-${view}`);
 }
 
+const headerPanels = [
+  { panel: 'shop-menu', toggle: 'shop-menu-toggle' },
+  { panel: 'manage-menu', toggle: 'manage-menu-toggle' },
+  { panel: 'profile-panel', toggle: 'profile-toggle' }
+];
+
+function closeHeaderPanels(except = null) {
+  headerPanels.forEach(({ panel, toggle }) => {
+    if (panel === except) return;
+    const panelElement = qs(panel);
+    const toggleElement = qs(toggle);
+    if (panelElement) panelElement.hidden = true;
+    if (toggleElement) toggleElement.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function toggleHeaderPanel(name) {
+  const entry = headerPanels.find((item) => item.panel === name);
+  if (!entry) return;
+  const panelElement = qs(entry.panel);
+  const toggleElement = qs(entry.toggle);
+  if (!panelElement || !toggleElement) return;
+
+  const wasOpen = !panelElement.hidden;
+  closeHeaderPanels(wasOpen ? null : entry.panel);
+  panelElement.hidden = wasOpen;
+  toggleElement.setAttribute('aria-expanded', String(!wasOpen));
+}
+
+function shopViewTarget(value) {
+  return value === 'featured' ? 'productos-destacados' : 'productos';
+}
+
+function scrollToCatalogSection(targetId) {
+  const target = qs(targetId);
+  if (!target || typeof target.scrollIntoView !== 'function') return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setShopFilter(value, targetId = shopViewTarget(value)) {
+  if (value === 'featured') {
+    state.filters = { category: 'all', maxPrice: '', featuredOnly: true };
+  } else {
+    state.filters = { category: value === 'all' ? 'all' : value, maxPrice: '', featuredOnly: false };
+  }
+  showView('catalog');
+  scrollToCatalogSection(targetId);
+}
+
+function handleHeaderClick(event) {
+  if (event.target.closest?.('#shop-menu-toggle')) {
+    toggleHeaderPanel('shop-menu');
+    return;
+  }
+  if (event.target.closest?.('#manage-menu-toggle')) {
+    toggleHeaderPanel('manage-menu');
+    return;
+  }
+  if (event.target.closest?.('#profile-toggle')) {
+    toggleHeaderPanel('profile-panel');
+    return;
+  }
+
+  const shopOption = event.target.closest?.('#shop-menu [data-shop-view]');
+  if (shopOption) {
+    const value = shopOption.dataset.shopView;
+    setShopFilter(value, shopViewTarget(value));
+  }
+}
+
+function handleHeaderKeydown(event) {
+  if (event.key !== 'Escape') return;
+  const openPanel = headerPanels.find(({ panel }) => {
+    const element = qs(panel);
+    return element && !element.hidden;
+  });
+  if (!openPanel) return;
+  closeHeaderPanels();
+  qs(openPanel.toggle)?.focus();
+}
+
+function handleDocumentClick(event) {
+  if (event.target.closest?.('.nav-header')) return;
+  closeHeaderPanels();
+}
+
 function setNotice(element, message) {
   if (!element) return;
   if (!message) {
@@ -69,6 +155,7 @@ function setNotice(element, message) {
 }
 
 export function showView(view) {
+  closeHeaderPanels();
   const unlockedAdmin = view !== 'admin' || state.adminUnlocked;
   const allowed = canAccessView(getRole(), view) && unlockedAdmin;
   const activeView = allowed ? view : 'catalog';
@@ -106,8 +193,11 @@ export function showView(view) {
 }
 
 function updateCartCount() {
+  const count = String(getCartCount());
   const badge = qs('cart-count');
-  if (badge) badge.textContent = String(getCartCount());
+  if (badge) badge.textContent = count;
+  const toggle = qs('cart-toggle');
+  if (toggle) toggle.setAttribute('aria-label', `Carrito, ${count} productos`);
 }
 
 function currentCoupon(subtotal) {
@@ -127,7 +217,8 @@ function currentCoupon(subtotal) {
 
 function renderCatalog() {
   const products = loadProducts();
-  const filtered = applyOffersToProducts(filterProducts(products, state.filters));
+  const source = state.filters.featuredOnly ? featuredProducts(products) : filterProducts(products, state.filters);
+  const filtered = applyOffersToProducts(source);
   const featured = applyOffersToProducts(featuredProducts(products));
 
   const filtersHost = qs('product-filters');
@@ -175,17 +266,19 @@ function handleFilterChange(event) {
   const target = event.target;
   if (target.id === 'filter-category') {
     state.filters.category = target.value;
+    state.filters.featuredOnly = false;
     renderCatalog();
   }
   if (target.id === 'filter-max-price') {
     state.filters.maxPrice = target.value;
+    state.filters.featuredOnly = false;
     renderCatalog();
   }
 }
 
 function handleFilterClick(event) {
   if (event.target.id !== 'filter-reset') return;
-  state.filters = { category: 'all', maxPrice: '' };
+  state.filters = { category: 'all', maxPrice: '', featuredOnly: false };
   renderCatalog();
 }
 
@@ -371,12 +464,14 @@ function renderConfirmation() {
     host.innerHTML = '<p class="empty-state">Todavía no hay un pedido confirmado.</p>';
     return;
   }
-  host.innerHTML = orderConfirmation(state.lastOrder);
+  host.innerHTML = orderConfirmation(state.lastOrder, { allowed: canViewHistory(getRole()) });
 }
 
 function handleConfirmationClick(event) {
   if (event.target.dataset?.action === 'go-catalog') showView('catalog');
-  if (event.target.dataset?.action === 'go-history') showView('history');
+  if (event.target.dataset?.action === 'go-history' && canAccessView(getRole(), 'history')) {
+    showView('history');
+  }
 }
 
 /* --------------------------------- Historial ------------------------------- */
@@ -598,6 +693,15 @@ function handleMetricsClick(event) {
     return;
   }
 
+  const rangeButton = event.target.closest?.('[data-chart-from][data-chart-to]');
+  if (rangeButton) {
+    state.metrics.from = rangeButton.dataset.chartFrom;
+    state.metrics.to = rangeButton.dataset.chartTo;
+    syncMetricsControls();
+    renderMetrics();
+    return;
+  }
+
   const dateButton = event.target.closest?.('[data-chart-date]');
   if (dateButton) {
     state.metrics.from = dateButton.dataset.chartDate;
@@ -641,7 +745,7 @@ function renderRoleSelector() {
 function applyRolePermissions() {
   const role = getRole();
   const permissions = { canViewHistory, canManageCatalog, canViewMetrics };
-  globalThis.document?.querySelectorAll('[data-view][data-requires]').forEach((button) => {
+  globalThis.document?.querySelectorAll('[data-requires]').forEach((button) => {
     const check = permissions[button.dataset.requires];
     button.hidden = typeof check === 'function' ? !check(role) : true;
   });
@@ -653,12 +757,12 @@ function applyRolePermissions() {
   }
 
   const adminAccess = qs('admin-access');
-  if (adminAccess) adminAccess.hidden = role !== 'admin';
+  if (adminAccess) adminAccess.hidden = role !== 'admin' || state.adminUnlocked;
 }
 
 function resetPrivilegedState() {
   state.adminUnlocked = false;
-  state.filters = { category: 'all', maxPrice: '' };
+  state.filters = { category: 'all', maxPrice: '', featuredOnly: false };
   state.metrics = { from: '', to: '', category: '' };
   state.admin.message = null;
   state.admin.offerValues = {};
@@ -698,10 +802,11 @@ function handleRoleDeniedReturn() {
 function requestAdminAccess() {
   if (!canManageCatalog(getRole())) return false;
   if (state.adminUnlocked) return true;
-  const inputCode = String(qs('admin-code')?.value || '').trim();
-  const code = inputCode || globalThis.prompt?.('Ingresa el código de acceso:');
-  if (String(code || '').trim() === ADMIN_ACCESS_CODE) {
+  const code = String(qs('admin-code')?.value || '').trim();
+  if (code === ADMIN_ACCESS_CODE) {
     state.adminUnlocked = true;
+    const adminAccess = qs('admin-access');
+    if (adminAccess) adminAccess.hidden = true;
     setNotice(qs('admin-access-error'), null);
     return true;
   }
@@ -712,12 +817,15 @@ function requestAdminAccess() {
 function bindStaticControls() {
   globalThis.document?.querySelectorAll('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
+      closeHeaderPanels();
       if (button.dataset.view === 'admin' && !requestAdminAccess()) return;
       showView(button.dataset.view);
     });
   });
 
-
+  globalThis.document?.querySelector('.nav-header')?.addEventListener('click', handleHeaderClick);
+  globalThis.document?.addEventListener('click', handleDocumentClick);
+  globalThis.document?.addEventListener('keydown', handleHeaderKeydown);
 
   qs('role-select')?.addEventListener('change', handleRoleChange);
   qs('role-logout')?.addEventListener('click', handleRoleLogout);
@@ -747,8 +855,6 @@ export async function boot(config) {
   renderRoleSelector();
   applyRolePermissions();
 
-  const brand = qs('brand-name');
-  if (brand) brand.textContent = getConfig().moduleName;
   if (globalThis.document) globalThis.document.title = getConfig().moduleName;
 
   loadProducts();

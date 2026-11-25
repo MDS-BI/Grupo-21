@@ -72,7 +72,7 @@ describe('module configuration', () => {
     expect(ROLES).toEqual(['customer', 'sales', 'admin']);
     expect(Object.keys(DEFAULT_CONFIG.roles)).toEqual(['customer', 'sales', 'admin']);
     expect(DEFAULT_CONFIG.roles.sales.label).toBe('Vendedor');
-    expect(DEFAULT_CONFIG.roles.admin.label).toBe('Dueño/Administrador');
+    expect(DEFAULT_CONFIG.roles.admin.label).toBe('Gerente General');
     expect(getRole()).toBe('customer');
     expect(setRole('sales')).toBe('sales');
     expect(getRole()).toBe('sales');
@@ -83,14 +83,16 @@ describe('module configuration', () => {
     expect(canViewFinancials('sales')).toBe(false);
     expect(canViewFinancials('customer')).toBe(false);
     expect(canManageCatalog('admin')).toBe(true);
-    expect(canViewHistory('customer')).toBe(true);
+    expect(canViewHistory('customer')).toBe(false);
     expect(canViewHistory('sales')).toBe(true);
     expect(canViewStock('sales')).toBe(true);
     expect(canViewStock('customer')).toBe(false);
     expect(canViewMetrics('admin')).toBe(true);
     expect(canViewMetrics('sales')).toBe(false);
     expect(canAccessView('customer', 'catalog')).toBe(true);
+    expect(canAccessView('customer', 'history')).toBe(false);
     expect(canAccessView('customer', 'metrics')).toBe(false);
+    expect(canAccessView('customer', 'admin')).toBe(false);
     expect(canAccessView('admin', 'metrics')).toBe(true);
   });
 

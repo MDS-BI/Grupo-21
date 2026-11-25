@@ -11,15 +11,17 @@ beforeEach(() => {
 });
 
 describe('role permissions', () => {
-  it('exposes a customer role with purchase and history access', () => {
+  it('exposes a customer role limited to purchase views', () => {
     expect(DEFAULT_CONFIG.roles.customer).toBeTruthy();
-    expect(canViewHistory('customer')).toBe(true);
+    expect(canViewHistory('customer')).toBe(false);
     expect(canViewStock('customer')).toBe(false);
     expect(canViewMetrics('customer')).toBe(false);
     expect(canManageCatalog('customer')).toBe(false);
     expect(canAccessView('customer', 'catalog')).toBe(true);
     expect(canAccessView('customer', 'cart')).toBe(true);
-    expect(canAccessView('customer', 'history')).toBe(true);
+    expect(canAccessView('customer', 'checkout')).toBe(true);
+    expect(canAccessView('customer', 'confirmation')).toBe(true);
+    expect(canAccessView('customer', 'history')).toBe(false);
   });
 
   it('gives the seller history and stock visibility but no metrics or catalog editing', () => {
@@ -30,7 +32,8 @@ describe('role permissions', () => {
     expect(canManageCatalog('sales')).toBe(false);
   });
 
-  it('reserves global metrics and catalog management for the owner/admin', () => {
+  it('reserves global metrics and catalog management for the Gerente General', () => {
+    expect(DEFAULT_CONFIG.roles.admin.label).toBe('Gerente General');
     expect(canViewMetrics('admin')).toBe(true);
     expect(canManageCatalog('admin')).toBe(true);
     expect(canViewHistory('admin')).toBe(true);

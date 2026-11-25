@@ -1,9 +1,12 @@
 import { escapeHtml, formatCurrency } from '../utils.js';
 
-export function orderConfirmation(order = {}) {
+export function orderConfirmation(order = {}, options = {}) {
   const items = (order.items || []).map((item) => `
     <li>${escapeHtml(item.name)} × ${escapeHtml(item.quantity)} — ${formatCurrency(item.lineTotal)}</li>
   `).join('');
+  const historyButton = options.allowed
+    ? '<button type="button" class="btn btn--ghost" data-action="go-history">Ver historial</button>'
+    : '';
 
   return `
     <div class="confirmation-card" id="order-confirmation">
@@ -15,7 +18,7 @@ export function orderConfirmation(order = {}) {
       <p class="confirmation-card__meta">Método de pago: ${escapeHtml(order.paymentMethod || '')}</p>
       <div class="confirmation-card__actions">
         <button type="button" class="btn btn--primary" data-action="go-catalog">Seguir comprando</button>
-        <button type="button" class="btn btn--ghost" data-action="go-history">Ver historial</button>
+        ${historyButton}
       </div>
     </div>
   `;

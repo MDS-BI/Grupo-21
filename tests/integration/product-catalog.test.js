@@ -70,34 +70,41 @@ describe('product catalog view', () => {
     expect(document.getElementById('cart-count').textContent).toBe('0');
   });
 
-  it('navigates between views', async () => {
+  it('navigates between purchase views', async () => {
     await startApp();
     clickNav('cart');
     expect(document.getElementById('view-cart').hidden).toBe(false);
     expect(document.getElementById('view-catalog').hidden).toBe(true);
-    clickNav('history');
-    expect(document.getElementById('view-history').hidden).toBe(false);
+    document.getElementById('go-checkout').click();
+    expect(document.getElementById('view-checkout').hidden).toBe(true);
     clickNav('catalog');
     expect(document.getElementById('view-catalog').hidden).toBe(false);
   });
 
-  it('shows the Hero Banner and keeps a flat four-column layout', async () => {
+  it('shows the Hero Banner without a card and with a flat four-column layout', async () => {
     await startApp();
     const header = document.querySelector('#view-catalog .view-header');
     expect(header).not.toBeNull();
-    expect(document.querySelector('#catalog-title').textContent).toBe('Catálogo de productos');
-    expect(document.querySelector('.hero__eyebrow')).not.toBeNull();
+    expect(document.getElementById('catalog-title').textContent).toBe('CATÁLOGO DE PRODUCTOS');
+    expect(document.querySelector('.hero__eyebrow').textContent).toBe('ROOTSOUTH · COLECCIÓN 2026');
 
     const css = readFileSync(resolve(process.cwd(), 'src/styles.css'), 'utf8');
-    expect(css).toContain('/images/hero-banner.jpg');
-    expect(css).toContain('rgba(0, 0, 0, 0.72)');
-    expect(css).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))');
-    expect(css.lastIndexOf('#view-catalog .view-header')).toBeGreaterThan(css.indexOf('background-image: none !important'));
+    const lowerCss = css.toLowerCase();
+    expect(lowerCss).toContain('/images/hero-banner.jpg');
+    expect(lowerCss).toContain('linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.2) 100%)');
+    expect(lowerCss).not.toContain('rgba(0, 0, 0, 0.72)');
+    expect(lowerCss).not.toContain('rgba(10, 10, 10, 0.92)');
+    expect(lowerCss).toContain('grid-template-columns: repeat(4, minmax(0, 1fr))');
+    expect(lowerCss).not.toContain('background: rgba(255, 255, 255, 0.94)');
+    expect(lowerCss).toMatch(/#view-catalog \.hero__content \{[^}]*background: transparent !important[^}]*\}/);
+    expect(lowerCss).toMatch(/#view-catalog \.view-header h1,\s*#view-catalog \.view-header \.view-subtitle \{[^}]*color: #ffffff !important[^}]*\}/);
+    expect(lowerCss.lastIndexOf('#view-catalog .view-header')).toBeGreaterThan(lowerCss.indexOf('background-image: none !important'));
+    expect(css.lastIndexOf('#view-catalog .hero__eyebrow')).toBeGreaterThan(css.indexOf('.hero__eyebrow {'));
   });
 
-  it('applies module branding and the Scuffers visual tokens', async () => {
+  it('keeps the RootSouth wordmark and applies the Scuffers visual tokens', async () => {
     await startApp({ config: { moduleName: 'Tienda Acme', theme: { accentColor: '#0f62fe' } } });
-    expect(document.getElementById('brand-name').textContent).toBe('Tienda Acme');
+    expect(document.getElementById('brand-name').textContent).toBe('ROOTSOUTH®');
     expect(document.title).toBe('Tienda Acme');
     expect(document.documentElement.style.getPropertyValue('--accent')).toBe('#0f62fe');
 

@@ -2,7 +2,7 @@
 
 El módulo de Ventas reutiliza las entidades base `Entity` y `Document` del ERP, adaptándolas como `Cliente` y `Documento de Venta`. La Cotización y el Pedido de Venta son el mismo documento en distintos estados del ciclo de vida, no entidades separadas.
 
-> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B. En la tienda, el FR-009 vigente corresponde al catálogo RootSouth y sus datos semilla (sección «Catálogo semilla RootSouth»), y el FR-010 a la presentación editorial (sección «Presentación editorial»). El FR-007 incorpora indicadores derivados para gráficos de categoría, fecha, estado y ranking (sección «Indicadores derivados»), y el FR-008 reduce los roles activos a `customer`, `sales` y `admin` (sección «Permisos por rol»).
+> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B. En la tienda, el FR-009 vigente corresponde al catálogo RootSouth y sus datos semilla (sección «Catálogo semilla RootSouth»), y el FR-010 a la presentación editorial y al encabezado (sección «Presentación editorial»). El FR-007 incorpora indicadores derivados para gráficos de categoría, fecha, estado y ranking (sección «Indicadores derivados»), y el FR-008 reduce los roles activos a `customer`, `sales` y `admin`, cambia la etiqueta visible de `admin` a `Gerente General` y retira el permiso de Historial a `customer` (sección «Permisos por rol»).
 
 ## Entidad: Cliente
 
@@ -319,9 +319,13 @@ Este versionado elimina los productos de tecnología de esquemas anteriores junt
 
 ### Presentación editorial (FR-010)
 
-Los tokens visuales se aplican en `src/styles.css` siguiendo la referencia de Scuffers: fondo blanco `#FFFFFF`, Hero Banner servido desde `public/images/hero-banner.jpg` con overlay oscuro y tipografía blanca, marcos de producto verticales con `aspect-ratio: 3 / 4` y fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, `border-radius: 0`, destacados y catálogo en grilla plana de cuatro columnas, tipografía sans-serif, etiquetas de navegación y categorías en mayúsculas con espaciado de letras y un zoom sutil de la imagen (`scale`) al pasar el cursor. `src/module-config.js` fija `theme.accentColor = '#111111'`; el verde `#1F7A3E` del perfil B2B queda solo como referencia histórica del plan.
+Los tokens visuales se aplican en `src/styles.css` siguiendo la referencia de Scuffers: fondo blanco `#FFFFFF`, Hero Banner servido desde `public/images/hero-banner.jpg`, marcos de producto verticales con `aspect-ratio: 3 / 4` y fondo `#F4F4F4`, paleta monocromática en `#111111` y grises neutros, `border-radius: 0`, destacados y catálogo en grilla plana de cuatro columnas, tipografía sans-serif, etiquetas de navegación y categorías en mayúsculas con espaciado de letras y un zoom sutil de la imagen (`scale`) al pasar el cursor. `src/module-config.js` fija `theme.accentColor = '#111111'`; el verde `#1F7A3E` del perfil B2B queda solo como referencia histórica del plan.
 
-Estos tokens son de presentación y no alteran el modelo persistido: `Producto.image` conserva la ruta original y el precio, el stock y la categoría no se derivan de la imagen.
+El encabezado se estructura en una cinta superior `.announcement-bar` de fondo `#111111` con avisos blancos de 11px en mayúsculas y `letter-spacing`, y una fila de 3 zonas: `TIENDA` y `GESTIÓN` a la izquierda con paneles anclados con `left: 0`, la marca tipográfica `ROOTSOUTH®` centrada sin cuadro `RS`, y Perfil/`CARRITO` a la derecha. El menú `TIENDA` muestra `Ver todo`, `Destacados`, `Knit`, `Poleras`, `Polerones` y `Accesorios`, con miniatura editorial servida desde `/images/producto-1.jpg`; cada opción aplica `state.filters`, cierra el panel y desplaza a `#productos-destacados` o `#productos`. El menú `GESTIÓN` se deriva de permisos y permanece sin cambios.
+
+El badge superior del Hero debe mostrar exactamente `ROOTSOUTH · COLECCIÓN 2026` como único pill con fondo blanco y texto `#111111` (o fondo negro con texto blanco). El título `CATÁLOGO DE PRODUCTOS` y el subtítulo son `#FFFFFF` directamente sobre la fotografía, sin caja, fondo ni tarjeta blanca; la legibilidad proviene del degradado lateral `linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.2) 100%)`.
+
+Estos tokens son de presentación y no alteran el modelo persistido: `Producto.image` conserva la ruta original y el precio, el stock y la categoría no se derivan de la imagen; la miniatura editorial reutiliza una imagen semilla existente y no crea una entidad nueva.
 
 ## Indicadores derivados (US8)
 
@@ -336,7 +340,7 @@ El panel de métricas no introduce una entidad persistida: calcula sus indicador
 | Alertas de stock | Productos con `stock <= 5`, incluidos los agotados (`stock = 0`). |
 | Descuentos y cupones | Suma de `Pedido.discount`, usos acumulados por código y usos de oferta registrados en las líneas. |
 | Ingresos por categoría | Agrupación de ingresos y unidades de `Pedido.items[]` por `Producto.category`; alimenta un gráfico de barras y filtra al hacer clic. |
-| Evolución de ventas por fecha | Agrupación de ingresos y cantidad de ventas completadas por `Pedido.date` (`YYYY-MM-DD`); alimenta un gráfico de columnas y filtra al hacer clic. |
+| Evolución de ventas por fecha | Agrupación de ingresos y cantidad de ventas completadas por `Pedido.date`; para la presentación se agrupa por mes (`YYYY-MM`) con etiqueta compacta (`$69k`), monto exacto en `title`/`aria-label` y tabla `sr-only`; el clic filtra por `data-chart-from`/`data-chart-to` del mes, con compatibilidad con `data-chart-date`. |
 | Distribución por estado | Conteo y porcentaje de `Pedido.status` sobre todos los documentos filtrados, con tono semántico `Cotización=warning`, `Pedido=info`, `Facturado=success`, `Cancelado=danger`. |
 | Progreso del ranking | Para cada producto: `revenueShare = round(revenue / totalRankedRevenue * 100)` y `progressPercent = round(revenue / maxRevenue * 100)`. |
 
@@ -344,13 +348,29 @@ Los filtros por rango de fechas (`Pedido.date`) y categoría (vía `Pedido.items
 
 ## Permisos por rol (US9)
 
-| Rol | Permisos |
+| Rol (id / etiqueta visible) | Permisos |
 |---|---|
-| `customer` | Rol por defecto: catálogo, carrito, pago e historial. No ve administración ni métricas; no ve cantidades de stock. |
-| `sales` | Vendedor: catálogo con disponibilidad de stock, carrito, pago e historial de clientes. No administra catálogo, ve métricas globales ni el límite de crédito. |
-| `admin` | Dueño/administrador: `canViewFinancials`, `canManageCatalog` y `canViewMetrics`; historial íntegro con límite de crédito visible, stock, métricas y administración de precios/ofertas. El panel exige el código `1234` en `#admin-code`. |
+| `customer` / Cliente | Rol por defecto: catálogo, carrito y pago. No ve Historial, Administración ni Métricas; tampoco ve cantidades de stock ni el menú `GESTIÓN`. |
+| `sales` / Vendedor | Catálogo con disponibilidad de stock, carrito, pago e historial de clientes. Ve solo `Historial` dentro de `GESTIÓN`; no administra catálogo, ve métricas globales ni el límite de crédito. |
+| `admin` / Gerente General | `canViewFinancials`, `canManageCatalog` y `canViewMetrics`; ve `Historial`, `Métricas` y `Administración`, historial íntegro con límite de crédito visible, stock y administración de precios/ofertas. El panel exige el código `1234` en `#admin-code`. |
 
-No existen los roles `warehouse` ni `finance`: `ROLES` en `src/module-config.js` contiene exactamente `customer`, `sales` y `admin`.
+No existen los roles `warehouse` ni `finance`: `ROLES` en `src/module-config.js` contiene exactamente `customer`, `sales` y `admin`. El id interno `admin` y la clave persistida `erp.role` se conservan; solo cambia la etiqueta visible a `Gerente General`.
 
-`src/app.js` filtra los botones de navegación con `data-requires` y aplica una guarda en `showView`; el contenido restringido se sustituye por un aviso con una acción para volver al catálogo. El cierre de sesión interna guarda el rol `customer` y devuelve a la vista pública.
+`canAccessView()` en `src/module-config.js` es el único mapeo vista → permiso. `src/app.js` deriva la visibilidad de `GESTIÓN` y de sus hijos desde esa función, y conserva una guarda en `showView()`; el contenido restringido se sustituye por un aviso con una acción para volver al catálogo. El botón «Ver historial» de la confirmación también depende de `canViewHistory(getRole())`. El cierre de sesión interna guarda el rol `customer` y devuelve a la vista pública.
+
+### Estado efímero de la interfaz
+
+Los siguientes estados no se persisten y no forman parte del esquema de datos:
+
+| Estado | Valor inicial | Regla |
+|---|---|---|
+| `state.role` | `getRole()` desde `erp.role`, con fallback `customer` | Cambia con el selector o el cierre de sesión; solo acepta `customer`, `sales` y `admin`. |
+| `state.view` | `catalog` | Toda navegación pasa por `showView()` y `canAccessView()`. |
+| `state.adminUnlocked` | `false` | Se activa solo con código `1234` para un rol con `canManageCatalog`; se reinicia al cambiar rol, cerrar sesión o recargar. |
+| Estados de disclosures | Cerrados (`hidden` y `aria-expanded="false"`) | Menús `TIENDA`/`GESTIÓN` y panel de perfil; se cierran al navegar, cambiar rol, Escape o clic fuera, incluida la selección de una opción de `TIENDA`. |
+| `state.filters` desde `TIENDA` | `{ category: 'all', maxPrice: '', featuredOnly: false }` | `Destacados` activa `featuredOnly`; `Ver todo` reinicia categoría; una categoría aplica `category`. Ningún valor se persiste. |
+| Rango mensual del gráfico | Derivado de `data-chart-from`/`data-chart-to` | Al hacer clic en una barra de «Evolución de ventas» actualiza `state.metrics.from`/`to`; es efímero y no altera pedidos semilla. |
+| Contador del carrito | Derivado de `getCartCount()` | Se refleja en `#cart-count` y en el `aria-label` del botón Carrito. |
+
+No se requiere migración: `erp.role = "admin"` sigue siendo válido y `SEED_VERSION` no cambia porque no se modifican productos, ofertas ni pedidos semilla.
 
