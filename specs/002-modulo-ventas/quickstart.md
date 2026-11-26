@@ -1,8 +1,8 @@
-# Guía rápida de validación: Hero, cabecera, TIENDA, Evolución de ventas y accesos gerenciales
+# Guía rápida de validación: Hero, cabecera, TIENDA, Evolución de ventas, accesos gerenciales y nombre del cliente en Historial
 
 **Feature**: `002-modulo-ventas`  
 **Rama**: `002-modulo-ventas`  
-**Referencias**: [`contracts/ui-header-contract.md`](contracts/ui-header-contract.md), [`data-model.md`](data-model.md), [`plan.md`](plan.md), [`spec.md`](spec.md)
+**Referencias**: [`contracts/ui-header-contract.md`](contracts/ui-header-contract.md), [`contracts/history-client-contract.md`](contracts/history-client-contract.md), [`data-model.md`](data-model.md), [`plan.md`](plan.md), [`spec.md`](spec.md)
 
 ## Prerrequisitos
 
@@ -22,7 +22,7 @@ npm test -- --run
 
 Resultados esperados:
 
-- `npm run test:002`: 25 archivos aprobados; el número de pruebas puede aumentar con los casos nuevos de Perfil, sesión gerencial y marquesina.
+- `npm run test:002`: 25 archivos aprobados; la línea base es 161 pruebas y debe aumentar con el caso nuevo de nombre del cliente en Historial.
 - `npm run build`: compilación Vite correcta; las imágenes de `public/images/` se copian a `dist/images/`.
 - `npm test -- --run`: la comparación debe respetar la línea base de 88 fallos heredados del módulo 001; este cambio no debe añadir fallos nuevos.
 
@@ -44,11 +44,13 @@ npx vitest run tests/unit/metrics-charts.test.js tests/integration/header-shell.
 6. **Categorías**: `Knit`, `Poleras`, `Polerones` y `Accesorios` aplican `category`, cierran el menú y bajan a `#productos`.
 7. **Evolución de ventas**: `salesByDateChart()` agrupa por `YYYY-MM`, muestra `$69k`, conserva el monto exacto en `title`/tabla `sr-only` y expone `data-chart-from`/`data-chart-to`.
 8. **Filtro mensual**: el clic en una columna actualiza `#metrics-from`/`#metrics-to` y recalcula el panel sin errores.
-9. **Regresiones**: permisos, Historial, Administración y grillas de 4 columnas permanecen iguales.
+9. **Regresiones**: permisos, Historial, Administración y grillas de 4 columnas permanecen iguales, salvo la lógica de datos y etiquetas del selector `#history-client`.
 10. **Perfil**: `#profile-panel` está dentro de `.profile-container`, el CSS contiene `position: relative`, `right: 0` y `left: auto`; los menús izquierdos conservan `left: 0`.
 11. **Acceso pendiente**: al cambiar `#role-select` a `admin`, `#admin-access` se muestra, `#admin-access-error` sigue oculto, `#role-logout` está oculto y `GESTIÓN` no habilita Historial/Administración/Métricas.
 12. **Acceso validado**: un código incorrecto muestra `Acceso denegado` sin activar permisos; `1234` oculta el formulario, habilita GESTIÓN, muestra `#role-logout` y permite el límite de crédito sin enmascarar.
 13. **Marquesina**: `.announcement-track` contiene dos copias del mensaje exacto y el CSS define `overflow: hidden`, `@keyframes`, `translateX(-50%)`, `linear infinite` y `animation-play-state: paused` en `:hover`.
+14. **Nombre del comprador**: tras una compra con un nombre nuevo y único, `erp.clients[].name` guarda exactamente el `fullName` del checkout y `#history-client` muestra esa misma cadena en la opción seleccionada, sin opciones vacías.
+15. **Sin `undefined`**: después de renderizar Historial, `document.body.textContent` no contiene `undefined`, incluso si existen clientes antiguos incompletos en `localStorage`.
 
 ## Validación manual en navegador
 
@@ -64,10 +66,11 @@ Abrir `http://localhost:5173` y comprobar:
 4. **TIENDA → Ver todo**: el menú se cierra, el filtro de categoría vuelve a «Todas» y la página baja suavemente a `PRODUCTOS`.
 5. **TIENDA → categoría**: `Knit`, `Poleras`, `Polerones` o `Accesorios` filtran el catálogo, cierran el menú y bajan a `PRODUCTOS`.
 6. **Métricas**: en el panel de Gerente General, «Evolución de ventas» muestra pocas etiquetas limpias como `$69k`; al pasar el cursor aparece el monto exacto y al hacer clic se filtra el mes.
-7. **Sin regresiones**: Historial, Administración y la grilla de 4 columnas siguen funcionando como antes.
+7. **Sin regresiones**: Historial, Administración y la grilla de 4 columnas siguen funcionando como antes; solo cambia la procedencia de las etiquetas del selector de clientes, sin tocar estilos ni encabezado.
 8. **Perfil**: abrir `Perfil` y comprobar que el panel cae justo debajo y a la derecha del botón, no al costado izquierdo.
 9. **Gerente General**: elegir `Gerente General`; debe aparecer el formulario de código, sin `Cerrar sesión` ni GESTIÓN habilitada. Probar `9999` (mensaje de error, sin cambios de permisos) y luego `1234` (formulario oculto, GESTIÓN y logout visibles).
 10. **Marquesina**: observar que los cinco avisos se desplazan sin cortes y que el movimiento se detiene al pasar el cursor por la cinta.
+11. **Checkout → Historial**: comprar con un nombre nuevo, cambiar a Vendedor o validar `1234` como Gerente General, abrir `GESTIÓN` → `Historial` y comprobar que el selector muestra el nombre exacto, sin opciones en blanco ni texto `undefined` al final de la pantalla.
 
 Para probar métricas manualmente, seleccionar `Gerente General`, validar `1234` en el panel de Perfil y abrir `GESTIÓN` → `Métricas`. No es necesario cambiar `erp.seedVersion`.
 
@@ -78,5 +81,5 @@ La entrega está lista para implementación/tareas cuando:
 - No existen `NEEDS CLARIFICATION` en [`research.md`](research.md).
 - El contrato DOM/ARIA/interacción, el modelo de presentación y la guía concuerdan con FR-007/FR-010.
 - Las suites afectadas por las cuatro correcciones y por los tres deltas están identificadas para actualización.
-- El contrato incluye Perfil alineado a la derecha, sesión gerencial pendiente/validada y marquesina infinita.
-- No se modifica el esquema persistido, `SEED_VERSION`, la matriz de permisos, el diseño de Historial/Administración ni la grilla de 4 columnas.
+- El contrato incluye Perfil alineado a la derecha, sesión gerencial pendiente/validada, marquesina infinita y selector de Historial sin nombres vacíos ni `undefined`.
+- No se modifica el esquema persistido, `SEED_VERSION`, la matriz de permisos, el diseño visual/CSS de Historial/Administración, el encabezado ni la grilla de 4 columnas.

@@ -439,7 +439,7 @@ async function handleCheckoutSubmit(event) {
     }),
     actions: {
       decreaseStock: (items) => items.every((item) => decreaseStock(item.productId, item.quantity)),
-      createClient: (clientData) => findOrCreateClient(clientData),
+      createClient: (clientData) => findOrCreateClient({ ...clientData, name: clientData.fullName }),
       createOrder: (orderData) => addOrder(orderData),
       recordCouponUse,
       clearCart

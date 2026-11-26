@@ -282,10 +282,40 @@ export function applyOffersToProducts(products, date = new Date()) {
 
 /* -------------------------------- Clientes -------------------------------- */
 
+const CLIENT_NAME_ALIASES = ['name', 'fullName', 'customerName', 'nombre', 'cliente'];
+const INVALID_TEXT_TOKENS = new Set(['undefined', 'null', 'nan']);
+
+function readableText(value) {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'number' && !Number.isFinite(value)) return '';
+  const text = String(value).trim();
+  return INVALID_TEXT_TOKENS.has(text.toLowerCase()) ? '' : text;
+}
+
+function clientName(data = {}) {
+  for (const key of CLIENT_NAME_ALIASES) {
+    const value = readableText(data?.[key]);
+    if (value) return value;
+  }
+  return '';
+}
+
+function clientLabel(client = {}) {
+  return clientName(client) || readableText(client.email) || readableText(client.code) || 'Cliente sin nombre';
+}
+
+function hasPlaceholderName(client = {}) {
+  const name = readableText(client.name);
+  if (!name) return true;
+  return name === 'Cliente sin nombre'
+    || normalizeText(name) === normalizeText(client.email)
+    || normalizeText(name) === normalizeText(client.code);
+}
+
 export function validateClient(data = {}) {
   const errors = {};
-  if (!String(data.name ?? '').trim()) errors.name = 'El nombre del cliente es obligatorio.';
-  if (!String(data.code ?? '').trim()) errors.code = 'El código del cliente es obligatorio.';
+  if (!clientName(data)) errors.name = 'El nombre del cliente es obligatorio.';
+  if (!readableText(data.code)) errors.code = 'El código del cliente es obligatorio.';
   if (data.email && !isValidEmail(data.email)) errors.email = 'El correo electrónico no es válido.';
   if (data.creditLimit !== undefined && data.creditLimit !== '' && toNumber(data.creditLimit, -1) < 0) {
     errors.creditLimit = 'El límite de crédito debe ser un número no negativo.';
@@ -295,10 +325,19 @@ export function validateClient(data = {}) {
 
 export function loadClients() {
   const stored = read(KEYS.clients, null);
-  if (Array.isArray(stored)) return stored;
   const seeded = [{ ...seedClient }];
-  write(KEYS.clients, seeded);
-  return seeded;
+  const clients = Array.isArray(stored) ? stored : seeded;
+  let changed = !Array.isArray(stored);
+  const normalized = clients.map((client) => {
+    const name = clientLabel(client);
+    if (readableText(client.name) !== name) {
+      changed = true;
+      return { ...client, name };
+    }
+    return client;
+  });
+  if (changed) write(KEYS.clients, normalized);
+  return normalized;
 }
 
 export function saveClients(clients) {
@@ -311,14 +350,15 @@ export function getClient(id) {
 
 export function addClient(data = {}) {
   const clients = loadClients();
+  const code = readableText(data.code) || `CLI-${String(clients.length + 1).padStart(3, '0')}`;
   const client = {
-    id: data.id || genId('client'),
-    name: String(data.name ?? '').trim(),
-    code: String(data.code ?? `CLI-${String(clients.length + 1).padStart(3, '0')}`).trim(),
-    email: String(data.email ?? '').trim(),
-    address: String(data.address ?? '').trim(),
-    city: String(data.city ?? '').trim(),
-    phone: String(data.phone ?? '').trim(),
+    id: readableText(data.id) || genId('client'),
+    name: clientName(data) || readableText(data.email) || code || 'Cliente sin nombre',
+    code,
+    email: readableText(data.email),
+    address: readableText(data.address),
+    city: readableText(data.city),
+    phone: readableText(data.phone),
     creditLimit: toNumber(data.creditLimit, 0),
     createdAt: now(),
     updatedAt: now()
@@ -345,12 +385,20 @@ export function deleteClient(id) {
   return next.length !== clients.length;
 }
 
-export function findOrCreateClient({ name, email, address, city, phone } = {}) {
+export function findOrCreateClient(data = {}) {
   const clients = loadClients();
-  const normalizedEmail = normalizeText(email);
+  const name = clientName(data);
+  const normalizedEmail = normalizeText(data.email);
   const existing = clients.find((client) => normalizedEmail && normalizeText(client.email) === normalizedEmail);
-  if (existing) return existing;
-  return addClient({ name, email, address, city, phone });
+  if (existing) {
+    if (name && hasPlaceholderName(existing)) {
+      existing.name = name;
+      existing.updatedAt = now();
+      saveClients(clients);
+    }
+    return existing;
+  }
+  return addClient({ ...data, name });
 }
 
 /* -------------------------------- Pedidos -------------------------------- */

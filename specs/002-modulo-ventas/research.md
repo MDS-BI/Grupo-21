@@ -78,7 +78,7 @@ La regla con ID gana especificidad frente a la anulación global y al final del 
 
 ### Decision
 
-La línea base actual es `npm run test:002` con 25 archivos y 159 pruebas aprobadas, y `npm run build` correcto. `npm test -- --run` incluye 88 fallos heredados del módulo 001 que no deben reescribirse en este cambio.
+La línea base actual es `npm run test:002` con 25 archivos y 161 pruebas aprobadas, y `npm run build` correcto. `npm test -- --run` incluye 88 fallos heredados del módulo 001 que no deben reescribirse en este cambio.
 
 Deben ajustarse las suites que cubren los cuatro puntos: `product-catalog.test.js` (Hero sin tarjeta, texto blanco), `header-shell.test.js` (zonas y alineación), `product-filters.test.js` (filtro + cierre + scroll), `metrics-charts.test.js` (etiquetas compactas y rangos mensuales) y `metrics-dashboard.test.js` (clic mensual). Las suites de permisos, historial y administración se conservan.
 
@@ -165,3 +165,57 @@ Duplicar la pista y desplazar exactamente la mitad de su ancho hace que el reini
 - `marquee` HTML obsoleto: rechazado por no ser estándar y no controlar pausa.
 - JavaScript con `setInterval`: rechazado por costo innecesario y mayor riesgo de saltos.
 - Una sola copia con `translateX(-100%)`: rechazado porque deja un espacio vacío al reiniciar.
+
+## Actualización de esta ronda: nombre del cliente en Historial y texto `undefined`
+
+No aparecen `NEEDS CLARIFICATION` nuevos: el usuario fija el flujo, la propiedad a conservar, la prohibición de opciones vacías y la prueba automatizada. No hay tecnologías, dependencias ni integraciones nuevas. La investigación se ejecutó con agentes enfocados en el flujo checkout → `erp.clients` → `#history-client` y en las convenciones de `test:002`.
+
+### Decisión 9: mapear `fullName` del checkout a `Cliente.name`
+
+#### Decision
+
+El checkout debe crear o vincular el cliente con un objeto que use `name: data.fullName` como campo canónico, además de `email`, `address`, `city` y `phone`. `findOrCreateClient()` debe aceptar alias de nombre (`fullName`, `customerName`, `nombre`, `cliente`) pero normalizarlos al guardar `erp.clients[].name`. Cuando el correo ya existe y el cliente tiene el nombre ausente o no legible, se completa ese nombre sin duplicar el registro.
+
+#### Rationale
+
+El bug se reproduce por un desajuste de propiedades: `src/app.js` y `src/checkout.js` manejan `fullName`, mientras `src/storage.js` espera `name`; `addClient()` convierte el `undefined` resultante en cadena vacía. Unir ambos extremos en la propiedad canónica evita depender de que cada llamador recuerde el alias y mantiene la identidad por correo ya existente.
+
+#### Alternatives considered
+
+- Seguir pasando el objeto completo y modificar solo `addClient()`: rechazado porque deja dos nombres de campo válidos y facilita nuevas regresiones.
+- Crear un campo `fullName` persistido adicional: rechazado porque duplicaría la verdad y obligaría a cambiar todas las lecturas del Historial.
+- Forzar una excepción cuando falte `name`: rechazado porque rompería clientes antiguos y llamadores heredados; se prefiere normalización con respaldo legible.
+
+### Decisión 10: sanear clientes antiguos y proteger el selector del Historial
+
+#### Decision
+
+`loadClients()` debe normalizar de forma aditiva los registros de `erp.clients`: resolver alias, recortar espacios externos, tratar `undefined`/`null`/`NaN` como ausentes y persistir el resultado sin cambiar claves ni `SEED_VERSION`. `orderHistory()` debe derivar la etiqueta de cada `<option>` de una función de respaldo: `name` legible → `email` → `code` → `Cliente sin nombre`; debe omitir registros sin `id` utilizable y aplicar respaldos similares a `documentType`, `orderNumber` y `status`.
+
+#### Rationale
+
+Los datos almacenados pueden conservar el nombre vacío generado por el bug o proceder de esquemas antiguos. Sanear al cargar evita que el estado inválido vuelva a aparecer tras recargar, y el respaldo en el render garantiza que ni siquiera datos corruptos manualmente produzcan opciones vacías o texto `undefined`. La normalización es aditiva y no destruye pedidos ni otras claves.
+
+#### Alternatives considered
+
+- Incrementar `SEED_VERSION` para borrar `erp.clients`: rechazado porque destruiría clientes y pedidos del usuario sin relación con el bug.
+- Mostrar solo el correo como nombre: rechazado porque no cumple la preservación del nombre completo cuando este existe.
+- Dejar el respaldo únicamente en el componente: rechazado porque el dato inválido seguiría persistido y podría filtrarse a otras vistas.
+
+### Decisión 11: origen del síntoma `undefined` y prueba de regresión
+
+#### Decision
+
+No se encontró en el código actual ninguna expresión que imprima literalmente `undefined` o `definedundefined`: `escapeHtml()` convierte `undefined`/`null` en cadena vacía, las plantillas del Historial tienen respaldos parciales y una reproducción con jsdom no produjo esa cadena. El plan elimina el riesgo de forma determinista en tres capas —normalización al guardar, saneamiento al cargar y respaldo al renderizar— y agrega una aserción de `document.body.textContent` sin `undefined` en `tests/integration/order-history.test.js`.
+
+La prueba debe completar una compra con un nombre nuevo y único, abrir Historial como rol autorizado, verificar que `#history-client` tenga una opción seleccionada con `textContent` exactamente igual al nombre ingresado y `value` no vacío, comprobar que no haya opciones vacías y verificar que el cuerpo del documento no contenga `undefined`.
+
+#### Rationale
+
+Aunque el literal no sea reproducible en el estado actual, el usuario lo observó y la consecuencia equivalente —opción en blanco por `name: ''`— sí es reproducible. Cubrir la cadena completa evita depender de una única expresión y hace imposible que datos incompletos antiguos vuelvan a romper la interfaz.
+
+#### Alternatives considered
+
+- Buscar solo una concatenación literal y no cambiar nada más: rechazado porque no explica ni corrige la opción vacía reproducible.
+- Añadir la aserción de `undefined` sin arreglar la persistencia: rechazado porque podría pasar mientras el nombre sigue guardado como cadena vacía.
+- Crear un nuevo archivo de prueba: rechazado porque `order-history.test.js` ya está incluido en `test:002` y concentra el flujo Historial.

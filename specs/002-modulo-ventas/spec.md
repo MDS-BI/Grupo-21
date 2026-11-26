@@ -78,6 +78,8 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 2. **Dado** que falta un campo obligatorio en el formulario de envío ,**cuando** el usuario intenta avanzar al pago, **entonces** el sistema resalta los campos faltantes e impide continuar.
 
+3. **Dado** que el cliente finaliza una compra con un nombre de cliente nuevo, **cuando** se confirma la orden, **entonces** el sistema DEBE registrar o vincular ese cliente conservando su nombre completo exacto para que aparezca legible en el selector de Historial de Ventas, sin renderizar textos `undefined` ni opciones en blanco y aplicando un respaldo legible si algún dato histórico viniera incompleto.
+
 ---
 
 ### Historia de usuario 6 - Historial y seguimiento de Documentos de Venta  (Prioriridad: P6)
@@ -92,7 +94,9 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 1. **Dado** que el Cliente tiene operaciones previas, **cuando** el Ejecutivo de Ventas consulta su ficha, **entonces** visualiza el historial detallando el tipo de documento, fecha, monto y estado actual.
 
 2. **Dado** que existen lineamientos estrictos sobre datos sensibles, **cuando** el usuario visualiza el historial, **entonces** el sistema enmascara la vista del límite de crédito (creditLimit) si el rol no tiene los permisos financieros correspondientes.
-   
+
+3. **Dado** que el Historial de Ventas muestra clientes registrados, **cuando** un nombre de cliente nuevo se registró o vinculó al finalizar una compra, **entonces** el selector DEBE mostrarlo con su nombre completo exacto y NUNCA renderizar textos `undefined` ni opciones de cliente en blanco, aplicando un respaldo legible si algún dato histórico viniera incompleto.
+
 ---
 
 ### Historia de Usuario 7 - Administración de precios y generación de ofertas (Prioridad: P7)
@@ -182,7 +186,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 - **FR-002**: El sistema DEBE [calcular y actualizar automáticamente el subtotal y total del carrito de compras cuando se modifican las cantidades o se eliminan productos.]
 - **FR-003**: El sistema DEBE [validar la vigencia de los cupones promocionales y aplicar el descuento correspondiente sobre el monto total del pedido.]
 - **FR-004**: El sistema DEBE [procesar los datos de envío y derivar el pago a una pasarela segura, generando un número de confirmación tras el éxito.]
-- **FR-005**: EL sistema DEBE [registrar el historial de documentos de venta (Cotización, Pedido, Facturado) y restringir datos sensibles según el rol del usuario (ej. Ejecutivo de Ventas).]
+- **FR-005**: EL sistema DEBE [registrar el historial de documentos de venta (Cotización, Pedido, Facturado) y restringir datos sensibles según el rol del usuario (ej. Ejecutivo de Ventas).] Al finalizar una compra con un nombre de cliente nuevo, el sistema DEBE registrar o vincular ese cliente conservando su nombre completo exacto para que aparezca legible en el selector de Historial de Ventas. La interfaz de Historial NUNCA DEBE renderizar textos `undefined` ni opciones de cliente en blanco; si algún dato histórico viniera incompleto, DEBE aplicar un respaldo legible.
 - **FR-006**: El sistema DEBE [permitir al administrador modificar los precios de los productos y crear, editar o desactivar ofertas con vigencia, validando los valores ingresados y aplicando automáticamente el descuento en el catálogo y el carrito.]
 - **FR-007**: El sistema DEBE calcular y presentar un panel de métricas comerciales (ingresos totales, ticket promedio, distribución de documentos por estado, ranking de productos más vendidos y alertas de stock) con filtros por categoría o rango de fechas. El panel DEBE incluir visualizaciones gráficas interactivas: gráfico de barras de ingresos por categoría, evolución de ventas por fecha, distribución visual proporcional de documentos por estado con etiquetas de color semánticas y barras de progreso en el ranking de productos más vendidos. Estas visualizaciones DEBEN alimentarse de un historial inicial representativo de al menos 12 pedidos de RootSouth distribuidos en los últimos 3 meses. Las etiquetas numéricas sobre las barras del gráfico «Evolución de ventas» NO DEBEN superponerse nunca: DEBEN agruparse por mes o abreviarse (por ejemplo `$69k`), y el monto exacto DEBE mostrarse en un tooltip al pasar el cursor.
 - **FR-008**: El sistema DEBE adaptar la barra de navegación, las vistas disponibles y los permisos de visualización o edición según el rol del usuario, impidiendo el acceso no autorizado a secciones restringidas. El selector de roles DEBE contener únicamente los 3 roles del módulo: Cliente, Vendedor y Gerente General, eliminando por completo roles externos del ERP base como Bodega o Finanzas. La etiqueta visible del rol de gerencia DEBE ser `Gerente General` en lugar de `Dueño/Administrador`, sin alterar el identificador interno `admin` ni el resto de permisos. El rol Cliente DEBE ocultar completamente las vistas de Historial, Administración y Métricas, incluidos enlaces de navegación, accesos directos y contenido. La pestaña Administración se mantiene disponible exclusivamente para Gerente General previa validación con código `1234`. Al seleccionar `Gerente General` en el menú `Perfil`, el sistema DEBE solicitar de inmediato el código `1234` dentro del mismo panel antes de otorgar permisos gerenciales; mientras no se valide, NO DEBE activar Métricas, Administración ni el límite de crédito sin enmascarar. El botón `Cerrar sesión` DEBE mostrarse únicamente cuando exista una sesión interna activa de Vendedor o de Gerente General ya validado, nunca mezclado con el formulario de acceso.

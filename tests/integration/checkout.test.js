@@ -14,6 +14,10 @@ function storedOrders() {
   return JSON.parse(localStorage.getItem('erp.orders') || '[]');
 }
 
+function storedClients() {
+  return JSON.parse(localStorage.getItem('erp.clients') || '[]');
+}
+
 async function openCheckout() {
   await startApp();
   buyFromCatalog('prod-steel-zip-knit');
@@ -64,10 +68,29 @@ describe('checkout flow', () => {
     const products = JSON.parse(localStorage.getItem('erp.products'));
     expect(products.find((product) => product.id === 'prod-steel-zip-knit').stock).toBe(11);
 
-    const clients = JSON.parse(localStorage.getItem('erp.clients'));
+    const clients = storedClients();
     expect(clients.some((client) => client.id === order.clientId)).toBe(true);
+    expect(clients.find((client) => client.id === order.clientId).name).toBe('Ana Pérez');
     expect(order.shipping.fullName).toBe('Ana Pérez');
     expect(JSON.parse(localStorage.getItem('erp.cart')).items).toHaveLength(0);
+  });
+
+  it('reuses a client by email and fills a missing name', async () => {
+    localStorage.setItem('erp.clients', JSON.stringify([{
+      id: 'client-legacy',
+      name: '',
+      code: 'CLI-900',
+      email: 'ana@example.com',
+      creditLimit: 0,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z'
+    }]));
+
+    await completePurchase();
+
+    const matches = storedClients().filter((client) => client.email === 'ana@example.com');
+    expect(matches).toHaveLength(1);
+    expect(matches[0].name).toBe('Ana Pérez');
   });
 
   it('records coupon usage when checking out with a coupon', async () => {

@@ -2,7 +2,7 @@
 description: "Task list for feature implementation"
 ---
 
-# Tasks: Módulo de Ventas — correcciones de cabecera/catálogo/métricas y ronda de Perfil, acceso gerencial y marquesina
+# Tasks: Módulo de Ventas — cabecera/catálogo/métricas, Perfil/acceso gerencial/marquesina y nombre del cliente en Historial
 
 **Input**: Design documents from `/specs/002-modulo-ventas/`
 
@@ -12,7 +12,7 @@ description: "Task list for feature implementation"
 
 **Tests**: Incluidas porque `plan.md` exige ajustes en `tests/integration/product-catalog.test.js`, `tests/integration/header-shell.test.js`, `tests/integration/product-filters.test.js`, `tests/unit/metrics-charts.test.js`, `tests/integration/metrics-dashboard.test.js`, `tests/integration/admin-panel.test.js`, `tests/integration/offer-lifecycle.test.js`, `tests/integration/role-views.test.js` y `tests/integration/order-history.test.js`, además de `npm run test:002`, `npm test -- --run` y `npm run build`.
 
-**Organization**: Las tareas se agrupan por historia de usuario. La entrega inicial cubre US1, US2, US8 y US9; la ronda actual añade trabajo en US7 y US9 para Perfil, acceso gerencial y marquesina. US3–US6 y US8 se conservan sin cambios en esta ronda.
+**Organization**: Las tareas se agrupan por historia de usuario. La entrega inicial cubre US1, US2, US8 y US9; la segunda ronda añade US7 y US9 para Perfil, acceso gerencial y marquesina. La ronda actual cubre US5 y US6 para el nombre del cliente en Historial y la eliminación de `undefined`, sin cambiar estilos ni encabezado.
 
 ## Formato: `[ID] [P?] [Story?] Descripción`
 
@@ -23,7 +23,7 @@ description: "Task list for feature implementation"
 ## Convenciones de Rutas
 
 - Aplicación web de un solo proyecto: `index.html`, `package.json`, `vite.config.js`, `vitest.config.mjs`, `src/`, `tests/` en la raíz del repositorio.
-- Contrato de interfaz: `specs/002-modulo-ventas/contracts/ui-header-contract.md`.
+- Contratos de interfaz: `specs/002-modulo-ventas/contracts/ui-header-contract.md` y `specs/002-modulo-ventas/contracts/history-client-contract.md`.
 - Validación manual: `specs/002-modulo-ventas/quickstart.md`.
 
 ---
@@ -120,21 +120,21 @@ description: "Task list for feature implementation"
 
 ## Phase 7: User Story 5 - Proceso de pago seguro (Priority: P5)
 
-**Goal**: Sin cambios en esta entrega.
+**Goal**: Sin cambios en la entrega inicial; la ronda actual añade T056–T058 en Phase 20 para conservar el nombre del comprador.
 
-**Independent Test**: Se mantiene la prueba independiente existente de checkout; no se modifica `src/components/order-confirmation.js` ni `tests/integration/checkout.test.js`.
+**Independent Test**: Se mantiene la prueba independiente existente de checkout y se complementa con la comprobación de que `erp.clients[].name` guarda exactamente el `fullName` ingresado.
 
-**Sin tareas nuevas.**
+**Sin tareas nuevas en la entrega inicial; ver Phase 20.**
 
 ---
 
 ## Phase 8: User Story 6 - Historial y seguimiento de Documentos de Venta (Priority: P6)
 
-**Goal**: Sin cambios en esta entrega; la vista de Historial permanece intacta.
+**Goal**: Sin cambios en la entrega inicial; la ronda actual añade T059–T060 en Phase 21 para el selector y los respaldos de texto.
 
-**Independent Test**: Se mantiene la matriz de permisos existente; no se modifica `src/components/order-history.js` ni `tests/integration/order-history.test.js`.
+**Independent Test**: Se mantiene la matriz de permisos existente y se complementa con un nombre exacto en `#history-client`, opciones no vacías y ausencia de `undefined` en el DOM.
 
-**Sin tareas nuevas.**
+**Sin tareas nuevas en la entrega inicial; ver Phase 21.**
 
 ---
 
@@ -289,6 +289,86 @@ description: "Task list for feature implementation"
 
 ---
 
+## Phase 18: Setup de la ronda de nombre del cliente y `undefined` (Shared Infrastructure)
+
+**Purpose**: Confirmar contratos, fixture y comandos antes de tocar la cadena checkout → `erp.clients` → `#history-client`.
+
+- [X] T050 [P] Confirmar FR-005, criterios de US5/US6 y comandos `test:002`/`build` en `specs/002-modulo-ventas/spec.md`, `specs/002-modulo-ventas/plan.md` y `package.json`
+- [X] T051 [P] Revisar el contrato del selector y las reglas de saneamiento en `specs/002-modulo-ventas/contracts/history-client-contract.md` y `specs/002-modulo-ventas/data-model.md`
+- [X] T052 [P] Confirmar `mountMarkup()`, `startApp()`, `fillCheckout()` y `flush()` con aislamiento de `localStorage` en `tests/helpers/app-fixture.js` y `tests/setup/jsdom.js`
+
+**Checkpoint**: Contratos, fixture y comandos listos; US5 puede comenzar.
+
+---
+
+## Phase 19: Foundational de la ronda (Blocking Prerequisites)
+
+**Purpose**: Verificar las fuentes de verdad que comparten el mapeo del nombre y el render del Historial.
+
+**⚠️ CRITICAL**: Ninguna tarea nueva de US5 o US6 puede comenzar hasta completar esta fase.
+
+- [X] T053 Verificar que `renderCheckout()`, `readCheckoutData()` y `handleCheckoutSubmit()` producen y propagan `fullName` en `src/app.js` y `src/checkout.js`
+- [X] T054 [P] Verificar que `loadClients()`, `addClient()` y `findOrCreateClient()` usan `erp.clients` sin cambiar `SEED_VERSION` en `src/storage.js`
+- [X] T055 [P] Verificar que `orderHistory()` es el único renderizador de `#history-client` y que `canAccessView()` autoriza `history` en `src/components/order-history.js` y `src/module-config.js`
+
+**Checkpoint**: Fundamento listo; US5 y US6 pueden ejecutarse secuencialmente sin tocar estilos ni encabezado.
+
+---
+
+## Phase 20: User Story 5 - Proceso de pago seguro (Priority: P5) 🎯 MVP de esta ronda
+
+**Goal**: Guardar y vincular al comprador con `Cliente.name` igual al `fullName` del checkout, saneando alias y clientes antiguos sin nombre.
+
+**Independent Test**: Completar una compra con un nombre nuevo; verificar en `erp.clients` que el cliente creado o reutilizado tiene exactamente ese `name` y que no se generó un duplicado por correo.
+
+### Tests for US5
+
+> Escribir primero; deben fallar antes de la implementación.
+
+- [X] T056 [P] [US5] Añadir en `tests/integration/checkout.test.js` una aserción de que `erp.clients[].name` guarda exactamente el `fullName` del checkout y que el cliente se reutiliza por correo sin duplicarse
+
+### Implementation for US5
+
+- [X] T057 [US5] Mapear `data.fullName` a `name` en la acción `createClient` de `handleCheckoutSubmit()` en `src/app.js`, conservando el valor exacto
+- [X] T058 [US5] Normalizar `name`/alias y reparar clientes con nombre ausente en `addClient()`, `findOrCreateClient()` y `loadClients()` de `src/storage.js`, persistiendo el saneo en `erp.clients` sin cambiar claves ni `SEED_VERSION`
+
+**Checkpoint**: US5 verificable de forma independiente; el origen del dato queda corregido antes de renderizar Historial.
+
+---
+
+## Phase 21: User Story 6 - Historial y seguimiento de Documentos de Venta (Priority: P6)
+
+**Goal**: Mostrar el nombre exacto del comprador en `#history-client`, sin opciones vacías ni texto `undefined`, incluso con datos históricos incompletos.
+
+**Independent Test**: Comprar con un nombre nuevo, abrir Historial como Vendedor o Gerente General validado, verificar la opción seleccionada exacta, `value` no vacío, ninguna opción en blanco y `document.body.textContent` sin `undefined`; sembrar además un cliente antiguo sin `name` y comprobar una etiqueta legible.
+
+### Tests for US6
+
+> Escribir primero; deben fallar antes de la implementación.
+
+- [X] T059 [P] [US6] Añadir en `tests/integration/order-history.test.js` el caso de compra con nombre nuevo, opción seleccionada exacta, ausencia de opciones vacías, cliente antiguo sin `name` con respaldo legible y `document.body.textContent` sin `undefined`
+
+### Implementation for US6
+
+- [X] T060 [US6] Crear la función de etiqueta legible y aplicar respaldos de `undefined`/`null`/`NaN` en `src/components/order-history.js`, omitiendo registros sin `id` útil y conservando la estructura visual del selector
+
+**Checkpoint**: US6 verificable de forma independiente; el Historial no cambia de permisos ni de diseño visual, solo de datos y etiquetas.
+
+---
+
+## Phase 22: Polish & Cross-Cutting Concerns de la ronda
+
+**Purpose**: Validar los dos bugs corregidos y confirmar que no se reabrieron estilos, encabezado, permisos ni semillas.
+
+- [X] T061 [P] Ejecutar la verificación enfocada `npx vitest run tests/integration/order-history.test.js tests/integration/checkout.test.js` desde `package.json` y `specs/002-modulo-ventas/plan.md`
+- [X] T062 [P] Ejecutar `npm run test:002` y `npm test -- --run`, respetando la línea base de 88 fallos heredados documentada en `package.json` y `specs/002-modulo-ventas/quickstart.md`
+- [X] T063 Ejecutar `npm run build` como verificación final de Vite en `package.json`
+- [X] T064 [P] Revisar manualmente el escenario 11 de `specs/002-modulo-ventas/quickstart.md`: compra nueva, Historial, nombre exacto y ausencia de `undefined`
+- [X] T065 [P] Confirmar que `src/styles.css`, `index.html`, `src/module-config.js` y `SEED_VERSION` en `src/storage.js` permanecen sin cambios
+- [X] T066 Marcar `T050`–`T066` como `[X]` en `specs/002-modulo-ventas/tasks.md` después de completar la validación
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -301,6 +381,11 @@ description: "Task list for feature implementation"
 - **Foundational de la ronda (Phase 14)**: Depende de Phase 13; bloquea las tareas nuevas de US7 y US9.
 - **US7 (Phase 15) y US9 (Phase 16)**: Dependen de Phase 14; pueden avanzar en paralelo, salvo la aserción de GESTIÓN de T041 que debe ejecutarse tras T039.
 - **Polish de la ronda (Phase 17)**: Depende de Phase 15 y Phase 16; T049 al final.
+- **Setup de la ronda actual (Phase 18)**: Depende de Phase 17 completada; no depende de otras historias.
+- **Foundational de la ronda actual (Phase 19)**: Depende de Phase 18; bloquea las tareas nuevas de US5 y US6.
+- **US5 (Phase 20)**: Depende de Phase 19; T056 precede a T057/T058.
+- **US6 (Phase 21)**: Depende de Phase 19 y de que US5 haya persistido `Cliente.name`; T059 precede a T060.
+- **Polish de la ronda actual (Phase 22)**: Depende de Phase 20 y Phase 21; T066 al final.
 
 ### User Story Dependencies
 
@@ -309,7 +394,9 @@ description: "Task list for feature implementation"
 - **US7 (P7)**: Sin tareas nuevas en la entrega inicial; en esta ronda depende solo de Phase 14 y toca `src/app.js` más cuatro suites de integración.
 - **US8 (P8)**: Independiente; toca `src/components/metrics-charts.js`, `src/app.js` y `src/styles.css`; sin tareas nuevas en esta ronda.
 - **US9 (P9)**: En la entrega inicial tocó `index.html` y `src/styles.css`; en esta ronda depende de Phase 14 y de T039 para validar el bloqueo de GESTIÓN en T041.
-- **US3–US6**: Sin tareas nuevas ni dependencias en esta ronda.
+- **US3 (P3) y US4 (P4)**: Sin tareas nuevas en ninguna ronda; dependen solo de la base completada.
+- **US5 (P5)**: Sin tareas en las rondas anteriores; en la ronda actual depende de Phase 19 y toca `tests/integration/checkout.test.js`, `src/app.js` y `src/storage.js`.
+- **US6 (P6)**: Sin tareas en las rondas anteriores; en la ronda actual depende de US5 para el dato persistido y toca `tests/integration/order-history.test.js` y `src/components/order-history.js`.
 
 ### Within Each User Story
 
@@ -319,6 +406,8 @@ description: "Task list for feature implementation"
 - En US9 de la entrega inicial, T020 precede a T021/T022.
 - En US7 de esta ronda, T034–T037 pueden escribirse en paralelo; T038 precede a T039 y T039 precede a T040 porque los tres modifican `src/app.js`.
 - En US9 de esta ronda, T041 precede a T042/T043; T042 precede a T043 porque T043 depende del markup de `index.html`.
+- En US5 de la ronda actual, T056 precede a T057 y T058; T057 y T058 pueden ejecutarse en paralelo porque tocan `src/app.js` y `src/storage.js`.
+- En US6 de la ronda actual, T059 precede a T060; T060 depende de que T058 haya normalizado `erp.clients`.
 
 ### Parallel Opportunities
 
@@ -334,6 +423,11 @@ description: "Task list for feature implementation"
 - US7 de la ronda: T034, T035, T036 y T037; T038, T039 y T040 se secuencian.
 - US9 de la ronda: T041 puede ejecutarse en paralelo con T034–T037; T042 y T043 se secuencian.
 - Polish de la ronda: T044, T045, T047 y T048 pueden ejecutarse en paralelo; T046 y T049 al final.
+- Setup de la ronda actual: T050, T051 y T052.
+- Foundational de la ronda actual: T053, T054 y T055.
+- US5 de la ronda actual: T056 se escribe primero; T057 y T058 pueden ejecutarse en paralelo.
+- US6 de la ronda actual: T059 se escribe primero; T060 se ejecuta después de T058.
+- Polish de la ronda actual: T061, T062, T064 y T065 pueden ejecutarse en paralelo; T063 y T066 al final.
 
 ---
 
@@ -369,6 +463,21 @@ Task: "Añadir CSS de Perfil y marquesina en src/styles.css"
 
 ---
 
+## Parallel Example: ronda de nombre del cliente
+
+```powershell
+# Escribir primero las pruebas en archivos distintos:
+Task: "Añadir aserción de `erp.clients[].name` en tests/integration/checkout.test.js"
+Task: "Añadir caso de Historial con nombre exacto y sin `undefined` en tests/integration/order-history.test.js"
+
+# Después, secuenciar la persistencia antes del render:
+Task: "Mapear `data.fullName` a `name` en src/app.js"
+Task: "Normalizar `addClient()`, `findOrCreateClient()` y `loadClients()` en src/storage.js"
+Task: "Aplicar etiquetas legibles en src/components/order-history.js"
+```
+
+---
+
 ## Implementation Strategy
 
 ### MVP First (User Story 1 Only) — entrega inicial
@@ -387,6 +496,14 @@ Task: "Añadir CSS de Perfil y marquesina en src/styles.css"
 4. **STOP and VALIDATE**: ejecutar las pruebas independientes de US7.
 5. Demo del acceso gerencial corregido antes de continuar con US9.
 
+### MVP First de la ronda actual (User Story 5 Only)
+
+1. Completar Phase 18: Setup de la ronda actual.
+2. Completar Phase 19: Foundational de la ronda actual.
+3. Completar Phase 20: US5 con `fullName` → `Cliente.name` y saneamiento de `erp.clients`.
+4. **STOP and VALIDATE**: ejecutar la prueba independiente de US5.
+5. Demo del nombre guardado correctamente antes de continuar con US6.
+
 ### Incremental Delivery
 
 1. Setup + Foundational → base lista.
@@ -399,6 +516,10 @@ Task: "Añadir CSS de Perfil y marquesina en src/styles.css"
 8. US7 → sesión gerencial pendiente/validada → validar.
 9. US9 → Perfil a la derecha y marquesina → validar.
 10. Polish de la ronda → verificación completa.
+11. Setup + Foundational de la ronda actual → contratos y fixture listos.
+12. US5 → nombre del comprador persistido → validar.
+13. US6 → Historial con nombre exacto y sin `undefined` → validar.
+14. Polish de la ronda actual → verificación completa.
 
 ### Parallel Team Strategy
 
@@ -407,6 +528,10 @@ Task: "Añadir CSS de Perfil y marquesina en src/styles.css"
 - Ronda actual: Desarrollador B en US9 (`index.html`, `src/styles.css` y `header-shell.test.js`).
 - Ronda actual: Desarrollador C en Setup/Foundational y verificación final.
 - Todos convergen en Phase 17.
+- Ronda actual: Desarrollador A en US5 (`tests/integration/checkout.test.js`, `src/app.js` y `src/storage.js`).
+- Ronda actual: Desarrollador B en US6 (`tests/integration/order-history.test.js` y `src/components/order-history.js`) después de US5.
+- Ronda actual: Desarrollador C en Setup/Foundational y verificación final.
+- Todos convergen en Phase 22 sin tocar `src/styles.css` ni `index.html`.
 
 ---
 
@@ -414,7 +539,8 @@ Task: "Añadir CSS de Perfil y marquesina en src/styles.css"
 
 - `[P]` tasks = archivos distintos y sin dependencias pendientes.
 - `[Story]` vincula cada tarea con US1–US9; Setup, Foundational y Polish no llevan etiqueta.
-- No se modifica el esquema persistido, `SEED_VERSION` ni la grilla de 4 columnas; Historial y Administración conservan su lógica, solo cambia su desbloqueo gerencial.
-- Las tareas de US3–US6 y US8 están deliberadamente vacías en esta ronda; US7 y US9 concentran los tres deltas.
+- No se modifica `SEED_VERSION`, el diseño visual, el encabezado ni la grilla de 4 columnas; solo se sanea de forma aditiva `erp.clients`.
+- Las rondas anteriores concentraron US1/US2/US8/US9 y US7/US9; la ronda actual concentra US5/US6 y deja US1–US4, US7–US9 sin cambios nuevos.
+- Las pruebas de la ronda actual deben fallar antes de T057/T058 y T060: sin el mapeo, `client.name` queda vacío y el selector no muestra el nombre exacto.
 - Verificar que las pruebas fallan antes de implementar cada corrección.
 - No crear commits salvo solicitud explícita.

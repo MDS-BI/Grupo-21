@@ -1,31 +1,56 @@
 import { escapeHtml, formatCurrency } from '../utils.js';
 import { labelFor, maskCreditLimit } from '../module-config.js';
 
+const INVALID_TEXT_TOKENS = new Set(['undefined', 'null', 'nan']);
+
+function readableText(value, fallback = '') {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'number' && !Number.isFinite(value)) return fallback;
+  const text = String(value).trim();
+  return INVALID_TEXT_TOKENS.has(text.toLowerCase()) ? fallback : text;
+}
+
+function clientLabel(client = {}) {
+  return readableText(client.name)
+    || readableText(client.email)
+    || readableText(client.code)
+    || 'Cliente sin nombre';
+}
+
 export function orderHistory({ clients = [], selectedClientId = '', orders = [], role = 'sales', allowed = true } = {}) {
   if (!allowed) {
     return `<p class="notice notice--error" role="alert">${escapeHtml(labelFor('accessRestricted', 'Acceso restringido: no tienes permisos para ver esta sección.'))}</p>`;
   }
 
-  const clientOptions = clients.map((client) => {
-    const selected = client.id === selectedClientId ? ' selected' : '';
-    return `<option value="${escapeHtml(client.id)}"${selected}>${escapeHtml(client.name)}</option>`;
+  const usableClients = clients.filter((client) => readableText(client?.id));
+  const selectedId = readableText(selectedClientId);
+  const clientOptions = usableClients.map((client) => {
+    const id = readableText(client.id);
+    const selected = id === selectedId ? ' selected' : '';
+    return `<option value="${escapeHtml(id)}"${selected}>${escapeHtml(clientLabel(client))}</option>`;
   }).join('');
 
-  const selectedClient = clients.find((client) => client.id === selectedClientId) || null;
+  const selectedClient = usableClients.find((client) => readableText(client.id) === selectedId) || null;
   const creditDisplay = selectedClient
     ? maskCreditLimit(formatCurrency(selectedClient.creditLimit), role)
     : '—';
 
   const rows = orders.length
-    ? orders.map((order) => `
-      <tr data-order-id="${escapeHtml(order.id)}">
-        <td>${escapeHtml(order.documentType || 'Pedido')}</td>
-        <td>${escapeHtml(String(order.date || '').slice(0, 10))}</td>
-        <td>${escapeHtml(order.orderNumber || '')}</td>
+    ? orders.map((order) => {
+      const documentType = readableText(order.documentType, 'Pedido');
+      const date = readableText(order.date).slice(0, 10);
+      const orderNumber = readableText(order.orderNumber, '—');
+      const status = readableText(order.status, '—');
+      return `
+      <tr data-order-id="${escapeHtml(readableText(order.id))}">
+        <td>${escapeHtml(documentType)}</td>
+        <td>${escapeHtml(date)}</td>
+        <td>${escapeHtml(orderNumber)}</td>
         <td>${formatCurrency(order.total)}</td>
-        <td><span class="badge badge--status" data-status="${escapeHtml(order.status || '')}">${escapeHtml(order.status || '')}</span></td>
+        <td><span class="badge badge--status" data-status="${escapeHtml(status)}">${escapeHtml(status)}</span></td>
       </tr>
-    `).join('')
+    `;
+    }).join('')
     : `<tr><td colspan="5" class="empty-state">${escapeHtml(labelFor('emptyHistory', 'No hay documentos de venta para este cliente.'))}</td></tr>`;
 
   return `

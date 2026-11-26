@@ -2,7 +2,7 @@
 
 El módulo de Ventas reutiliza las entidades base `Entity` y `Document` del ERP, adaptándolas como `Cliente` y `Documento de Venta`. La Cotización y el Pedido de Venta son el mismo documento en distintos estados del ciclo de vida, no entidades separadas.
 
-> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B. En la tienda, el FR-009 vigente corresponde al catálogo RootSouth y sus datos semilla (sección «Catálogo semilla RootSouth»), y el FR-010 a la presentación editorial y al encabezado (sección «Presentación editorial»). El FR-007 incorpora indicadores derivados para gráficos de categoría, fecha, estado y ranking (sección «Indicadores derivados»), y el FR-008 reduce los roles activos a `customer`, `sales` y `admin`, cambia la etiqueta visible de `admin` a `Gerente General` y retira el permiso de Historial a `customer` (sección «Permisos por rol»). La ronda actual añade el estado pendiente de Gerente General hasta validar `1234` y la cinta marquesina como presentación, sin crear entidades ni claves nuevas.
+> **Reconciliación con `spec.md` (T050)**: las secciones siguientes describen el modelo B2B de referencia (Cliente/Documento, ciclo Cotización → Pedido → Facturado). La entrega implementada sigue `spec.md` y construye una tienda en línea cuyas entidades reales —Producto, Cupón y Pedido— se detallan en la sección **«Entidades implementadas (tienda en línea)»** al final de este documento. No se implementan Cotización, Facturado, `entity_id`, `series`/`folio` ni las transiciones de estado B2B. En la tienda, el FR-009 vigente corresponde al catálogo RootSouth y sus datos semilla (sección «Catálogo semilla RootSouth»), y el FR-010 a la presentación editorial y al encabezado (sección «Presentación editorial»). El FR-007 incorpora indicadores derivados para gráficos de categoría, fecha, estado y ranking (sección «Indicadores derivados»), y el FR-008 reduce los roles activos a `customer`, `sales` y `admin`, cambia la etiqueta visible de `admin` a `Gerente General` y retira el permiso de Historial a `customer` (sección «Permisos por rol»). La ronda actual añade el estado pendiente de Gerente General hasta validar `1234` y la cinta marquesina como presentación, sin crear entidades ni claves nuevas. Esta ronda también corrige la propagación del nombre del comprador desde `fullName` del checkout hasta `Cliente.name` y su etiqueta en `#history-client`, sin crear claves nuevas ni cambiar `SEED_VERSION`.
 
 ## Entidad: Cliente
 
@@ -209,6 +209,28 @@ Los ocho registros de `src/data/products.js` son productos reales de RootSouth. 
 
 Las categorías del catálogo son `Knit`, `Poleras`, `Polerones` y `Accesorios`; exactamente cuatro productos están marcados como destacados (`prod-steel-zip-knit`, `prod-polera-coach-c`, `prod-black-zipper-layers`, `prod-jockey`) y la sección de destacados se limita a cuatro tarjetas. `prod-bandanas` tiene `stock = 0`, por lo que se muestra como «Agotado» y no se puede comprar.
 
+### Cliente (tienda en línea)
+
+| Campo | Tipo | Descripción | Restricciones |
+|---|---|---|---|
+| id | string | Identificador interno del comprador | Único, generado automáticamente |
+| name | string | Nombre completo visible en `#history-client` | Campo canónico; obligatorio y legible para el Historial |
+| code | string | Código comercial del cliente | Generado por defecto como `CLI-nnn`; sirve como respaldo de etiqueta |
+| email | string | Correo del comprador | Normalizado para reutilizar cliente y como respaldo de etiqueta |
+| address | string | Dirección de envío | Opcional en el registro del cliente |
+| city | string | Ciudad de envío | Opcional en el registro del cliente |
+| phone | string | Teléfono de contacto | Opcional |
+| creditLimit | number | Límite de crédito informativo | No negativo; enmascarado salvo Gerente General validado |
+| createdAt / updatedAt | string | Marcas de tiempo ISO | Generadas por el sistema |
+
+Reglas de nombre del cliente:
+
+- El checkout captura `fullName`; al confirmar, ese valor se mapea a `Cliente.name` sin alterar su contenido interno, mayúsculas ni acentos. Solo se recortan espacios externos.
+- `findOrCreateClient()` puede recibir alias (`fullName`, `customerName`, `nombre`, `cliente`), pero normaliza cualquiera de ellos a `name` antes de guardar.
+- Los registros antiguos de `erp.clients` se sanan al cargar: alias, cadenas vacías y valores `undefined`/`null`/`NaN` se convierten en un `name` legible. El saneo persiste en `erp.clients` sin crear nuevas claves ni cambiar `SEED_VERSION`.
+- Si un cliente se reutiliza por correo y tiene el nombre ausente o no legible, un nombre válido del checkout completa el registro existente en lugar de crear un duplicado.
+- La etiqueta del selector usa `name`, luego `email`, luego `code` y finalmente `Cliente sin nombre`. Nunca se muestra una opción vacía ni el texto `undefined`.
+
 ### Cupón
 
 | Campo | Tipo | Descripción | Restricciones |
@@ -295,7 +317,7 @@ Este versionado elimina los productos de tecnología de esquemas anteriores junt
 
 ### Relaciones y reglas implementadas
 
-- Un cliente puede tener muchos pedidos; cada pedido pertenece a un solo cliente (`Pedido.clientId → Cliente.id`). No se permiten pedidos huérfanos: el checkout crea o reutiliza el cliente antes de guardar el pedido.
+- Un cliente puede tener muchos pedidos; cada pedido pertenece a un solo cliente (`Pedido.clientId → Cliente.id`). No se permiten pedidos huérfanos: el checkout crea o reutiliza el cliente antes de guardar el pedido, mapeando `shipping.fullName`/`fullName` a `Cliente.name` y conservando ese nombre exacto para `#history-client`.
 - Al eliminar un cliente se eliminan en cascada sus pedidos (`deleteOrdersForClient`).
 - El stock se descuenta al confirmar el pago. Si alguna línea no tiene stock suficiente, la compra se rechaza y el carrito se conserva.
 - El cupón se valida contra subtotal, vigencia y límite de uso; al confirmar el pedido se incrementa su uso.
