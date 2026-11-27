@@ -50,7 +50,7 @@ Como cliente que accede a la plataforma online, quiero que en la pagina principa
 
 ### Historia de Usuario 4 - Aplicación de códigos de descuento (Prioridad: P4)
 
-**Descripción**: Como cliente, quiero ingresar un código de cupón promocional en el resumen de compra o carrito para obtener un descuento directo en el valor total de mi pedido, dinamizando mi experiencia de compra.
+**Descripción**: Como cliente, quiero ingresar un código de cupón promocional en el carrito o resumen de compra para obtener una rebaja directa en el monto total de mi pedido y así pagar menos por mis productos.
 
 **¿Por qué esta prioridad?:** Es una herramienta comercial estratégica fundamental para captar la atención de nuevos clientes, incentivar campañas de marketing y mejorar la retención, a pesar de que la venta puede completarse con normalidad aunque el cupón no exista o no se utilice.
 
